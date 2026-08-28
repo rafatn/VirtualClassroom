@@ -3,135 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - מתקדמת</title>
-    <!-- ספריות חיצוניות למחולל גרפים ו-Chart.js -->
+    <title>כיתה וירטואלית חכמה - פלטפורמת למידה מתקדמת</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        h2, h3, h4 {
+            color: var(--text-main);
+            margin-top: 0;
+        }
+
         .hidden { display: none !important; }
-        input, select, button, textarea { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 16px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .room-item { background: #e9ecef; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .tool-box { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #dee2e6; }
-        video { width: 100%; max-height: 250px; background: black; border-radius: 4px; }
-        hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
-        .chat-box { height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background: white; margin-bottom: 10px; }
+
+        input, select, button, textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 14px;
+            padding: 12px;
+            font-size: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tool-box {
+            background: #f1f5f9;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .room-item {
+            background: #ffffff;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        video {
+            width: 100%;
+            max-height: 280px;
+            background: #0f172a;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 25px 0;
+        }
+
+        .chat-box {
+            height: 160px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>כיתה וירטואלית חכמה (גרסת AI & Tools)</h2>
+        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 25px;">🎓 כיתה וירטואלית חכמה - פלטפורמת למידה</h2>
 
-        <!-- ========== 1. מסך התחברות / הרשמה ========== -->
-        <div id="auth-section">
-            <h3 id="form-title">התחברות למערכת</h3>
+        <div id="auth-section" style="max-width: 450px; margin: 0 auto;">
+            <h3 id="form-title" style="text-align: center;">התחברות למערכת</h3>
             <input type="email" id="email" placeholder="אימייל">
             <input type="password" id="password" placeholder="סיסמה">
             
             <div id="register-fields" class="hidden">
                 <input type="text" id="full_name" placeholder="שם מלא">
                 <select id="role">
-                    <option value="student">תלמיד</option>
-                    <option value="teacher">מורה</option>
+                    <option value="student">תלמיד 👨‍🎓</option>
+                    <option value="teacher">מורה 👨‍🏫</option>
                 </select>
             </div>
 
             <button id="auth-action-btn" onclick="handleAuthSubmit()">התחבר</button>
-            <button onclick="toggleAuthMode()" style="background: #6c757d;">עבור להרשמה / התחברות</button>
+            <button onclick="toggleAuthMode()" style="background: var(--text-muted);">עבור להרשמה / התחברות</button>
         </div>
 
-        <!-- ========== 2. מסך לוח בקרה (Dashboard) ========== -->
         <div id="dashboard-section" class="hidden">
-            <h3 id="welcome-user">שלום, משתמש</h3>
-            <button onclick="logout()" style="background: #dc3545;">התנתק</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px; border-radius: 8px;">
+                <h3 id="welcome-user" style="margin: 0;">שלום, משתמש</h3>
+                <button onclick="logout()" style="background: var(--danger-color); width: auto; padding: 8px 16px; margin: 0;">התנתק</button>
+            </div>
 
             <hr>
 
-            <!-- שערי מטבעות מתעדכנים -->
-            <div class="tool-box">
-                <h4>שערי מטבעות (מול שקל)</h4>
-                <div id="currency-rates">טוען שערים...</div>
+            <div class="tool-box" style="text-align: center;">
+                <h4 style="margin-bottom: 8px;">💱 שערי מטבעות חיים (מול שקל)</h4>
+                <div id="currency-rates" style="font-weight: 600; color: var(--primary-color);">טוען שערים...</div>
             </div>
 
-            <div id="teacher-panel" class="hidden">
-                <h4>פתיחת שיעור / חדר חדש</h4>
-                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: פיזיקה מתקדמת)">
-                <button onclick="createAndOpenRoom()">פתח חדר</button>
+            <div id="teacher-panel" class="hidden tool-box">
+                <h4>👨‍🏫 פתיחת שיעור / חדר חדש</h4>
+                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: מתמטיקה מתקדמת - פיצוח בגרויות)">
+                <button onclick="createAndOpenRoom()" style="background: var(--success-color);">פתח חדר חדש</button>
             </div>
 
             <div id="student-panel">
-                <h4>חדרים פעילים כרגע</h4>
+                <h4>🏫 חדרים פעילים כרגע</h4>
                 <div id="rooms-list">טוען חדרים...</div>
             </div>
         </div>
 
-        <!-- ========== 3. מסך בתוך החדר (Classroom) ========== -->
         <div id="room-section" class="hidden">
-            <h3 id="current-room-title">שם החדר</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 id="current-room-title" style="margin: 0; color: var(--primary-color);">שם החדר</h3>
+                <button onclick="leaveRoom()" style="background: var(--warning-color); color: #000; width: auto; padding: 8px 16px; margin: 0;">צא מהחדר 🚪</button>
+            </div>
             
             <div class="grid-container">
-                <!-- צד שמאל: וידאו, שיתוף מסחק, צ'אט ותמלול -->
                 <div>
-                    <div>
+                    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                         <video id="local-video" autoplay muted></video>
-                        <div style="display: flex; gap: 5px; margin-top: 5px;">
-                            <button onclick="startScreenShare()">שתף מסך</button>
-                            <button onclick="startRecording()" style="background: #28a745;">התחל הקלטה</button>
-                            <button onclick="stopAndSaveRecording()" style="background: #dc3545;" class="hidden" id="stop-rec-btn">עצור ושמור הקלטה</button>
+                        <div id="video-user-label" style="background: rgba(15, 23, 42, 0.9); color: white; padding: 10px; font-weight: bold; text-align: center; font-size: 15px; border-top: 1px solid #334155;">
+                            טוען שם משתמש...
                         </div>
                     </div>
 
-                    <!-- צ'אט חי -->
-                    <div class="tool-box" style="margin-top: 15px;">
-                        <h4>צ'אט כיתתי</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 12px;">
+                        <button onclick="startScreenShare()">🖥️ שתף מסך</button>
+                        <button onclick="startRecording()" style="background: var(--success-color);">🔴 התחל הקלטה</button>
+                        <button onclick="stopAndSaveRecording()" style="background: var(--danger-color);" class="hidden" id="stop-rec-btn">⏹️ עצור ושמור הקלטה</button>
+                    </div>
+
+                    <div class="tool-box" style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 10px;">💬 צ'אט כיתתי</h4>
                         <div id="chat-messages" class="chat-box"></div>
-                        <input type="text" id="chat-input" placeholder="הקלד הודעה...">
+                        <input type="text" id="chat-input" placeholder="הקלד הודעה לכיתה...">
                         <button onclick="sendChatMessage()">שלח הודעה</button>
                     </div>
 
-                    <!-- תמלול חי ו-AI -->
                     <div class="tool-box">
-                        <h4>תמלול חי (AI Speech-to-Text)</h4>
-                        <button onclick="toggleSpeechRecognition()" id="mic-btn" style="background: #17a2b8;">הפעל מיקרופון לתמלול</button>
-                        <p id="transcript-output" style="background: white; padding: 8px; min-height: 40px; border: 1px solid #ccc;"></p>
+                        <h4 style="margin-bottom: 10px;">🎙️ תמלול חי (AI Speech-to-Text)</h4>
+                        <button onclick="toggleSpeechRecognition()" id="mic-btn" style="background: #0ea5e9;">הפעל מיקרופון לתמלול אוטומטי</button>
+                        <p id="transcript-output" style="background: white; padding: 10px; min-height: 45px; border: 1px solid var(--border-color); border-radius: 6px; margin: 0; font-size: 14px;"></p>
                     </div>
                 </div>
 
-                <!-- צד ימין: משתתפים, מחשבון וגרפים -->
                 <div>
-                    <!-- משתתפים מחוברים -->
                     <div class="tool-box">
-                        <h4>משתתפים מחוברים</h4>
-                        <ul id="participants-list" style="padding-right: 20px; font-size: 14px;"></ul>
+                        <h4 style="margin-bottom: 10px;">👥 משתתפים מחוברים</h4>
+                        <ul id="participants-list" style="padding-right: 15px; font-size: 14px; list-style-type: none; margin: 0; max-height: 200px; overflow-y: auto;"></ul>
                     </div>
 
-                    <!-- מחשבון מדעי -->
                     <div class="tool-box">
-                        <h4>מחשבון מדעי</h4>
+                        <h4 style="margin-bottom: 10px;">🧮 מחשבון מדעי</h4>
                         <input type="text" id="calc-input" placeholder="למשל: Math.sin(1) * 5">
-                        <button onclick="calculateMath()">חשב</button>
-                        <p id="calc-result" style="font-weight: bold;"></p>
+                        <button onclick="calculateMath()" style="background: #8b5cf6;">חשב תוצאה</button>
+                        <p id="calc-result" style="font-weight: bold; font-size: 16px; color: var(--primary-color); margin: 5px 0 0 0;"></p>
                     </div>
 
-                    <!-- מחולל גרפים -->
                     <div class="tool-box">
-                        <h4>מחולל גרפים (מבוסס נתונים)</h4>
-                        <input type="text" id="chart-data-input" placeholder="הכנס מספרים מופרדים בפסיקים: 10,25,15,40">
-                        <button onclick="generateChart()">צור גרף</button>
-                        <canvas id="myChart" style="max-height: 150px; margin-top: 10px;"></canvas>
+                        <h4 style="margin-bottom: 10px;">📊 מחולל גרפים (Chart.js)</h4>
+                        <input type="text" id="chart-data-input" placeholder="הכנס מספרים מופרדים בפסיקים: 10,25,15,40,60">
+                        <button onclick="generateChart()" style="background: #ec4899;">צור גרף חכם</button>
+                        <div style="background: white; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
+                            <canvas id="myChart" style="max-height: 160px;"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <button onclick="leaveRoom()" style="background: #ffc107; color: black; margin-top: 20px;">צא מהחדר</button>
         </div>
     </div>
 
-    <!-- טעינת ספריות וקוד יישום -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -201,32 +323,27 @@
             window.location.reload();
         }
 
-        // שליפת שערי מטבעות חיים
         async function fetchCurrencyRates() {
             try {
                 const res = await fetch('https://api.exchangerate-api.com/v4/latest/ILS');
                 const data = await res.json();
                 document.getElementById('currency-rates').innerHTML = `
-                    דולר ($): ${(1 / data.rates.USD).toFixed(2)} ₪ | 
-                    יורו (€): ${(1 / data.rates.EUR).toFixed(2)} ₪ | 
-                    פאונד (£): ${(1 / data.rates.GBP).toFixed(2)} ₪
+                    💵 דולר: ${(1 / data.rates.USD).toFixed(2)} ₪ &nbsp;|&nbsp; 
+                    💶 יורו: ${(1 / data.rates.EUR).toFixed(2)} ₪ &nbsp;|&nbsp; 
+                    💷 פאונד: ${(1 / data.rates.GBP).toFixed(2)} ₪
                 `;
             } catch (e) {
                 document.getElementById('currency-rates').innerText = 'שערי מטבעות אינם זמינים כרגע.';
             }
         }
 
-        // זיהוי פרטי דפדפן, מערכת הפעלה ומיקום מבוסס IP
         async function getClientMetadata() {
             const ua = navigator.userAgent;
             let browser = "לא ידוע";
             let os = "לא ידוע";
 
             if (ua.indexOf("Firefox") > -1) browser = "Firefox";
-            else if (ua.indexOf("SamsungBrowser") > -1) browser = "Samsung Browser";
-            else if (ua.indexOf("Opera") > -1 || ua.indexOf("OPR") > -1) browser = "Opera";
-            else if (ua.indexOf("Trident") > -1) browser = "Internet Explorer";
-            else if (ua.indexOf("Edge") > -1) browser = "MS Edge";
+            else if (ua.indexOf("Edge") > -1) browser = "Edge";
             else if (ua.indexOf("Chrome") > -1) browser = "Chrome";
             else if (ua.indexOf("Safari") > -1) browser = "Safari";
 
@@ -245,7 +362,7 @@
                 }
             } catch (e) {}
 
-            // יצירת צבע אקראי ייחודי לכל משתמש לפי מזהה
+            // יצירת צבע ייחודי למשתמש לפי מזהה
             const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId.charCodeAt(0)) * 16777215)).toString(16);
 
             return { browser, os, location: locationStr, color: colorHash };
@@ -264,13 +381,13 @@
             const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
             const listEl = document.getElementById('rooms-list');
             if (!rooms || rooms.length === 0) {
-                listEl.innerHTML = '<p>אין חדרים פעילים כרגע.</p>';
+                listEl.innerHTML = '<p style="color: var(--text-muted);">אין חדרים פעילים כרגע.</p>';
                 return;
             }
             listEl.innerHTML = rooms.map(room => `
                 <div class="room-item">
-                    <span><b>${room.title}</b> (מורה: ${room.profiles?.full_name || 'לא ידוע'})</span>
-                    <button onclick="enterRoom('${room.id}', '${room.title}')" style="width: auto; padding: 5px 15px; margin:0;">הכנס לחדר</button>
+                    <span><b>${room.title}</b> <span style="color: var(--text-muted); font-size: 13px;">(מורה: ${room.profiles?.full_name || 'לא ידוע'})</span></span>
+                    <button onclick="enterRoom('${room.id}', '${room.title}')" style="width: auto; padding: 6px 14px; margin:0;">הכנס לחדר</button>
                 </div>
             `).join('');
         }
@@ -281,6 +398,14 @@
             document.getElementById('current-room-title').innerText = roomTitle;
 
             const meta = await getClientMetadata();
+
+            // עדכון תווית השם מתחת לוידאו בצבע האישי
+            const { data: currentProfile } = await supabase.from('profiles').select('full_name, role').eq('id', currentUserId).single();
+            if (currentProfile) {
+                const labelEl = document.getElementById('video-user-label');
+                labelEl.innerText = `${currentProfile.full_name} (${currentProfile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
+                labelEl.style.color = meta.color;
+            }
 
             await supabase.from('room_participants').upsert([
                 { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color }
@@ -294,7 +419,6 @@
                 })
                 .subscribe();
 
-            // הפעלת מצלמה מקומית בסיסית
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('local-video').srcObject = stream;
@@ -309,14 +433,13 @@
             if (!data) return;
 
             ul.innerHTML = data.map(p => `
-                <li style="color: ${p.color || '#000'}; font-weight: bold; margin-bottom: 6px;">
+                <li style="color: ${p.color || '#000'}; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
                     👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})<br>
-                    <span style="font-size: 11px; color: #666;">🌍 ${p.location} | 💻 ${p.browser} / ${p.os}</span>
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">🌍 ${p.location} | 💻 ${p.browser} / ${p.os}</span>
                 </li>
             `).join('');
         }
 
-        // שיתוף מסך
         window.startScreenShare = async function() {
             try {
                 const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -326,7 +449,6 @@
             }
         }
 
-        // הקלטת שיעור מקומית
         window.startRecording = function() {
             const stream = document.getElementById('local-video').srcObject;
             if (!stream) return alert('אין זרם וידאו פעיל להקלטה');
@@ -343,28 +465,27 @@
             };
             mediaRecorder.start();
             document.getElementById('stop-rec-btn').classList.remove('hidden');
-            alert('ההקלטה החלה...');
+            alert('ההקלטה החלה בהצלחה!');
         }
 
         window.stopAndSaveRecording = function() {
             if (mediaRecorder) {
                 mediaRecorder.stop();
                 document.getElementById('stop-rec-btn').classList.add('hidden');
+                alert('ההקלטה הופסקה והורדה למחשבך.');
             }
         }
 
-        // מחשבון מדעי
         window.calculateMath = function() {
             const expr = document.getElementById('calc-input').value;
             try {
                 const res = eval(expr);
                 document.getElementById('calc-result').innerText = `= ${res}`;
             } catch (e) {
-                document.getElementById('calc-result').innerText = 'שגיאה בביטוי';
+                document.getElementById('calc-result').innerText = 'שגיאה בביטוי המתמטי';
             }
         }
 
-        // מחולל גרפים
         window.generateChart = function() {
             const input = document.getElementById('chart-data-input').value;
             const dataArr = input.split(',').map(Number);
@@ -374,16 +495,15 @@
                 type: 'bar',
                 data: {
                     labels: dataArr.map((_, i) => `נקודה ${i+1}`),
-                    datasets: [{ label: 'נתוני כיתה', data: dataArr, backgroundColor: '#007bff' }]
+                    datasets: [{ label: 'נתוני שיעור', data: dataArr, backgroundColor: '#4f46e5' }]
                 }
             });
         }
 
-        // תמלול חי באמצעות Web Speech API
         let recognition = null;
         window.toggleSpeechRecognition = function() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                return alert('הדפדפן שלך אינו תומך בתמלול קולי אוטומטי');
+                return alert('הדפדפן שלך אינו תומך בתמלול קולי');
             }
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
@@ -397,7 +517,17 @@
                 document.getElementById('transcript-output').innerText = transcript;
             };
             recognition.start();
-            document.getElementById('mic-btn').innerText = 'מאזין ומסכם... 🎙️';
+            document.getElementById('mic-btn').innerText = 'מצותת וממיר לטקסט... 🎙️';
+        }
+
+        window.sendChatMessage = function() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value;
+            if(!msg) return;
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div><b>אני:</b> ${msg}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         window.leaveRoom = async function() {
