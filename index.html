@@ -1,79 +1,7 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית - Supabase</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .hidden { display: none !important; }
-        input, select, button { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 16px; box-sizing: border-box; }
-        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .room-item { background: #e9ecef; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h2>כיתה וירטואלית חכמה</h2>
-
-        <!-- ========== 1. מסך התחברות / הרשמה ========== -->
-        <div id="auth-section">
-            <h3 id="form-title">התחברות למערכת</h3>
-            <input type="email" id="email" placeholder="אימייל">
-            <input type="password" id="password" placeholder="סיסמה">
-            
-            <!-- שדות שמופיעים רק בהרשמה -->
-            <div id="register-fields" class="hidden">
-                <input type="text" id="full_name" placeholder="שם מלא">
-                <select id="role">
-                    <option value="student">תלמיד</option>
-                    <option value="teacher">מורה</option>
-                </select>
-            </div>
-
-            <button id="auth-action-btn" onclick="handleAuthSubmit()">התחבר</button>
-            <button onclick="toggleAuthMode()" style="background: #6c757d;">עבור להרשמה / התחברות</button>
-        </div>
-
-        <!-- ========== 2. מסך לוח בקרה (Dashboard) ========== -->
-        <div id="dashboard-section" class="hidden">
-            <h3 id="welcome-user">שלום, משתמש</h3>
-            <button onclick="logout()" style="background: #dc3545;">התנתק</button>
-
-            <hr>
-
-            <!-- אזור למורים בלבד -->
-            <div id="teacher-panel" class="hidden">
-                <h4>פתיחת שיעור / חדר חדש</h4>
-                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: שיעור פיזיקה)">
-                <button onclick="createAndOpenRoom()">פתח חדר</button>
-            </div>
-
-            <!-- אזור לתלמידים / חדרים פעילים -->
-            <div id="student-panel">
-                <h4>חדרים פעילים כרגע</h4>
-                <div id="rooms-list">טוען חדרים...</div>
-            </div>
-        </div>
-
-        <!-- ========== 3. מסך בתוך החדר (Classroom) ========== -->
-        <div id="room-section" class="hidden">
-            <h3 id="current-room-title">שם החדר</h3>
-            <p><b>משתתפים מחוברים בכיתה:</b></p>
-            <ul id="participants-list"></ul>
-            <button onclick="leaveRoom()" style="background: #ffc107; color: black; margin-top: 20px;">צא מהחדר</button>
-        </div>
-    </div>
-
-    <!-- טעינת ספריות Supabase מהרשת וקוד הניהול -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // ⚠️ הכנס כאן את פרטי הפרויקט האמיתיים שלך מ-Supabase Dashboard -> Settings -> API
+        // ⚠️ הכנס כאן את פרטי הפרויקט שלך
         const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
         const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
@@ -84,20 +12,18 @@
         let currentRoomId = null;
         let currentActiveChannel = null;
 
-        // בדיקת התחברות בעליית העמוד
         window.addEventListener('DOMContentLoaded', async () => {
             checkUserSession();
         });
 
-        // מעבר בין מסך התחברות להרשמה
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
-            document.getElementById('form-titleinnerText' || 'form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
+            // התיקון כאן למטה:
+            document.getElementById('form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
             document.getElementById('register-fields').classList.toggle('hidden', !isRegisterMode);
             document.getElementById('auth-action-btn').innerText = isRegisterMode ? 'הירשם' : 'התחבר';
         }
 
-        // שליחת טופס התחברות או הרשמה
         window.handleAuthSubmit = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -126,7 +52,6 @@
             }
         }
 
-        // בדיקת סטטוס משתמש מחובר
         async function checkUserSession() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
@@ -136,7 +61,6 @@
 
             currentUserId = user.id;
 
-            // שליפת פרופיל המשתמש מטבלת profiles
             const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
             if (error || !profile) {
                 console.error('שגיאה בטעינת פרופיל:', error);
@@ -144,21 +68,17 @@
             }
 
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
-            
-            // הצגת לוח בקרה מותאם לתפקיד
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
             
             showSection('dashboard-section');
             loadActiveRooms();
         }
 
-        // התנתקות
         window.logout = async function() {
             await supabase.auth.signOut();
             window.location.reload();
         }
 
-        // מורה פותח חדר חדש
         window.createAndOpenRoom = async function() {
             const title = document.getElementById('room-title-input').value;
             if (!title) return alert('נא להכניס כותרת לשיעור');
@@ -173,7 +93,6 @@
             enterRoom(data.id, data.title);
         }
 
-        // טעינת רשימת החדרים הפעילים לתלמידים
         async function loadActiveRooms() {
             const { data: rooms, error } = await supabase
                 .from('rooms')
@@ -194,20 +113,17 @@
             `).join('');
         }
 
-        // כניסה לחדר בפועל (הוספה כמשתתף והאזנה בזמן אמת)
         window.enterRoom = async function(roomId, roomTitle) {
             currentRoomId = roomId;
             showSection('room-section');
             document.getElementById('current-room-title').innerText = roomTitle;
 
-            // רישום המשתמש כמשתתף בחדר
             await supabase.from('room_participants').upsert([
                 { room_id: roomId, user_id: currentUserId }
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
 
-            // האזנה לשינויים בזמן אמת בתוך החדר (מי נכנס/יצא)
             currentActiveChannel = supabase.channel(`room_${roomId}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, () => {
                     fetchParticipants(roomId);
@@ -215,7 +131,6 @@
                 .subscribe();
         }
 
-        // שליפת משתתפי החדר והצגתם ברשימה
         async function fetchParticipants(roomId) {
             const { data, error } = await supabase
                 .from('room_participants')
@@ -230,12 +145,10 @@
             `).join('');
         }
 
-        // יציאה מהחדר
         window.leaveRoom = async function() {
             if (currentActiveChannel) {
                 supabase.removeChannel(currentActiveChannel);
             }
-            // מחיקת הנוכחות של המשתמש מהטבלה בצאתו (אופציונלי)
             if (currentRoomId && currentUserId) {
                 await supabase.from('room_participants').delete().match({ room_id: currentRoomId, user_id: currentUserId });
             }
@@ -244,7 +157,6 @@
             loadActiveRooms();
         }
 
-        // פונקציית עזר להחלפת מסכים ב-DOM
         function showSection(sectionId) {
             ['auth-section', 'dashboard-section', 'room-section'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -252,5 +164,3 @@
             document.getElementById(sectionId).classList.remove('hidden');
         }
     </script>
-</body>
-</html>
