@@ -3,22 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית - Supabase</title>
+    <title>כיתה וירטואלית חכמה - מתקדמת</title>
+    <!-- ספריות חיצוניות למחולל גרפים ו-Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        input, select, button { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 16px; box-sizing: border-box; }
+        input, select, button, textarea { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 16px; box-sizing: border-box; }
         button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background: #0056b3; }
         .room-item { background: #e9ecef; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .tool-box { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #dee2e6; }
+        video { width: 100%; max-height: 250px; background: black; border-radius: 4px; }
         hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
+        .chat-box { height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; background: white; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>כיתה וירטואלית חכמה</h2>
+        <h2>כיתה וירטואלית חכמה (גרסת AI & Tools)</h2>
 
         <!-- ========== 1. מסך התחברות / הרשמה ========== -->
         <div id="auth-section">
@@ -26,7 +32,6 @@
             <input type="email" id="email" placeholder="אימייל">
             <input type="password" id="password" placeholder="סיסמה">
             
-            <!-- שדות שמופיעים רק בהרשמה -->
             <div id="register-fields" class="hidden">
                 <input type="text" id="full_name" placeholder="שם מלא">
                 <select id="role">
@@ -46,14 +51,18 @@
 
             <hr>
 
-            <!-- אזור למורים בלבד -->
+            <!-- שערי מטבעות מתעדכנים -->
+            <div class="tool-box">
+                <h4>שערי מטבעות (מול שקל)</h4>
+                <div id="currency-rates">טוען שערים...</div>
+            </div>
+
             <div id="teacher-panel" class="hidden">
                 <h4>פתיחת שיעור / חדר חדש</h4>
-                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: שיעור פיזיקה)">
+                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: פיזיקה מתקדמת)">
                 <button onclick="createAndOpenRoom()">פתח חדר</button>
             </div>
 
-            <!-- אזור לתלמידים / חדרים פעילים -->
             <div id="student-panel">
                 <h4>חדרים פעילים כרגע</h4>
                 <div id="rooms-list">טוען חדרים...</div>
@@ -63,33 +72,86 @@
         <!-- ========== 3. מסך בתוך החדר (Classroom) ========== -->
         <div id="room-section" class="hidden">
             <h3 id="current-room-title">שם החדר</h3>
-            <p><b>משתתפים מחוברים בכיתה:</b></p>
-            <ul id="participants-list"></ul>
+            
+            <div class="grid-container">
+                <!-- צד שמאל: וידאו, שיתוף מסחק, צ'אט ותמלול -->
+                <div>
+                    <div>
+                        <video id="local-video" autoplay muted></video>
+                        <div style="display: flex; gap: 5px; margin-top: 5px;">
+                            <button onclick="startScreenShare()">שתף מסך</button>
+                            <button onclick="startRecording()" style="background: #28a745;">התחל הקלטה</button>
+                            <button onclick="stopAndSaveRecording()" style="background: #dc3545;" class="hidden" id="stop-rec-btn">עצור ושמור הקלטה</button>
+                        </div>
+                    </div>
+
+                    <!-- צ'אט חי -->
+                    <div class="tool-box" style="margin-top: 15px;">
+                        <h4>צ'אט כיתתי</h4>
+                        <div id="chat-messages" class="chat-box"></div>
+                        <input type="text" id="chat-input" placeholder="הקלד הודעה...">
+                        <button onclick="sendChatMessage()">שלח הודעה</button>
+                    </div>
+
+                    <!-- תמלול חי ו-AI -->
+                    <div class="tool-box">
+                        <h4>תמלול חי (AI Speech-to-Text)</h4>
+                        <button onclick="toggleSpeechRecognition()" id="mic-btn" style="background: #17a2b8;">הפעל מיקרופון לתמלול</button>
+                        <p id="transcript-output" style="background: white; padding: 8px; min-height: 40px; border: 1px solid #ccc;"></p>
+                    </div>
+                </div>
+
+                <!-- צד ימין: משתתפים, מחשבון וגרפים -->
+                <div>
+                    <!-- משתתפים מחוברים -->
+                    <div class="tool-box">
+                        <h4>משתתפים מחוברים</h4>
+                        <ul id="participants-list" style="padding-right: 20px; font-size: 14px;"></ul>
+                    </div>
+
+                    <!-- מחשבון מדעי -->
+                    <div class="tool-box">
+                        <h4>מחשבון מדעי</h4>
+                        <input type="text" id="calc-input" placeholder="למשל: Math.sin(1) * 5">
+                        <button onclick="calculateMath()">חשב</button>
+                        <p id="calc-result" style="font-weight: bold;"></p>
+                    </div>
+
+                    <!-- מחולל גרפים -->
+                    <div class="tool-box">
+                        <h4>מחולל גרפים (מבוסס נתונים)</h4>
+                        <input type="text" id="chart-data-input" placeholder="הכנס מספרים מופרדים בפסיקים: 10,25,15,40">
+                        <button onclick="generateChart()">צור גרף</button>
+                        <canvas id="myChart" style="max-height: 150px; margin-top: 10px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <button onclick="leaveRoom()" style="background: #ffc107; color: black; margin-top: 20px;">צא מהחדר</button>
         </div>
     </div>
 
-    <!-- טעינת ספריות Supabase מהרשת וקוד הניהול -->
+    <!-- טעינת ספריות וקוד יישום -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // הנתונים שלך משולבים כאן
         const SUPABASE_URL = 'https://ufivtmlumzhdsljjckqv.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaXZ0bWx1bXpoZHNsampja3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIxMjEsImV4cCI6MjEwMzUwODEyMX0.qW-A_JdOZifQtkAmPku6XJWDV-_AVfI8M8GGMdSNLIw';
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let isRegisterMode = false;
         let currentUserId = null;
         let currentRoomId = null;
         let currentActiveChannel = null;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let activeChart = null;
 
-        // בדיקת התחברות בעליית העמוד
         window.addEventListener('DOMContentLoaded', async () => {
             checkUserSession();
+            fetchCurrencyRates();
         });
 
-        // מעבר בין מסך התחברות להרשמה
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
@@ -97,95 +159,114 @@
             document.getElementById('auth-action-btn').innerText = isRegisterMode ? 'הירשם' : 'התחבר';
         }
 
-        // שליחת טופס התחברות או הרשמה
         window.handleAuthSubmit = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
-            if (!email || !password) {
-                return alert('נא למלא אימייל וסיסמה');
-            }
+            if (!email || !password) return alert('נא למלא אימייל וסיסמה');
 
             if (isRegisterMode) {
                 const full_name = document.getElementById('full_name').value;
                 const role = document.getElementById('role').value;
-
                 if (!full_name) return alert('נא להכניס שם מלא');
 
-                const { data, error } = await supabase.auth.signUp({
-                    email, password,
-                    options: { data: { full_name, role } }
-                });
+                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name, role } } });
                 if (error) return alert('שגיאה בהרשמה: ' + error.message);
                 alert('הירשמת בהצלחה! כעת תוכל להתחבר.');
                 toggleAuthMode();
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) return alert('שגיאה בהתחברות: ' + error.message);
                 checkUserSession();
             }
         }
 
-        // בדיקת סטטוס משתמש מחובר
         async function checkUserSession() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 showSection('auth-section');
                 return;
             }
-
             currentUserId = user.id;
-
-            // שליפת פרופיל המשתמש מטבלת profiles
-            const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            if (error || !profile) {
-                console.error('שגיאה בטעינת פרופיל:', error);
-                return;
-            }
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (!profile) return;
 
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
-            
-            // הצגת לוח בקרה מותאם לתפקיד
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
-            
             showSection('dashboard-section');
             loadActiveRooms();
         }
 
-        // התנתקות
         window.logout = async function() {
             await supabase.auth.signOut();
             window.location.reload();
         }
 
-        // מורה פותח חדר חדש
+        // שליפת שערי מטבעות חיים
+        async function fetchCurrencyRates() {
+            try {
+                const res = await fetch('https://api.exchangerate-api.com/v4/latest/ILS');
+                const data = await res.json();
+                document.getElementById('currency-rates').innerHTML = `
+                    דולר ($): ${(1 / data.rates.USD).toFixed(2)} ₪ | 
+                    יורו (€): ${(1 / data.rates.EUR).toFixed(2)} ₪ | 
+                    פאונד (£): ${(1 / data.rates.GBP).toFixed(2)} ₪
+                `;
+            } catch (e) {
+                document.getElementById('currency-rates').innerText = 'שערי מטבעות אינם זמינים כרגע.';
+            }
+        }
+
+        // זיהוי פרטי דפדפן, מערכת הפעלה ומיקום מבוסס IP
+        async function getClientMetadata() {
+            const ua = navigator.userAgent;
+            let browser = "לא ידוע";
+            let os = "לא ידוע";
+
+            if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+            else if (ua.indexOf("SamsungBrowser") > -1) browser = "Samsung Browser";
+            else if (ua.indexOf("Opera") > -1 || ua.indexOf("OPR") > -1) browser = "Opera";
+            else if (ua.indexOf("Trident") > -1) browser = "Internet Explorer";
+            else if (ua.indexOf("Edge") > -1) browser = "MS Edge";
+            else if (ua.indexOf("Chrome") > -1) browser = "Chrome";
+            else if (ua.indexOf("Safari") > -1) browser = "Safari";
+
+            if (ua.indexOf("Win") > -1) os = "Windows";
+            else if (ua.indexOf("Mac") > -1) os = "MacOS";
+            else if (ua.indexOf("Linux") > -1) os = "Linux";
+            else if (ua.indexOf("Android") > -1) os = "Android";
+            else if (ua.indexOf("like Mac") > -1) os = "iOS";
+
+            let locationStr = "ישראל (מקומי)";
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                if (ipData.city && ipData.country_name) {
+                    locationStr = `${ipData.city}, ${ipData.country_name}`;
+                }
+            } catch (e) {}
+
+            // יצירת צבע אקראי ייחודי לכל משתמש לפי מזהה
+            const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId.charCodeAt(0)) * 16777215)).toString(16);
+
+            return { browser, os, location: locationStr, color: colorHash };
+        }
+
         window.createAndOpenRoom = async function() {
             const title = document.getElementById('room-title-input').value;
             if (!title) return alert('נא להכניס כותרת לשיעור');
 
-            const { data, error } = await supabase
-                .from('rooms')
-                .insert([{ title, teacher_id: currentUserId, is_active: true }])
-                .select()
-                .single();
-
+            const { data, error } = await supabase.from('rooms').insert([{ title, teacher_id: currentUserId, is_active: true }]).select().single();
             if (error) return alert('שגיאה ביצירת החדר: ' + error.message);
             enterRoom(data.id, data.title);
         }
 
-        // טעינת רשימת החדרים הפעילים לתלמידים
         async function loadActiveRooms() {
-            const { data: rooms, error } = await supabase
-                .from('rooms')
-                .select(`id, title, profiles:teacher_id (full_name)`)
-                .eq('is_active', true);
-
+            const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
             const listEl = document.getElementById('rooms-list');
-            if (error || !rooms || rooms.length === 0) {
+            if (!rooms || rooms.length === 0) {
                 listEl.innerHTML = '<p>אין חדרים פעילים כרגע.</p>';
                 return;
             }
-
             listEl.innerHTML = rooms.map(room => `
                 <div class="room-item">
                     <span><b>${room.title}</b> (מורה: ${room.profiles?.full_name || 'לא ידוע'})</span>
@@ -194,47 +275,133 @@
             `).join('');
         }
 
-        // כניסה לחדר בפועל (הוספה כמשתתף והאזנה בזמן אמת)
         window.enterRoom = async function(roomId, roomTitle) {
             currentRoomId = roomId;
             showSection('room-section');
             document.getElementById('current-room-title').innerText = roomTitle;
 
-            // רישום המשתמש כמשתתף בחדר
+            const meta = await getClientMetadata();
+
             await supabase.from('room_participants').upsert([
-                { room_id: roomId, user_id: currentUserId }
+                { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color }
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
 
-            // האזנה לשינויים בזמן אמת בתוך החדר (מי נכנס/יצא)
             currentActiveChannel = supabase.channel(`room_${roomId}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, () => {
                     fetchParticipants(roomId);
                 })
                 .subscribe();
+
+            // הפעלת מצלמה מקומית בסיסית
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = stream;
+            } catch (e) {
+                console.log('מצלמה אינה זמינה');
+            }
         }
 
-        // שליפת משתתפי החדר והצגתם ברשימה
         async function fetchParticipants(roomId) {
-            const { data, error } = await supabase
-                .from('room_participants')
-                .select(`*, profiles:user_id (full_name, role)`)
-                .eq('room_id', roomId);
-
+            const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', roomId);
             const ul = document.getElementById('participants-list');
-            if (error || !data) return;
+            if (!data) return;
 
             ul.innerHTML = data.map(p => `
-                <li>👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})</li>
+                <li style="color: ${p.color || '#000'}; font-weight: bold; margin-bottom: 6px;">
+                    👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})<br>
+                    <span style="font-size: 11px; color: #666;">🌍 ${p.location} | 💻 ${p.browser} / ${p.os}</span>
+                </li>
             `).join('');
         }
 
-        // יציאה מהחדר
-        window.leaveRoom = async function() {
-            if (currentActiveChannel) {
-                supabase.removeChannel(currentActiveChannel);
+        // שיתוף מסך
+        window.startScreenShare = async function() {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                document.getElementById('local-video').srcObject = screenStream;
+            } catch (e) {
+                alert('שיתוף המסך בוטל');
             }
+        }
+
+        // הקלטת שיעור מקומית
+        window.startRecording = function() {
+            const stream = document.getElementById('local-video').srcObject;
+            if (!stream) return alert('אין זרם וידאו פעיל להקלטה');
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'lesson-recording.webm';
+                a.click();
+            };
+            mediaRecorder.start();
+            document.getElementById('stop-rec-btn').classList.remove('hidden');
+            alert('ההקלטה החלה...');
+        }
+
+        window.stopAndSaveRecording = function() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                document.getElementById('stop-rec-btn').classList.add('hidden');
+            }
+        }
+
+        // מחשבון מדעי
+        window.calculateMath = function() {
+            const expr = document.getElementById('calc-input').value;
+            try {
+                const res = eval(expr);
+                document.getElementById('calc-result').innerText = `= ${res}`;
+            } catch (e) {
+                document.getElementById('calc-result').innerText = 'שגיאה בביטוי';
+            }
+        }
+
+        // מחולל גרפים
+        window.generateChart = function() {
+            const input = document.getElementById('chart-data-input').value;
+            const dataArr = input.split(',').map(Number);
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (activeChart) activeChart.destroy();
+            activeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataArr.map((_, i) => `נקודה ${i+1}`),
+                    datasets: [{ label: 'נתוני כיתה', data: dataArr, backgroundColor: '#007bff' }]
+                }
+            });
+        }
+
+        // תמלול חי באמצעות Web Speech API
+        let recognition = null;
+        window.toggleSpeechRecognition = function() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return alert('הדפדפן שלך אינו תומך בתמלול קולי אוטומטי');
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'he-IL';
+            recognition.interimResults = true;
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('transcript-output').innerText = transcript;
+            };
+            recognition.start();
+            document.getElementById('mic-btn').innerText = 'מאזין ומסכם... 🎙️';
+        }
+
+        window.leaveRoom = async function() {
+            if (currentActiveChannel) supabase.removeChannel(currentActiveChannel);
             if (currentRoomId && currentUserId) {
                 await supabase.from('room_participants').delete().match({ room_id: currentRoomId, user_id: currentUserId });
             }
@@ -243,7 +410,6 @@
             loadActiveRooms();
         }
 
-        // פונקציית עזר להחלפת מסכים ב-DOM
         function showSection(sectionId) {
             ['auth-section', 'dashboard-section', 'room-section'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
