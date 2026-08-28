@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - לוח לבן ושיתוף PDF</title>
+    <title>כיתה וירטואלית חכמה - מצב כהה/בהיר</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
+        /* הגדרת ערכות נושא: בהיר (Light) וכהה (Dark) */
+        :root[data-theme="light"] {
             --primary-color: #4f46e5;
             --primary-hover: #4338ca;
             --bg-color: #f8fafc;
@@ -15,9 +16,24 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
+            --tool-bg: #f1f5f9;
             --danger-color: #ef4444;
             --success-color: #10b981;
             --warning-color: #f59e0b;
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --tool-bg: #111827;
+            --danger-color: #f87171;
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
         }
 
         body {
@@ -27,6 +43,7 @@
             margin: 0;
             padding: 20px;
             direction: rtl;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
@@ -35,7 +52,8 @@
             background: var(--card-bg);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
         }
 
         h2, h3, h4 { color: var(--text-main); margin-top: 0; }
@@ -51,6 +69,8 @@
             border-radius: 6px;
             box-sizing: border-box;
             outline: none;
+            background: var(--card-bg);
+            color: var(--text-main);
         }
 
         button {
@@ -76,7 +96,7 @@
         }
 
         .tool-box {
-            background: #f1f5f9;
+            background: var(--tool-bg);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
@@ -84,7 +104,7 @@
         }
 
         .room-item {
-            background: #ffffff;
+            background: var(--card-bg);
             padding: 12px 16px;
             margin-bottom: 10px;
             border-radius: 6px;
@@ -97,7 +117,7 @@
         video {
             width: 100%;
             max-height: 220px;
-            background: #0f172a;
+            background: #000;
             border-radius: 6px;
             object-fit: cover;
         }
@@ -107,16 +127,15 @@
             overflow-y: auto;
             border: 1px solid var(--border-color);
             padding: 8px;
-            background: white;
+            background: var(--card-bg);
             border-radius: 6px;
             margin-bottom: 8px;
             font-size: 14px;
         }
 
-        /* עיצוב לוח לבן ומציג PDF */
         #whiteboard-canvas, #pdf-canvas {
             width: 100%;
-            background: white;
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             cursor: crosshair;
@@ -124,12 +143,28 @@
         }
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
+        
+        .theme-toggle-btn {
+            background: var(--text-muted);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            width: auto;
+            display: inline-block;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">🎓 כיתה וירטואלית חכמה - לוח לבן ו-PDF</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--primary-color); margin: 0;">🎓 כיתה וירטואלית חכמה</h2>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
+        </div>
 
         <div id="auth-section" style="max-width: 400px; margin: 0 auto;">
             <h3 id="form-title" style="text-align: center;">התחברות למערכת</h3>
@@ -149,7 +184,7 @@
         </div>
 
         <div id="dashboard-section" class="hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--tool-bg); padding: 15px; border-radius: 8px;">
                 <h3 id="welcome-user" style="margin: 0;">שלום, משתמש</h3>
                 <button onclick="logout()" style="background: var(--danger-color); width: auto; padding: 6px 14px; margin: 0;">התנתק</button>
             </div>
@@ -181,9 +216,9 @@
             
             <div class="grid-container">
                 <div>
-                    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+                    <div style="background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
                         <video id="local-video" autoplay muted></video>
-                        <div id="video-user-label" style="background: rgba(15, 23, 42, 0.9); color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 14px; border-top: 1px solid #334155;">
+                        <div id="video-user-label" style="background: rgba(0, 0, 0, 0.85); color: white; padding: 8px; font-weight: bold; text-align: center; font-size: 14px; border-top: 1px solid #333;">
                             טוען שם...
                         </div>
                     </div>
@@ -265,24 +300,31 @@
         let recordedChunks = [];
         let activeChart = null;
 
-        // משתנים ללוח הלבן
-        const canvas = document.getElementById('whiteboard-canvas');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
+        // ניהול מעבר בין מצב בהיר לכהה
+        window.toggleTheme = function() {
+            const htmlEl = document.documentElement;
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            htmlEl.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
 
-        // משתנים ל-PDF
-        let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
-        const pdfCanvas = document.getElementById('pdf-canvas');
-        const pdfCtx = pdfCanvas.getContext('2d');
-
+        // טעינת ההעדפה השמורה בדפדפן בעליית העמוד
         window.addEventListener('DOMContentLoaded', async () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
             checkUserSession();
             fetchCurrencyRates();
             initWhiteboard();
             initPdfUploader();
         });
 
-        // פונקציות לוח לבן
+        // לוח לבן
+        const canvas = document.getElementById('whiteboard-canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+
         function initWhiteboard() {
             canvas.width = canvas.offsetWidth;
             canvas.height = 220;
@@ -315,7 +357,11 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        // פונקציות טעינה ומעבר חלק ב-PDF
+        // PDF Viewer
+        let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
+        const pdfCanvas = document.getElementById('pdf-canvas');
+        const pdfCtx = pdfCanvas.getContext('2d');
+
         function initPdfUploader() {
             document.getElementById('pdf-upload').addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -356,11 +402,7 @@
         }
 
         function queueRenderPage(num) {
-            if (pageRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
-            }
+            if (pageRendering) { pageNumPending = num; } else { renderPage(num); }
         }
 
         window.prevPage = function() {
@@ -375,7 +417,7 @@
             queueRenderPage(pageNum);
         }
 
-        // ניהול משתמשים, התחברות וחדרים (זהה לגרסה הקודמת)
+        // ניהול משתמשים וחדרים
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
