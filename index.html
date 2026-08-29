@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - כולל תמלול חי</title>
+    <title>כיתה וירטואלית חכמה - גרסה מלאה ומתקדמת</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -122,7 +122,7 @@
         }
 
         .chat-box, .transcript-box {
-            height: 110px;
+            height: 100px;
             overflow-y: auto;
             border: 1px solid var(--border-color);
             padding: 8px;
@@ -173,7 +173,7 @@
 
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="color: var(--primary-color); margin: 0;">🎓 כיתה וירטואלית חכמה</h2>
+            <h2 style="color: var(--primary-color); margin: 0;">🎓 כיתה וירטואלית חכמה (מתקדמת)</h2>
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
         </div>
 
@@ -222,7 +222,10 @@
         <div id="room-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="current-room-title" style="margin: 0; color: var(--primary-color);">שם החדר</h3>
-                <button onclick="leaveRoom()" style="background: var(--warning-color); color: #000; width: auto; padding: 6px 14px; margin: 0;">צא מהחדר 🚪</button>
+                <div>
+                    <button id="raise-hand-btn" onclick="toggleRaiseHand()" style="display: inline-block; width: auto; padding: 6px 14px; margin-left: 8px; background: var(--warning-color); color: #000;">🙋‍♂️ הרם יד</button>
+                    <button onclick="leaveRoom()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--danger-color); margin: 0;">צא מהחדר 🚪</button>
+                </div>
             </div>
             
             <div class="grid-container">
@@ -247,20 +250,20 @@
 
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h4 style="margin: 0;">🎨 לוח לבן שיתופי</h4>
+                            <h4 style="margin: 0;">🎨 לוח לבן שיתופי (חי)</h4>
                             <div>
                                 <input type="color" id="brush-color" value="#4f46e5" style="display: inline-block; width: 35px; height: 30px; padding: 0; vertical-align: middle;">
                                 <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger-color);">נקה לוח</button>
                             </div>
                         </div>
-                        <canvas id="whiteboard-canvas" height="220"></canvas>
+                        <canvas id="whiteboard-canvas" height="200"></canvas>
                     </div>
 
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">📄 הצגת חומרי לימוד (PDF)</h4>
                         <input type="file" id="pdf-upload" accept="application/pdf" style="margin-bottom: 8px; padding: 6px;">
                         <div style="position: relative; text-align: center;">
-                            <canvas id="pdf-canvas" style="max-height: 250px; object-fit: contain;"></canvas>
+                            <canvas id="pdf-canvas" style="max-height: 220px; object-fit: contain;"></canvas>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;" id="pdf-controls" class="hidden">
                             <button onclick="prevPage()" style="width: auto; padding: 6px 12px; margin: 0;">◀ עמוד קודם</button>
@@ -272,37 +275,46 @@
 
                 <div>
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים ושליטה</h4>
-                        <div id="participants-list" style="max-height: 150px; overflow-y: auto;"></div>
+                        <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים</h4>
+                        <div id="participants-list" style="max-height: 130px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div class="tool-box" id="quiz-container">
+                        <h4 style="margin-bottom: 6px;">📝 בוחן כיתתי חי</h4>
+                        <div id="teacher-quiz-creator" class="hidden">
+                            <input type="text" id="quiz-question" placeholder="שאלה לתלמידים">
+                            <input type="text" id="quiz-opt1" placeholder="אפשרות א'">
+                            <input type="text" id="quiz-opt2" placeholder="אפשרות ב'">
+                            <button onclick="publishQuiz()" style="background: var(--success-color); padding: 6px;">שלח בוחן לכיתה</button>
+                        </div>
+                        <div id="student-quiz-taker">
+                            <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 6px 0;">אין בוחן פעיל כרגע.</p>
+                        </div>
                     </div>
 
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <h4 style="margin: 0;">🗣️ תמלול חי (Live Transcript)</h4>
-                            <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 4px 10px; margin: 0; font-size: 12px; background: var(--success-color);">הפעל תמלול</button>
+                            <h4 style="margin: 0;">🗣️ תמלול חי וסיכום</h4>
+                            <div>
+                                <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="display: inline-block; width: auto; padding: 3px 8px; font-size: 11px; background: var(--success-color); margin: 0;">הפעל</button>
+                                <button onclick="downloadTranscript()" style="display: inline-block; width: auto; padding: 3px 8px; font-size: 11px; background: var(--text-muted); margin: 0;">שמור טקסט</button>
+                            </div>
                         </div>
-                        <div id="transcript-messages" class="transcript-box">ממתין להפעלת תמלול...</div>
+                        <div id="transcript-messages" class="transcript-box">תמלול מופסק...</div>
                     </div>
 
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">💬 צ'אט כיתתי</h4>
                         <div id="chat-messages" class="chat-box"></div>
                         <input type="text" id="chat-input" placeholder="הקלד הודעה...">
-                        <button onclick="sendChatMessage()" style="padding: 8px;">שלח</button>
+                        <button onclick="sendChatMessage()" style="padding: 6px;">שלח</button>
                     </div>
 
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">🧮 מחשבון מדעי</h4>
                         <input type="text" id="calc-input" placeholder="למשל: Math.sqrt(144)">
-                        <button onclick="calculateMath()" style="background: #8b5cf6; padding: 8px;">חשב</button>
-                        <p id="calc-result" style="font-weight: bold; font-size: 15px; color: var(--primary-color); margin: 4px 0 0 0;"></p>
-                    </div>
-
-                    <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">📊 מחולל גרפים</h4>
-                        <input type="text" id="chart-data-input" placeholder="מספרים בפסיקים: 15,30,45,20">
-                        <button onclick="generateChart()" style="background: #ec4899; padding: 8px;">צור גרף</button>
-                        <canvas id="myChart" style="max-height: 120px; margin-top: 6px;"></canvas>
+                        <button onclick="calculateMath()" style="background: #8b5cf6; padding: 6px;">חשב</button>
+                        <p id="calc-result" style="font-weight: bold; font-size: 14px; color: var(--primary-color); margin: 2px 0 0 0;"></p>
                     </div>
                 </div>
             </div>
@@ -325,11 +337,10 @@
         let mediaStream = null;
         let mediaRecorder;
         let recordedChunks = [];
-        let activeChart = null;
-
-        // משתני זיהוי דיבור (תמלול חי)
         let recognition = null;
         let isTranscribing = false;
+        let fullTranscriptText = "";
+        let handRaised = false;
 
         window.toggleTheme = function() {
             const htmlEl = document.documentElement;
@@ -342,7 +353,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-
             checkUserSession();
             fetchCurrencyRates();
             initWhiteboard();
@@ -350,14 +360,63 @@
             initSpeechRecognition();
         });
 
-        // אתחול תמלול חי באמצעות Web Speech API
+        // לוח לבן משותף עם שידור בזמן אמת
+        const canvas = document.getElementById('whiteboard-canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+
+        function initWhiteboard() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 200;
+
+            canvas.addEventListener('mousedown', (e) => startPosition(e));
+            canvas.addEventListener('mouseup', endPosition);
+            canvas.addEventListener('mousemove', (e) => draw(e, true));
+            
+            canvas.addEventListener('touchstart', (e) => startPosition(e.touches[0]));
+            canvas.addEventListener('touchend', endPosition);
+            canvas.addEventListener('touchmove', (e) => draw(e.touches[0], true));
+        }
+
+        function startPosition(e) { painting = true; draw(e, false); }
+        function endPosition() { painting = false; ctx.beginPath(); }
+        
+        function draw(e, sendOverChannel) {
+            if (!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const color = document.getElementById('brush-color').value;
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = color;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            if (sendOverChannel && currentActiveChannel) {
+                currentActiveChannel.send({
+                    type: 'broadcast',
+                    event: 'draw_line',
+                    payload: { x, y, color, prev: false }
+                });
+            }
+        }
+
+        window.clearWhiteboard = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (currentActiveChannel) {
+                currentActiveChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
+            }
+        }
+
+        // תמלול חי
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                document.getElementById('transcript-messages').innerText = 'הדפדפן שלך אינו תומך בתמלול חי (נסה ב-Google Chrome).';
-                document.getElementById('toggle-transcript-btn').disabled = true;
-                return;
-            }
+            if (!SpeechRecognition) return;
 
             recognition = new SpeechRecognition();
             recognition.lang = 'he-IL';
@@ -365,103 +424,68 @@
             recognition.continuous = true;
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
                 let finalTranscript = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
                 }
-
                 if (finalTranscript) {
-                    const transcriptBox = document.getElementById('transcript-messages');
-                    transcriptBox.innerHTML += `<div><b>${currentUserName}:</b> ${finalTranscript}</div>`;
-                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+                    const textLine = `${currentUserName}: ${finalTranscript}\n`;
+                    fullTranscriptText += textLine;
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${currentUserName}:</b> ${finalTranscript}</div>`;
+                    box.scrollTop = box.scrollHeight;
 
-                    // שליחת הודעת תמלול גם ל-Supabase ששאר המשתתפים יראו (אופציונלי / דרך ערוץ החדר)
                     if (currentActiveChannel) {
-                        currentActiveChannel.send({
-                            type: 'broadcast',
-                            event: 'transcript',
-                            payload: { user: currentUserName, text: finalTranscript }
-                        });
+                        currentActiveChannel.send({ type: 'broadcast', event: 'transcript', payload: { user: currentUserName, text: finalTranscript } });
                     }
                 }
             };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error', event.error);
-            };
-
-            recognition.onend = () => {
-                if (isTranscribing) {
-                    try { recognition.start(); } catch (e) {}
-                }
-            };
+            recognition.onend = () => { if (isTranscribing) try { recognition.start(); } catch(e){} };
         }
 
         window.toggleSpeechRecognition = function() {
             if (!recognition) return;
             const btn = document.getElementById('toggle-transcript-btn');
-            const box = document.getElementById('transcript-messages');
-
+            isTranscribing = !isTranscribing;
             if (isTranscribing) {
-                isTranscribing = false;
-                recognition.stop();
-                btn.innerText = 'הפעל תמלול';
-                btn.style.background = 'var(--success-color)';
-                box.innerHTML += '<div style="color: var(--text-muted); font-size: 12px;">[התמלול הופסק]</div>';
+                recognition.start();
+                btn.innerText = 'עצור';
+                btn.style.background = 'var(--danger-color)';
             } else {
-                isTranscribing = true;
-                try {
-                    recognition.start();
-                    btn.innerText = 'עצור תמלול';
-                    btn.style.background = 'var(--danger-color)';
-                    box.innerHTML = '<div style="color: var(--success-color); font-size: 12px;">[התמלול הופל פעיל...]</div>';
-                } catch (e) {
-                    isTranscribing = false;
-                }
+                recognition.stop();
+                btn.innerText = 'הפעל';
+                btn.style.background = 'var(--success-color)';
             }
         }
 
-        // לוח לבן
-        const canvas = document.getElementById('whiteboard-canvas');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
-
-        function initWhiteboard() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = 220;
-
-            canvas.addEventListener('mousedown', startPosition);
-            canvas.addEventListener('mouseup', endPosition);
-            canvas.addEventListener('mousemove', draw);
-            
-            canvas.addEventListener('touchstart', (e) => { startPosition(e.touches[0]); });
-            canvas.addEventListener('touchend', endPosition);
-            canvas.addEventListener('touchmove', (e) => { draw(e.touches[0]); });
+        window.downloadTranscript = function() {
+            const blob = new Blob([fullTranscriptText], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'lesson_transcript.txt';
+            a.click();
         }
 
-        function startPosition(e) { painting = true; draw(e); }
-        function endPosition() { painting = false; ctx.beginPath(); }
-        function draw(e) {
-            if (!painting) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = document.getElementById('brush-color').value;
-
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        // הרמת יד
+        window.toggleRaiseHand = async function() {
+            handRaised = !handRaised;
+            const btn = document.getElementById('raise-hand-btn');
+            btn.style.background = handRaised ? 'var(--danger-color)' : 'var(--warning-color)';
+            btn.innerText = handRaised ? '🙋‍♂️ הורד יד' : '🙋‍♂️ הרם יד';
+            await supabase.from('room_participants').update({ hand_raised: handRaised }).match({ room_id: currentRoomId, user_id: currentUserId });
         }
 
-        window.clearWhiteboard = function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // בוחן חי (Quiz)
+        window.publishQuiz = function() {
+            const question = document.getElementById('quiz-question').value;
+            const opt1 = document.getElementById('quiz-opt1').value;
+            const opt2 = document.getElementById('quiz-opt2').value;
+            if (!question) return alert('הכנס שאלה');
+
+            if (currentActiveChannel) {
+                currentActiveChannel.send({ type: 'broadcast', event: 'new_quiz', payload: { question, opt1, opt2 } });
+                alert('הבוחן שוגר בהצלחה לכיתה!');
+            }
         }
 
         // PDF Viewer
@@ -473,89 +497,48 @@
             document.getElementById('pdf-upload').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file && file.type === 'application/pdf') {
-                    const fileReader = new FileReader();
-                    fileReader.onload = function() {
-                        const typedarray = new Uint8Array(this.result);
-                        pdfjsLib.getDocument(typedarray).promise.then(function(pdfDoc_) {
-                            pdfDoc = pdfDoc_;
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        pdfjsLib.getDocument(new Uint8Array(this.result)).promise.then(pdf => {
+                            pdfDoc = pdf;
                             document.getElementById('pdf-controls').classList.remove('hidden');
                             renderPage(pageNum);
                         });
                     };
-                    fileReader.readAsArrayBuffer(file);
+                    reader.readAsArrayBuffer(file);
                 }
             });
         }
 
         function renderPage(num) {
             pageRendering = true;
-            pdfDoc.getPage(num).then(function(page) {
-                const viewport = page.getViewport({ scale: 1.0 });
-                pdfCanvas.height = viewport.height;
-                pdfCanvas.width = viewport.width;
-
-                const renderContext = { canvasContext: pdfCtx, viewport: viewport };
-                const renderTask = page.render(renderContext);
-
-                renderTask.promise.then(function() {
+            pdfDoc.getPage(num).then(page => {
+                const vp = page.getViewport({ scale: 1.0 });
+                pdfCanvas.height = vp.height;
+                pdfCanvas.width = vp.width;
+                page.render({ canvasContext: pdfCtx, viewport: vp }).promise.then(() => {
                     pageRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
-                    }
+                    if (pageNumPending !== null) { renderPage(pageNumPending); pageNumPending = null; }
                 });
             });
             document.getElementById('pdf-page-info').innerText = `עמוד ${num} מתוך ${pdfDoc.numPages}`;
         }
 
-        function queueRenderPage(num) {
-            if (pageRendering) { pageNumPending = num; } else { renderPage(num); }
-        }
-
-        window.prevPage = function() {
-            if (pageNum <= 1) return;
-            pageNum--;
-            queueRenderPage(pageNum);
-        }
-
-        window.nextPage = function() {
-            if (pageNum >= pdfDoc.numPages) return;
-            pageNum++;
-            queueRenderPage(pageNum);
-        }
+        window.prevPage = function() { if (pageNum > 1) renderPage(--pageNum); }
+        window.nextPage = function() { if (pageNum < pdfDoc.numPages) renderPage(++pageNum); }
 
         async function getClientMetadata() {
             const ua = navigator.userAgent;
-            let browser = "Google Chrome";
-            let os = "Windows";
-
+            let browser = "Google Chrome", os = "Windows", locationStr = "ישראל";
             if (ua.indexOf("Firefox") > -1) browser = "Firefox";
             else if (ua.indexOf("Edg") > -1) browser = "Microsoft Edge";
-            else if (ua.indexOf("Chrome") > -1) browser = "Google Chrome";
-            else if (ua.indexOf("Safari") > -1) browser = "Apple Safari";
-            else if (ua.indexOf("OPR") > -1) browser = "Opera";
-
-            if (ua.indexOf("Win") > -1) os = "Windows";
-            else if (ua.indexOf("Mac") > -1) os = "macOS";
-            else if (ua.indexOf("Linux") > -1) os = "Linux";
-            else if (ua.indexOf("Android") > -1) os = "Android";
-            else if (ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS";
-
-            let locationStr = "ישראל";
+            if (ua.indexOf("Mac") > -1) os = "macOS";
             try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                if (ipRes.ok) {
-                    const ipData = await ipRes.json();
-                    if (ipData.city && ipData.country_name) {
-                        locationStr = `${ipData.city}, ${ipData.country_name}`;
-                    } else if (ipData.country_name) {
-                        locationStr = ipData.country_name;
-                    }
-                }
-            } catch (e) {}
-
-            const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId ? currentUserId.charCodeAt(0) : 1) * 16777215)).toString(16);
-            return { browser, os, location: locationStr, color: colorHash };
+                const res = await fetch('https://ipapi.co/json/');
+                if (res.ok) { const d = await res.json(); if (d.country_name) locationStr = d.country_name; }
+            } catch(e){}
+            const color = '#' + Math.floor(Math.abs(Math.sin(currentUserId ? currentUserId.charCodeAt(0) : 1) * 16777215)).toString(16);
+            return { browser, os, location: locationStr, color };
         }
 
         window.toggleAuthMode = function() {
@@ -569,19 +552,16 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             if (!email || !password) return alert('נא למלא אימייל וסיסמה');
-
             if (isRegisterMode) {
                 const full_name = document.getElementById('full_name').value;
                 const role = document.getElementById('role').value;
-                if (!full_name) return alert('נא להכניס שם מלא');
-
                 const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name, role } } });
-                if (error) return alert('שגיאה בהרשמה: ' + error.message);
-                alert('הירשמת בהצלחה!');
+                if (error) return alert(error.message);
+                alert('נרשמת בהצלחה!');
                 toggleAuthMode();
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert('שגיאה בהתחברות: ' + error.message);
+                if (error) return alert(error.message);
                 checkUserSession();
             }
         }
@@ -597,6 +577,7 @@
             currentUserName = profile.full_name;
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
+            document.getElementById('teacher-quiz-creator').classList.toggle('hidden', profile.role !== 'teacher');
             showSection('dashboard-section');
             loadActiveRooms();
         }
@@ -606,31 +587,27 @@
         async function fetchCurrencyRates() {
             try {
                 const res = await fetch('https://api.exchangerate-api.com/v4/latest/ILS');
-                const data = await res.json();
-                document.getElementById('currency-rates').innerHTML = `
-                    💵 דולר: ${(1 / data.rates.USD).toFixed(2)} ₪ &nbsp;|&nbsp; 
-                    💶 יורו: ${(1 / data.rates.EUR).toFixed(2)} ₪ &nbsp;|&nbsp; 
-                    💷 פאונד: ${(1 / data.rates.GBP).toFixed(2)} ₪
-                `;
-            } catch (e) { document.getElementById('currency-rates').innerText = 'שערי מטבעות לא זמינים.'; }
+                const d = await res.json();
+                document.getElementById('currency-rates').innerHTML = `💵 דולר: ${(1/d.rates.USD).toFixed(2)} ₪ | 💶 יורו: ${(1/d.rates.EUR).toFixed(2)} ₪`;
+            } catch(e){}
         }
 
         window.createAndOpenRoom = async function() {
             const title = document.getElementById('room-title-input').value;
-            if (!title) return alert('נא להכניס כותרת לשיעור');
+            if (!title) return alert('הכנס כותרת');
             const { data, error } = await supabase.from('rooms').insert([{ title, teacher_id: currentUserId, is_active: true }]).select().single();
-            if (error) return alert('שגיאה: ' + error.message);
+            if (error) return alert(error.message);
             enterRoom(data.id, data.title);
         }
 
         async function loadActiveRooms() {
             const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
             const listEl = document.getElementById('rooms-list');
-            if (!rooms || rooms.length === 0) { listEl.innerHTML = '<p style="color: var(--text-muted);">אין חדרים פעילים.</p>'; return; }
-            listEl.innerHTML = rooms.map(room => `
+            if (!rooms || rooms.length === 0) { listEl.innerHTML = '<p style="color:var(--text-muted)">אין חדרים פעילים.</p>'; return; }
+            listEl.innerHTML = rooms.map(r => `
                 <div class="room-item">
-                    <span><b>${room.title}</b> <span style="color: var(--text-muted); font-size: 13px;">(מורה: ${room.profiles?.full_name || 'לא ידוע'})</span></span>
-                    <button onclick="enterRoom('${room.id}', '${room.title}')" style="width: auto; padding: 5px 12px; margin:0;">הכנס</button>
+                    <span><b>${r.title}</b> (מורה: ${r.profiles?.full_name || 'לא ידוע'})</span>
+                    <button onclick="enterRoom('${r.id}', '${r.title}')" style="width:auto; padding:5px 12px; margin:0;">הכנס</button>
                 </div>
             `).join('');
         }
@@ -641,93 +618,56 @@
             document.getElementById('current-room-title').innerText = roomTitle;
 
             const meta = await getClientMetadata();
-            const { data: currentProfile } = await supabase.from('profiles').select('full_name, role').eq('id', currentUserId).single();
-            if (currentProfile) {
-                const labelEl = document.getElementById('video-user-label');
-                labelEl.innerText = `${currentProfile.full_name} (${currentProfile.role === 'teacher' ? 'מורה' : 'תלמיד'})`;
-                labelEl.style.color = meta.color;
-            }
+            document.getElementById('video-user-label').innerText = `${currentUserName} (${currentUserRole === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            document.getElementById('video-user-label').style.color = meta.color;
 
             await supabase.from('room_participants').upsert([
-                { 
-                    room_id: roomId, 
-                    user_id: currentUserId, 
-                    browser: meta.browser, 
-                    os: meta.os, 
-                    location: meta.location, 
-                    color: meta.color, 
-                    cam_active: true, 
-                    mic_active: true 
-                }
+                { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color, cam_active: true, mic_active: true, hand_raised: false }
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
-            
+
             currentActiveChannel = supabase.channel(`room_${roomId}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, (payload) => {
-                    if (payload.new && payload.new.user_id === currentUserId) {
-                        if (mediaStream) {
-                            if (payload.new.cam_active === false) {
-                                mediaStream.getVideoTracks().forEach(t => t.enabled = false);
-                                document.getElementById('toggle-cam-btn').innerText = '📷 הפעל מצלמה';
-                            } else if (payload.new.cam_active === true) {
-                                mediaStream.getVideoTracks().forEach(t => t.enabled = true);
-                                document.getElementById('toggle-cam-btn').innerText = '📷 כבה מצלמה';
-                            }
-                            if (payload.new.mic_active === false) {
-                                mediaStream.getAudioTracks().forEach(t => t.enabled = false);
-                                document.getElementById('toggle-mic-btn').innerText = '🎤 הפעל מיקרופון';
-                            } else if (payload.new.mic_active === true) {
-                                mediaStream.getAudioTracks().forEach(t => t.enabled = true);
-                                document.getElementById('toggle-mic-btn').innerText = '🎤 הַשְׁתֵּק מיקרופון';
-                            }
-                        }
-                    }
-                    fetchParticipants(roomId);
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, () => fetchParticipants(roomId))
+                .on('broadcast', { event: 'draw_line' }, payload => {
+                    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = payload.payload.color;
+                    ctx.lineTo(payload.payload.x, payload.payload.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(payload.payload.x, payload.payload.y);
                 })
+                .on('broadcast', { event: 'clear_board' }, () => ctx.clearRect(0, 0, canvas.width, canvas.height))
                 .on('broadcast', { event: 'transcript' }, payload => {
-                    const transcriptBox = document.getElementById('transcript-messages');
-                    transcriptBox.innerHTML += `<div><b>${payload.payload.user}:</b> ${payload.payload.text}</div>`;
-                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${payload.payload.user}:</b> ${payload.payload.text}</div>`;
+                    box.scrollTop = box.scrollHeight;
+                })
+                .on('broadcast', { event: 'new_quiz' }, payload => {
+                    document.getElementById('student-quiz-taker').innerHTML = `
+                        <p style="font-weight: bold; margin: 4px 0;">שאלה: ${payload.payload.question}</p>
+                        <button onclick="alert('תשובתך נקלטה!')" style="padding:4px; margin-bottom:4px;">1. ${payload.payload.opt1}</button>
+                        <button onclick="alert('תשובתך נקלטה!')" style="padding:4px;">2. ${payload.payload.opt2}</button>
+                    `;
                 })
                 .subscribe();
 
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('local-video').srcObject = mediaStream;
-            } catch (e) {}
+            } catch(e){}
         }
 
         window.toggleMyCamera = async function() {
             if (!mediaStream) return;
-            const videoTrack = mediaStream.getVideoTracks()[0];
-            if (!videoTrack) return;
-            videoTrack.enabled = !videoTrack.enabled;
-            const isEnabled = videoTrack.enabled;
-            document.getElementById('toggle-cam-btn').innerText = isEnabled ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
-
-            await supabase.from('room_participants').update({ cam_active: isEnabled }).match({ room_id: currentRoomId, user_id: currentUserId });
+            const t = mediaStream.getVideoTracks()[0];
+            t.enabled = !t.enabled;
+            document.getElementById('toggle-cam-btn').innerText = t.enabled ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
+            await supabase.from('room_participants').update({ cam_active: t.enabled }).match({ room_id: currentRoomId, user_id: currentUserId });
         }
 
         window.toggleMyMicrophone = async function() {
             if (!mediaStream) return;
-            const audioTrack = mediaStream.getAudioTracks()[0];
-            if (!audioTrack) return;
-            audioTrack.enabled = !audioTrack.enabled;
-            const isEnabled = audioTrack.enabled;
-            document.getElementById('toggle-mic-btn').innerText = isEnabled ? '🎤 הַשְׁתֵּק מיקרופון' : '🎤 הפעל מיקרופון';
-
-            await supabase.from('room_participants').update({ mic_active: isEnabled }).match({ room_id: currentRoomId, user_id: currentUserId });
-        }
-
-        window.teacherToggleUserCam = async function(targetUserId, currentCamState) {
-            if (currentUserRole !== 'teacher') return;
-            await supabase.from('room_participants').update({ cam_active: !currentCamState }).match({ room_id: currentRoomId, user_id: targetUserId });
-        }
-
-        window.teacherToggleUserMic = async function(targetUserId, currentMicState) {
-            if (currentUserRole !== 'teacher') return;
-            await supabase.from('room_participants').update({ mic_active: !currentMicState }).match({ room_id: currentRoomId, user_id: targetUserId });
+            const t = mediaStream.getAudioTracks()[0];
+            t.enabled = !t.enabled;
+            document.getElementById('toggle-mic-btn').innerText = t.enabled ? '🎤 הַשְׁתֵּק מיקרופון' : '🎤 הפעל מיקרופון';
+            await supabase.from('room_participants').update({ mic_active: t.enabled }).match({ room_id: currentRoomId, user_id: currentUserId });
         }
 
         async function fetchParticipants(roomId) {
@@ -735,81 +675,44 @@
             const listContainer = document.getElementById('participants-list');
             if (!data) return;
 
-            listContainer.innerHTML = data.map(p => {
-                const userBrowser = p.browser && p.browser !== 'undefined' ? p.browser : 'Google Chrome';
-                const userLocation = p.location && p.location !== 'undefined' ? p.location : 'ישראל';
-                const userOs = p.os && p.os !== 'undefined' ? p.os : 'Windows';
-
-                return `
-                    <div class="participant-card">
-                        <div>
-                            <b style="color: ${p.color || '#000'}">👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})</b><br>
-                            <span style="font-size: 11px; color: var(--text-muted);">
-                                🌍 ${userLocation} | 💻 ${userBrowser} / ${userOs}<br>
-                                מצלמה: ${p.cam_active !== false ? '🟢 פתוחה' : '🔴 כבויה'} | מיקרופון: ${p.mic_active !== false ? '🟢 פעיל' : '🔴 מושתק'}
-                            </span>
-                        </div>
-                        ${currentUserRole === 'teacher' && p.user_id !== currentUserId ? `
-                            <div style="display: flex; gap: 4px; flex-direction: column;">
-                                <button onclick="teacherToggleUserCam('${p.user_id}', ${p.cam_active !== false})" style="font-size: 11px; padding: 4px 8px; margin: 0; background: ${p.cam_active !== false ? 'var(--danger-color)' : 'var(--success-color)'};">
-                                    ${p.cam_active !== false ? 'כבה מצלמה' : 'הפעל מצלמה'}
-                                </button>
-                                <button onclick="teacherToggleUserMic('${p.user_id}', ${p.mic_active !== false})" style="font-size: 11px; padding: 4px 8px; margin: 0; background: ${p.mic_active !== false ? 'var(--danger-color)' : 'var(--success-color)'};">
-                                    ${p.mic_active !== false ? 'השתק מיקרופון' : 'הפעל מיקרופון'}
-                                </button>
-                            </div>
-                        ` : ''}
+            listContainer.innerHTML = data.map(p => `
+                <div class="participant-card">
+                    <div>
+                        <b style="color: ${p.color}">👤 ${p.profiles?.full_name || 'משתמש'} ${p.hand_raised ? '🙋‍♂️ (הרים יד!)' : ''}</b><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">🌍 ${p.location || 'ישראל'} | מצלמה: ${p.cam_active !== false ? '🟢' : '🔴'}</span>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
 
         window.startScreenShare = async function() {
-            try {
-                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                document.getElementById('local-video').srcObject = stream;
-            } catch (e) {}
+            try { document.getElementById('local-video').srcObject = await navigator.mediaDevices.getDisplayMedia({ video: true }); } catch(e){}
         }
 
         window.startRecording = function() {
             const stream = document.getElementById('local-video').srcObject;
-            if (!stream) return alert('אין וידאו להקלטה');
+            if (!stream) return alert('אין וידאו');
             recordedChunks = [];
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
             mediaRecorder.onstop = () => {
                 const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'lesson.webm';
-                a.click();
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lesson.webm'; a.click();
             };
             mediaRecorder.start();
             document.getElementById('stop-rec-btn').classList.remove('hidden');
         }
 
-        window.stopAndSaveRecording = function() {
-            if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); }
-        }
+        window.stopAndSaveRecording = function() { if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); } }
 
         window.calculateMath = function() {
             try { document.getElementById('calc-result').innerText = `= ${eval(document.getElementById('calc-input').value)}`; }
-            catch (e) { document.getElementById('calc-result').innerText = 'שגיאה'; }
-        }
-
-        window.generateChart = function() {
-            const dataArr = document.getElementById('chart-data-input').value.split(',').map(Number);
-            const ctxChart = document.getElementById('myChart').getContext('2d');
-            if (activeChart) activeChart.destroy();
-            activeChart = new Chart(ctxChart, {
-                type: 'bar',
-                data: { labels: dataArr.map((_, i) => i+1), datasets: [{ data: dataArr, backgroundColor: '#4f46e5' }] }
-            });
+            catch(e) { document.getElementById('calc-result').innerText = 'שגיאה'; }
         }
 
         window.sendChatMessage = function() {
             const input = document.getElementById('chat-input');
-            if(!input.value) return;
+            if (!input.value) return;
             document.getElementById('chat-messages').innerHTML += `<div><b>אני:</b> ${input.value}</div>`;
             input.value = '';
         }
