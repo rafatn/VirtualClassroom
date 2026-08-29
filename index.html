@@ -856,7 +856,7 @@
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', roomId);
             const listContainer = document.getElementById('participants-list');
             if (!data) return;
-            sessionParticipantsList = data; // שמירה לדוח נוכחות
+            sessionParticipantsList = data;
 
             listContainer.innerHTML = data.map(p => `
                 <div class="participant-card">
@@ -910,8 +910,8 @@
 
         function showSection(id) {
             ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(sec => {
-                TheEl = document.getElementById(sec);
-                if (TheEl) TheEl.classList.add('hidden');
+                const el = document.getElementById(sec);
+                if (el) el.classList.add('hidden');
             });
             const target = document.getElementById(id);
             if (target) target.classList.remove('hidden');
