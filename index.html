@@ -245,6 +245,13 @@
             </div>
         </div>
 
+        <!-- חדר המתנה לתלמיד -->
+        <div id="waiting-room-section" class="hidden" style="text-align: center; padding: 40px;">
+            <h3 style="color: var(--warning-color);">⏳ ממתין לאישור המורה...</h3>
+            <p style="color: var(--text-muted);">נכנסת לחדר בהצלחה. אנא המתן עד שהמורה יאשר את כניסתך לכיתה.</p>
+            <button onclick="leaveRoom()" style="max-width: 200px; margin: 20px auto; background: var(--danger-color);">בטל ועזוב</button>
+        </div>
+
         <!-- חלון השיעור / הכיתה הווירטואלית -->
         <div id="room-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -275,7 +282,7 @@
                         <button onclick="stopAndSaveRecording()" style="background: var(--danger-color); padding: 8px;" class="hidden" id="stop-rec-btn">⏹️ עצור הקלטה</button>
                     </div>
 
-                    <!-- פיצ'ר 2: שיתוף סרטוני YouTube -->
+                    <!-- שיתוף סרטוני YouTube -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">📺 שיתוף סרטון YouTube לכיתה</h4>
                         <div style="display: flex; gap: 8px;">
@@ -313,16 +320,21 @@
                 </div>
 
                 <div>
+                    <!-- אזור ניהול ממתינים למורה -->
+                    <div class="tool-box hidden" id="teacher-waiting-box">
+                        <h4 style="margin-bottom: 8px; color: var(--warning-color);">⏳ תלמידים הממתינים לאישור</h4>
+                        <div id="waiting-students-list" style="max-height: 120px; overflow-y: auto;">אין תלמידים ממתינים.</div>
+                    </div>
+
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <h4 style="margin: 0;">👥 משתתפים מחוברים</h4>
-                            <!-- פיצ'ר 4: הורדת דוח נוכחות למורה -->
                             <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success-color); margin: 0;">הפק דוח שיעור 📊</button>
                         </div>
                         <div id="participants-list" style="max-height: 130px; overflow-y: auto;"></div>
                     </div>
 
-                    <!-- פיצ'ר 3: סקרים חיים עם גרפים (Chart.js) -->
+                    <!-- סקרים חיים עם גרפים (Chart.js) -->
                     <div class="tool-box" id="poll-container">
                         <h4 style="margin-bottom: 6px;">📊 סקר כיתתי חי</h4>
                         <div id="teacher-poll-creator" class="hidden">
@@ -470,7 +482,6 @@
             }
         }
 
-        // פיצ'ר 2: שיתוף סרטון YouTube
         window.shareYouTubeVideo = function() {
             const urlInput = document.getElementById('youtube-url-input').value;
             const videoId = extractYouTubeId(urlInput);
@@ -495,7 +506,6 @@
             container.classList.remove('hidden');
         }
 
-        // פיצ'ר 3: סקרים חיים וגרפים באמצעות Chart.js
         window.publishPoll = function() {
             const question = document.getElementById('poll-question').value;
             const opt1 = document.getElementById('poll-opt1').value;
@@ -565,7 +575,6 @@
             });
         }
 
-        // פיצ'ר 4: דוח נוכחות וסיכום שיעור למורה
         let sessionParticipantsList = [];
         window.downloadAttendanceReport = function() {
             let reportContent = `===== דוח נוכחות וסיכום שיעור =====\n`;
@@ -584,7 +593,6 @@
             a.click();
         }
 
-        // תמלול חי
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return;
@@ -645,7 +653,6 @@
             await supabase.from('room_participants').update({ hand_raised: handRaised }).match({ room_id: currentRoomId, user_id: currentUserId });
         }
 
-        // PDF Viewer
         let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
         const pdfCanvas = document.getElementById('pdf-canvas');
         const pdfCtx = pdfCanvas.getContext('2d');
@@ -793,23 +800,53 @@
 
         window.enterRoom = async function(roomId, roomTitle) {
             currentRoomId = roomId;
-            showSection('room-section');
             document.getElementById('current-room-title').innerText = roomTitle;
             document.getElementById('teacher-poll-creator').classList.toggle('hidden', currentUserRole !== 'teacher');
             document.getElementById('download-report-btn').classList.toggle('hidden', currentUserRole !== 'teacher');
+            document.getElementById('teacher-waiting-box').classList.toggle('hidden', currentUserRole !== 'teacher');
 
             const meta = await getClientMetadata();
             document.getElementById('video-user-label').innerText = `${currentUserName} (${currentUserRole === 'teacher' ? 'מורה' : 'תלמיד'})`;
             document.getElementById('video-user-label').style.color = meta.color;
 
+            // אם המורה נכנס - הוא מאושר ישר. אם תלמיד - נכנס לסטטוס 'waiting'
+            const initialStatus = (currentUserRole === 'teacher') ? 'approved' : 'waiting';
+
+            if (initialStatus === 'waiting') {
+                showSection('waiting-room-section');
+            } else {
+                showSection('room-section');
+                initMediaStream();
+            }
+
             await supabase.from('room_participants').upsert([
-                { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color, cam_active: true, mic_active: true, hand_raised: false }
+                { 
+                    room_id: roomId, 
+                    user_id: currentUserId, 
+                    browser: meta.browser, 
+                    os: meta.os, 
+                    location: meta.location, 
+                    color: meta.color, 
+                    cam_active: true, 
+                    mic_active: true, 
+                    hand_raised: false,
+                    status: initialStatus
+                }
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
 
             currentActiveChannel = supabase.channel(`room_${roomId}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, () => fetchParticipants(roomId))
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, payload => {
+                    fetchParticipants(roomId);
+                    // בדיקה האם התלמיד קיבל אישור מהמורה
+                    if (currentUserRole === 'student' && payload.new && payload.new.user_id === currentUserId) {
+                        if (payload.new.status === 'approved') {
+                            showSection('room-section');
+                            initMediaStream();
+                        }
+                    }
+                })
                 .on('broadcast', { event: 'draw_line' }, payload => {
                     ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = payload.payload.color;
                     ctx.lineTo(payload.payload.x, payload.payload.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(payload.payload.x, payload.payload.y);
@@ -829,11 +866,20 @@
                     box.scrollTop = box.scrollHeight;
                 })
                 .subscribe();
+        }
 
+        async function initMediaStream() {
+            if (mediaStream) return;
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('local-video').srcObject = mediaStream;
             } catch(e){}
+        }
+
+        window.approveStudent = async function(studentUserId) {
+            await supabase.from('room_participants')
+                .update({ status: 'approved' })
+                .match({ room_id: currentRoomId, user_id: studentUserId });
         }
 
         window.toggleMyCamera = async function() {
@@ -854,11 +900,16 @@
 
         async function fetchParticipants(roomId) {
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', roomId);
-            const listContainer = document.getElementById('participants-list');
             if (!data) return;
             sessionParticipantsList = data;
 
-            listContainer.innerHTML = data.map(p => `
+            // הפרדה בין משתתפים שאושרו לבין אלו שממתינים בחדר ההמתנה
+            const approvedList = data.filter(p => p.status === 'approved');
+            const waitingList = data.filter(p => p.status === 'waiting');
+
+            // עדכון רשימת המשתתפים בכיתה
+            const listContainer = document.getElementById('participants-list');
+            listContainer.innerHTML = approvedList.map(p => `
                 <div class="participant-card">
                     <div>
                         <b style="color: ${p.color}">👤 ${p.profiles?.full_name || 'משתמש'} ${p.hand_raised ? '🙋‍♂️ (הרים יד!)' : ''}</b><br>
@@ -866,6 +917,21 @@
                     </div>
                 </div>
             `).join('');
+
+            // אם זה מורה, הצג את רשימת הממתינים בכדי שיאשר אותם
+            if (currentUserRole === 'teacher') {
+                const waitingContainer = document.getElementById('waiting-students-list');
+                if (waitingList.length === 0) {
+                    waitingContainer.innerHTML = '<span style="color:var(--text-muted); font-size: 12px;">אין תלמידים ממתינים.</span>';
+                } else {
+                    waitingContainer.innerHTML = waitingList.map(w => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: var(--card-bg); padding: 6px; border-radius: 4px;">
+                            <span style="font-size: 13px;"><b>${w.profiles?.full_name || 'תלמיד'}</b></span>
+                            <button onclick="approveStudent('${w.user_id}')" style="width: auto; padding: 4px 10px; margin: 0; background: var(--success-color); font-size: 12px;">אשר כניסה ✓</button>
+                        </div>
+                    `).join('');
+                }
+            }
         }
 
         window.startScreenShare = async function() {
@@ -909,7 +975,7 @@
         }
 
         function showSection(id) {
-            ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(sec => {
+            ['auth-section', 'reset-password-section', 'dashboard-section', 'waiting-room-section', 'room-section'].forEach(sec => {
                 const el = document.getElementById(sec);
                 if (el) el.classList.add('hidden');
             });
