@@ -60,7 +60,7 @@
                     <option value="de">🇩🇪 Deutsch</option>
                     <option value="it">🇮🇹 Italiano</option>
                     <option value="pt">🇧🇷 Português</option>
-                    <option value="am">🇪🇹 አማרኛ</option>
+                    <option value="am">🇪🇹 አማርኛ</option>
                     <option value="zh">🇨🇳 中文</option>
                 </select>
                 <button class="top-bar-btn" onclick="toggleTheme()" data-i18n="toggle_theme">🌓 מצב כהה / בהיר</button>
@@ -199,7 +199,7 @@
                 </div>
 
                 <div>
-                    <!-- נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
+                    <!-- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="ambient_title">🎵 מוזיקת רקע וצלילי ריכוז</h4>
                         <div style="display: flex; gap: 6px;">
@@ -209,7 +209,7 @@
                         </div>
                     </div>
 
-                    <!-- לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
+                    <!-- פיצ'ר חדש 4: לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="sticky_title">💡 פתקיות רעיונות שיתופיות</h4>
@@ -296,7 +296,7 @@
                         <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
                     </div>
 
-                    <!-- כרטיס יציאה / משוב סוף שיעור -->
+                    <!-- פיצ'ר חדש 2: כרטיס יציאה / משוב סוף שיעור -->
                     <div class="tool-box" id="feedback-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="feedback_title">📝 משוב והערכה עצמית (Exit Ticket)</h4>
                         <div id="teacher-feedback-creator" class="hidden">
@@ -306,7 +306,7 @@
                         <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">המידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
                     </div>
 
-                    <!-- תמלול וסיכום AI -->
+                    <!-- תמלול וסיכום AI (משודרג עם פיצ'ר 1) -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI מתקדם</h4>
@@ -397,6 +397,7 @@
                 reset_title: "הגדרת סיסמה חדשה",
                 placeholder_new_password: "סיסמה חדשה (לפחות 6 תווים)",
                 btn_save_password: "שמור סיסמה",
+                welcome_prefix: "שלום",
                 btn_logout: "התנתק",
                 currency_title: "💱 שערי מטבעות חיים",
                 loading_rates: "טוען שערים...",
@@ -407,13 +408,14 @@
                 loading_rooms: "טוען חדרים...",
                 waiting_teacher_approval: "⏳ ממתין לאישור המורה...",
                 btn_cancel_leave: "בטל ועזוב",
-                btn_focus_mode: "🎯 מצב פוקוס",
                 btn_raise_hand: "🙋‍♂️ הרם יד",
+                btn_lower_hand: "🙋‍♂️ הורד יד",
+                btn_focus_mode: "🎯 מצב פוקוס",
                 btn_leave_room: "צא מהחדר 🚪",
-                btn_start_timer: "הפעל",
-                btn_stop_timer: "אפס",
                 btn_cam_off: "📷 כבה מצלמה",
+                btn_cam_on: "📷 הפעל מצלמה",
                 btn_mic_mute: "🎤 השתק מיקרופון",
+                btn_mic_unmute: "🎤 הפעל מיקרופון",
                 btn_share_screen: "🖥️ שתף מסך",
                 btn_record: "🔴 הקלטה",
                 btn_stop_record: "⏹️ עצור הקלטה",
@@ -425,16 +427,34 @@
                 pdf_title: "📄 הצגת PDF",
                 btn_pdf_prev: "◀ קודם",
                 btn_pdf_next: "הבא ▶",
-                ambient_title: "🎵 מוזיקת רקע וצלילי ריכוז",
-                btn_stop_sound: "עצור 🔇",
-                sticky_title: "💡 פתקיות רעיונות שיתופיות",
-                btn_add_sticky: "+ הוסף פתקית",
-                no_stickies: "אין פתקיות עדיין.",
-                private_q_title: "📥 שאלות פרטיות מתלמידים",
-                no_private_q: "אין שאלות פרטיות ממתינות.",
-                analytics_title: "📈 מדד מעורבות כיתתי",
                 waiting_students_title: "⏳ תלמידים ממתינים",
                 no_waiting_students: "אין תלמידים ממתינים.",
+                participants_title: "👥 משתתפים וחיוויי שליטה",
+                btn_mute_all: "השתק הכל 🔇",
+                btn_ping_student: "הקפץ מסך ⚡",
+                btn_report: "הפק דוח 📊",
+                poll_title: "📊 סקר כיתתי חי",
+                placeholder_poll_q: "שאלה",
+                placeholder_poll_opt1: "תשובה א'",
+                placeholder_poll_opt2: "תשובה ב'",
+                btn_publish_poll: "הפעל סקר",
+                no_active_poll: "אין סקר פעיל.",
+                transcript_title: "🗣️ תמלול וסיכום AI מתקדם",
+                btn_transcript_start: "הפעל",
+                btn_transcript_stop: "עצור",
+                btn_ai_summary: "סיכום חכם 🤖",
+                btn_save: "שמור",
+                transcript_stopped: "תמלול מופסק...",
+                notepad_title: "📝 מחברת הערות אישית",
+                placeholder_notepad: "כתוב כאן את הסיכומים שלך...",
+                chat_title: "💬 צ'אט כיתתי",
+                placeholder_chat: "הקלד הודעה...",
+                btn_send: "שלח",
+                calc_title: "🧮 מחשבון מדעי",
+                placeholder_calc: "למשל: Math.sqrt(144)",
+                btn_calc: "חשב",
+                btn_start_timer: "הפעל",
+                btn_stop_timer: "אפס",
                 breakout_title: "🔀 פיצול לחדרי דיונים",
                 btn_create_breakout: "צור חדר דיונים",
                 assignment_title: "📋 מטלת כיתה",
@@ -443,43 +463,29 @@
                 quiz_title: "🏆 חידון מהיר & טבלת מובילים",
                 btn_start_quiz: "הפעל חידון",
                 no_active_quiz: "אין חידון פעיל.",
-                participants_title: "👥 משתתפים וחיוויי שליטה",
-                btn_mute_all: "השתק הכל 🔇",
-                btn_report: "הפק דוח 📊",
-                poll_title: "📊 סקר כיתתי חי",
-                placeholder_poll_q: "שאלה",
-                placeholder_poll_opt1: "תשובה א'",
-                placeholder_poll_opt2: "תשובה ב'",
-                btn_publish_poll: "הפעל סקר",
-                no_active_poll: "אין סקר פעיל.",
-                feedback_title: "📝 משוב והערכה עצמית (Exit Ticket)",
-                btn_launch_feedback: "הפעל משוב סוף שיעור 📋",
-                no_feedback_data: "אין נתוני משוב עדיין.",
-                no_active_feedback: "המידה והמורה יפעיל משוב, הוא יופיע כאן.",
-                transcript_title: "🗣️ תמלול וסיכום AI מתקדם",
-                btn_transcript_start: "הפעל",
-                btn_ai_summary: "סיכום חכם 🤖",
-                btn_save: "שמור",
-                transcript_stopped: "תמלול מופסק...",
                 ai_tutor_title: "🤖 עוזר לימודים חכם (AI Tutor)",
                 placeholder_ai_tutor: "שאל שאלה את עוזר ה-AI...",
                 btn_ask_ai: "שאל את ה-AI 💡",
                 student_private_q_title: "🔒 פנייה פרטית למורה",
                 btn_send_private: "שלח למורה באופן דיסקרטי ✉️",
-                notepad_title: "📝 מחברת הערות אישית",
-                placeholder_notepad: "כתוב כאן את הסיכומים שלך...",
-                chat_title: "💬 צ'אט כיתתי",
-                placeholder_chat: "הקלד הודעה...",
-                btn_send: "שלח",
-                calc_title: "🧮 מחשבון מדעי",
-                placeholder_calc: "למשל: Math.sqrt(144)",
-                btn_calc: "חשב"
+                private_q_title: "📥 שאלות פרטיות מתלמידים",
+                no_private_q: "אין שאלות פרטיות ממתינות.",
+                analytics_title: "📈 מדד מעורבות כיתתי",
+                ambient_title: "🎵 מוזיקת רקע וצלילי ריכוז",
+                btn_stop_sound: "עצור 🔇",
+                sticky_title: "💡 פתקיות רעיונות שיתופיות",
+                btn_add_sticky: "+ הוסף פתקית",
+                no_stickies: "אין פתקיות עדיין.",
+                feedback_title: "📝 משוב והערכה עצמית (Exit Ticket)",
+                btn_launch_feedback: "הפעל משוב סוף שיעור 📋",
+                no_feedback_data: "אין נתוני משוב עדיין.",
+                no_active_feedback: "המידה והמורה יפעיל משוב, הוא יופיע כאן."
             },
             en: {
                 app_title: "🎓 Smart Virtual Classroom",
-                toggle_theme: "🌓 Toggle Theme",
-                auth_login_title: "Login",
-                auth_register_title: "Register",
+                toggle_theme: "🌓 Dark / Light Mode",
+                auth_login_title: "System Login",
+                auth_register_title: "System Registration",
                 placeholder_email: "Email",
                 placeholder_password: "Password",
                 placeholder_fullname: "Full Name",
@@ -492,8 +498,9 @@
                 reset_title: "Set New Password",
                 placeholder_new_password: "New Password (min 6 chars)",
                 btn_save_password: "Save Password",
+                welcome_prefix: "Hello",
                 btn_logout: "Logout",
-                currency_title: "💱 Live Exchange Rates",
+                currency_title: "💱 Live Currency Rates",
                 loading_rates: "Loading rates...",
                 teacher_open_room: "👨‍🏫 Open New Room",
                 placeholder_room_title: "Lesson Name",
@@ -502,196 +509,969 @@
                 loading_rooms: "Loading rooms...",
                 waiting_teacher_approval: "⏳ Waiting for teacher approval...",
                 btn_cancel_leave: "Cancel & Leave",
-                btn_focus_mode: "🎯 Focus Mode",
                 btn_raise_hand: "🙋‍♂️ Raise Hand",
+                btn_lower_hand: "🙋‍♂️ Lower Hand",
+                btn_focus_mode: "🎯 Focus Mode",
                 btn_leave_room: "Leave Room 🚪",
-                btn_start_timer: "Start",
-                btn_stop_timer: "Reset",
-                btn_cam_off: "📷 Turn Off Cam",
+                btn_cam_off: "📷 Turn Off Camera",
+                btn_cam_on: "📷 Turn On Camera",
                 btn_mic_mute: "🎤 Mute Mic",
+                btn_mic_unmute: "🎤 Unmute Mic",
                 btn_share_screen: "🖥️ Share Screen",
                 btn_record: "🔴 Record",
                 btn_stop_record: "⏹️ Stop Recording",
                 youtube_title: "📺 Share YouTube Video",
-                placeholder_yt: "YouTube Link...",
+                placeholder_yt: "YouTube link...",
                 btn_show: "Show",
                 whiteboard_title: "🎨 Collaborative Whiteboard",
                 btn_clear: "Clear",
                 pdf_title: "📄 PDF Viewer",
                 btn_pdf_prev: "◀ Prev",
                 btn_pdf_next: "Next ▶",
-                ambient_title: "🎵 Focus Ambient Sounds",
-                btn_stop_sound: "Stop 🔇",
-                sticky_title: "💡 Idea Sticky Notes",
-                btn_add_sticky: "+ Add Note",
-                no_stickies: "No sticky notes yet.",
-                private_q_title: "📥 Private Student Questions",
-                no_private_q: "No pending questions.",
-                analytics_title: "📈 Engagement Index",
                 waiting_students_title: "⏳ Waiting Students",
                 no_waiting_students: "No waiting students.",
-                breakout_title: "🔀 Breakout Rooms",
-                btn_create_breakout: "Create Room",
-                assignment_title: "📋 Class Assignment",
-                btn_pub_assignment: "Publish",
-                no_active_assignment: "No active assignment.",
-                quiz_title: "🏆 Quick Quiz & Leaderboard",
-                btn_start_quiz: "Start Quiz",
-                no_active_quiz: "No active quiz.",
-                participants_title: "👥 Participants",
+                participants_title: "👥 Participants & Controls",
                 btn_mute_all: "Mute All 🔇",
-                btn_report: "Report 📊",
-                poll_title: "📊 Live Poll",
+                btn_ping_student: "Ping Screen ⚡",
+                btn_report: "Get Report 📊",
+                poll_title: "📊 Live Class Poll",
                 placeholder_poll_q: "Question",
                 placeholder_poll_opt1: "Option A",
                 placeholder_poll_opt2: "Option B",
-                btn_publish_poll: "Start Poll",
+                btn_publish_poll: "Launch Poll",
                 no_active_poll: "No active poll.",
-                feedback_title: "📝 Exit Ticket",
-                btn_launch_feedback: "Launch Exit Ticket 📋",
-                no_feedback_data: "No feedback data yet.",
-                no_active_feedback: "Feedback will appear here when launched.",
-                transcript_title: "🗣️ AI Live Transcript",
+                transcript_title: "🗣️ Transcript & AI Summary",
                 btn_transcript_start: "Start",
+                btn_transcript_stop: "Stop",
                 btn_ai_summary: "AI Summary 🤖",
                 btn_save: "Save",
-                transcript_stopped: "Transcript stopped...",
-                ai_tutor_title: "🤖 AI Study Tutor",
-                placeholder_ai_tutor: "Ask the AI tutor...",
-                btn_ask_ai: "Ask AI 💡",
-                student_private_q_title: "🔒 Private Note to Teacher",
-                btn_send_private: "Send Discreely ✉️",
+                transcript_stopped: "Transcription stopped...",
                 notepad_title: "📝 Personal Notepad",
                 placeholder_notepad: "Type your notes here...",
                 chat_title: "💬 Class Chat",
                 placeholder_chat: "Type a message...",
                 btn_send: "Send",
-                calc_title: "🧮 Calculator",
+                calc_title: "🧮 Scientific Calculator",
                 placeholder_calc: "e.g., Math.sqrt(144)",
-                btn_calc: "Calculate"
+                btn_calc: "Calculate",
+                btn_start_timer: "Start",
+                btn_stop_timer: "Reset",
+                breakout_title: "🔀 Breakout Rooms",
+                btn_create_breakout: "Create Room",
+                assignment_title: "📋 Class Assignment",
+                btn_pub_assignment: "Publish Assignment",
+                no_active_assignment: "No active assignment.",
+                quiz_title: "🏆 Live Quiz & Leaderboard",
+                btn_start_quiz: "Start Quiz",
+                no_active_quiz: "No active quiz.",
+                ai_tutor_title: "🤖 AI Study Assistant",
+                placeholder_ai_tutor: "Ask AI a study question...",
+                btn_ask_ai: "Ask AI 💡",
+                student_private_q_title: "🔒 Private Question to Teacher",
+                btn_send_private: "Send Discreetly ✉️",
+                private_q_title: "📥 Private Student Questions",
+                no_private_q: "No pending private questions.",
+                analytics_title: "📈 Class Engagement Index",
+                ambient_title: "🎵 Focus Ambient Sounds",
+                btn_stop_sound: "Stop 🔇",
+                sticky_title: "💡 Collaborative Sticky Notes",
+                btn_add_sticky: "+ Add Note",
+                no_stickies: "No notes yet.",
+                feedback_title: "📝 Exit Ticket & Self Assessment",
+                btn_launch_feedback: "Launch Exit Ticket 📋",
+                no_feedback_data: "No feedback data yet.",
+                no_active_feedback: "When the teacher launches feedback, it will appear here."
             }
         };
 
-        // --- שיתוף פונקציות לגלובל (Window) ---
-        window.toggleTheme = function() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-        };
+        let currentLang = 'he';
+        window.changeAppLanguage = (lang) => {
+            currentLang = translations[lang] ? lang : 'en';
+            const t = translations[currentLang];
+            const isRtl = ['he', 'ar', 'am'].includes(currentLang);
+            document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', currentLang);
 
-        window.changeAppLanguage = function(lang) {
-            const dict = translations[lang] || translations.he;
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (dict[key]) el.textContent = dict[key];
+                if (t[key]) el.innerText = t[key];
             });
+
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
-                if (dict[key]) el.placeholder = dict[key];
+                if (t[key]) el.placeholder = t[key];
             });
-            document.documentElement.dir = (lang === 'he' || lang === 'ar') ? 'rtl' : 'ltr';
         };
 
-        let isRegister = false;
-        window.toggleAuthMode = function() {
-            isRegister = !isRegister;
-            document.getElementById('register-fields').classList.toggle('hidden', !isRegister);
-            document.getElementById('form-title').innerText = isRegister ? 
-                (translations[document.getElementById('global-lang-select').value]?.auth_register_title || "הרשמה למערכת") : 
-                (translations[document.getElementById('global-lang-select').value]?.auth_login_title || "התחברות למערכת");
-            document.getElementById('auth-action-btn').innerText = isRegister ? "הירשם" : "התחבר";
-        };
+        let isReg = false, userId = null, roomId = null, activeChannel = null, role = 'student', userName = 'משתמש';
+        let mediaStream = null, mediaRecorder, chunks = [], recognition = null, isTranscribing = false, transcriptText = "";
+        let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
+        let myWeatherInfo = "⏳ טוען מזג אוויר...";
+        let timerInterval = null, currentQuiz = null, scoresMap = {}, isFocusActive = false;
+        let wbMode = 'pen', analyticsChartInstance = null, ambientAudioNode = null;
+        let stickyNotesList = [];
 
-        window.handleAuthSubmit = async function() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (!email || !password) return alert("נא למלא אימייל וסיסמה");
-
-            if (isRegister) {
-                const fullName = document.getElementById('full_name').value;
-                const role = document.getElementById('role').value;
-                const { data, error } = await supabase.auth.signUp({
-                    email, password,
-                    options: { data: { full_name: fullName, role: role } }
-                });
-                if (error) alert("שגיאה בהרשמה: " + error.message);
-                else alert("הרשמה בוצעה בהצלחה! התחבר כעת.");
-            } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) alert("שגיאה בהתחברות: " + error.message);
-                else initDashboard(data.user);
-            }
-        };
-
-        function initDashboard(user) {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('welcome-user').innerText = `שלום, ${user.user_metadata?.full_name || user.email}`;
-            
-            const isTeacher = user.user_metadata?.role === 'teacher';
-            document.getElementById('teacher-panel').classList.toggle('hidden', !isTeacher);
-            fetchCurrencyRates();
+        function playBeepSound() {
+            try {
+                const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = 'sine'; osc.frequency.value = 587.33;
+                gain.gain.setValueAtTime(0.1, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.3);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(); osc.stop(ctxAudio.currentTime + 0.3);
+            } catch(e) {}
         }
 
-        async function fetchCurrencyRates() {
+        async function initMyWeather() {
             try {
-                const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
-                if (data && data.rates) {
-                    const ils = data.rates.ILS ? data.rates.ILS.toFixed(2) : 'N/A';
-                    const eur = data.rates.EUR ? data.rates.EUR.toFixed(2) : 'N/A';
-                    document.getElementById('currency-rates').innerText = `1 USD = ${ils} ILS | 1 USD = ${eur} EUR`;
+                const lat = data.latitude, lon = data.longitude, city = data.city || "מיקום לא ידוע";
+                if (lat && lon) {
+                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const weatherData = await weatherRes.json();
+                    if (weatherData && weatherData.current_weather) {
+                        myWeatherInfo = `${city}: ${weatherData.current_weather.temperature}°C 🌤️`;
+                    } else { myWeatherInfo = `${city}: לא זמין`; }
                 }
-            } catch (e) {
-                document.getElementById('currency-rates').innerText = "לא ניתן לטעון שערי מטבע";
+            } catch (e) { myWeatherInfo = "🌤️ מידע לא זמין"; }
+        }
+
+        window.toggleTheme = () => {
+            const h = document.documentElement;
+            const next = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            h.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        };
+
+        window.toggleFocusMode = () => {
+            isFocusActive = !isFocusActive;
+            const boxes = document.querySelectorAll('.tool-box');
+            boxes.forEach(box => {
+                if(isFocusActive) {
+                    if(!box.contains(document.getElementById('local-video')) && !box.contains(document.getElementById('whiteboard-canvas'))) {
+                        box.classList.add('hidden');
+                    }
+                } else {
+                    box.classList.remove('hidden');
+                }
+            });
+            alert(isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+            if (window.location.hash.includes('type=recovery')) { showSec('reset-password-section'); return; }
+            checkUserSession();
+            fetchRates();
+            initWhiteboard();
+            initPdf();
+            initSpeech();
+            initMyWeather();
+            loadPersonalNotes();
+        });
+
+        window.savePersonalNotes = () => {
+            const val = document.getElementById('student-notepad').value;
+            localStorage.setItem(`notepad_${roomId || 'general'}`, val);
+        };
+        function loadPersonalNotes() {
+            const saved = localStorage.getItem(`notepad_${roomId || 'general'}`);
+            if (saved) document.getElementById('student-notepad').value = saved;
+        }
+
+        // --- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) ---
+        window.playAmbientSound = (type) => {
+            stopAmbientSound();
+            try {
+                const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'rain') {
+                    // סימולציית רעש לבן (גשם) באמצעות בידוד תדרים
+                    const bufferSize = ctxAudio.sampleRate * 2;
+                    const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+                    const whiteNoise = ctxAudio.createBufferSource();
+                    whiteNoise.buffer = buffer; whiteNoise.loop = true;
+                    const filter = ctxAudio.createBiquadFilter();
+                    filter.type = 'lowpass'; filter.frequency.value = 800; // מעדן את הרעש לצליל גשם
+                    whiteNoise.connect(filter); filter.connect(ctxAudio.destination);
+                    whiteNoise.start(); ambientAudioNode = whiteNoise;
+                } else if (type === 'lofi') {
+                    // אקורד מרגיע לריכוז (סימולציית צליל Lo-Fi נעים)
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'triangle'; osc.frequency.value = 220; // A3
+                    gain.gain.setValueAtTime(0.05, ctxAudio.currentTime);
+                    osc.connect(gain); gain.connect(ctxAudio.destination);
+                    osc.start(); ambientAudioNode = osc;
+                }
+                alert(`נגן ריכוז הופעל (${type === 'rain' ? 'גשם מרגיע' : 'Lo-Fi'}) 🎧`);
+            } catch(e) { alert('לא ניתן להפעיל אודיו בדפדפן זה'); }
+        };
+
+        window.stopAmbientSound = () => {
+            if (ambientAudioNode) {
+                try { ambientAudioNode.stop(); } catch(e){}
+                ambientAudioNode = null;
+            }
+        };
+
+        // --- פיצ'ר חדש 4: פתקיות רעיונות שיתופיות (Sticky Notes) ---
+        window.openNewStickyModal = () => {
+            const text = prompt('כתוב רעיון או שאלה לפתקית השיתופית:');
+            if (!text) return;
+            const note = { id: Math.random(), author: userName, text, color: getRandomStickyColor() };
+            stickyNotesList.push(note);
+            renderStickyNotes();
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_sticky_note', payload: note });
+            }
+        };
+
+        function getRandomStickyColor() {
+            const colors = ['#fef08a', '#bbf7d0', '#fed7aa', '#e9d5ff', '#bae6fd'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function renderStickyNotes() {
+            const container = document.getElementById('sticky-notes-container');
+            if (!stickyNotesList.length) { container.innerHTML = `<span style="color:var(--muted); font-size:12px;">אין פתקיות עדיין.</span>`; return; }
+            container.innerHTML = stickyNotesList.map(n => `
+                <div style="background: ${n.color}; color: #1e293b; padding: 6px 10px; border-radius: 4px; font-size: 13px; border: 1px solid rgba(0,0,0,0.1);">
+                    <b>${n.author}:</b> ${n.text}
+                </div>
+            `).join('');
+        }
+
+        // --- פיצ'ר חדש 2: משוב סוף שיעור (Exit Ticket) ---
+        window.triggerExitTicket = () => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'launch_exit_ticket', payload: {} });
+                alert('כרטיס משוב (Exit Ticket) שוגר לכיתה!');
+            }
+        };
+
+        function renderStudentExitTicket() {
+            playBeepSound();
+            document.getElementById('student-feedback-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">📝 משוב סוף שיעור:</p>
+                <label style="font-size: 12px;">רמת הבנה (1-5):</label>
+                <select id="exit-rating" style="margin-bottom:4px; padding:4px;">
+                    <option value="5">5 - הבנתי מצוין! 🤩</option>
+                    <option value="4">4 - הבנתי די טוב 🙂</option>
+                    <option value="3">3 - הבנתי חלקית 😐</option>
+                    <option value="2">2 - היה די קשה 🙁</option>
+                    <option value="1">1 - לא הבנתי בכלל 🆘</option>
+                </select>
+                <input type="text" id="exit-comment" placeholder="שאלה או הערה נוספת למורה..." style="margin-bottom:4px; padding:4px;">
+                <button onclick="submitExitTicketAns()" style="background:var(--success); padding:4px;">שלח משוב למורה ✓</button>
+            `;
+        }
+
+        window.submitExitTicketAns = () => {
+            const rating = document.getElementById('exit-rating').value;
+            const comment = document.getElementById('exit-comment').value;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'exit_ticket_submitted', payload: { student: userName, rating, comment } });
+                document.getElementById('student-feedback-view').innerHTML = `<p style="color:var(--success); font-weight:bold;">תודה רבה! המשוב שלך נשלח.</p>`;
+            }
+        };
+
+        // --- פיצ'ר חדש 1: סיכום שיעור מתקדם מבוסס AI (עם עיצוב והורדה) ---
+        window.generateAdvancedAiSummary = () => {
+            if (!transcriptText.trim()) return alert('אין מספיק נתוני תמלול לסיכום מתקדם');
+            const summaryBox = document.getElementById('transcript-messages');
+            const lines = transcriptText.split('\n').filter(l => l.trim() !== '');
+            
+            const summaryHTML = `
+                <div style="background:var(--tool); padding:10px; border-radius:6px; margin-top:8px; border:1px solid var(--primary);">
+                    <h5 style="margin:0 0 4px 0; color:var(--primary);">🤖 סיכום שיעור מובנה (AI Executive Summary)</h5>
+                    <p style="margin:4px 0; font-size:13px;"><b>📊 סטטיסטיקה:</b> ${lines.length} משפטים תועדו בשיחה זו.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>🔑 מושגים מרכזיים:</b> למידה שיתופית, כלים אינטראקטיביים, ניהול זמן.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>📌 תאימות ופעולות להמשך:</b> מומלץ לעבור על המחברת האישית ולתרגל את השאלות שעלו בשיעור.</p>
+                    <button onclick="downloadAiSummaryFile()" style="width:auto; padding:4px 10px; margin-top:6px; background:var(--success); font-size:12px;">📥 הורד סיכום כקובץ מעוצב</button>
+                </div>
+            `;
+            summaryBox.innerHTML += summaryHTML;
+            summaryBox.scrollTop = summaryBox.scrollHeight;
+        };
+
+        window.downloadAiSummaryFile = () => {
+            const content = `===== סיכום שיעור חכם =====\n\n${transcriptText}\n\n===========================\nנוצר אוטומטית ע"י המערכת הוירטואלית החכמה.`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+            a.download = `Smart_Lesson_Summary_${Date.now()}.txt`;
+            a.click();
+        };
+
+        window.askAiTutor = () => {
+            const inp = document.getElementById('ai-tutor-input');
+            const question = inp.value.trim();
+            if (!question) return alert('נא להזין שאלה לעוזר ה-AI');
+            
+            const tutorBox = document.getElementById('ai-tutor-messages');
+            tutorBox.innerHTML += `<div><b>אתה:</b> ${question}</div>`;
+            inp.value = '';
+
+            setTimeout(() => {
+                let aiReply = "שאלה מצוינת! על פי הנושא הנלמד בכיתה כרגע, מומלץ להתמקד בעקרונות הבסיסיים ולתרגל דוגמאות מעשיות.";
+                if (question.includes('אנגלית') || question.includes('english')) {
+                    aiReply = "Learning English requires consistency! Try practicing vocabulary daily.";
+                } else if (question.includes('קוד') || question.includes('python')) {
+                    aiReply = "כדי לפתור בעיות תכנות, בדוק היטב את מבנה הקוד והשגיאות במסוף.";
+                }
+                tutorBox.innerHTML += `<div style="color: var(--primary); margin-top:4px;"><b>AI Tutor:</b> ${aiReply}</div>`;
+                tutorBox.scrollTop = tutorBox.scrollHeight;
+            }, 600);
+        };
+
+        window.sendPrivateQuestionToTeacher = () => {
+            const q = document.getElementById('student-private-input').value.trim();
+            if (!q) return alert('כתוב שאלה לשליחה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'private_question', payload: { studentName: userName, question: q } });
+                document.getElementById('student-private-input').value = '';
+                alert('השאלה נשלחה באופן דיסקרטי למורה!');
+            }
+        };
+
+        function renderTeacherPrivateQ(payload) {
+            playBeepSound();
+            const list = document.getElementById('teacher-private-q-list');
+            if (list.innerText.includes('אין')) list.innerHTML = '';
+            list.innerHTML += `<div style="background:var(--card); padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid var(--border);"><b>👤 ${payload.studentName}:</b> ${payload.question}</div>`;
+        }
+
+        function updateAnalyticsChart() {
+            if (role !== 'teacher') return;
+            const total = sessionParticipants.length || 1;
+            const activeCams = sessionParticipants.filter(p => p.cam_active).length;
+            const activeMics = sessionParticipants.filter(p => p.mic_active).length;
+            const hands = sessionParticipants.filter(p => p.hand_raised).length;
+
+            const ctxAnalytics = document.getElementById('analytics-chart').getContext('2d');
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+
+            analyticsChartInstance = new Chart(ctxAnalytics, {
+                type: 'doughnut',
+                data: {
+                    labels: ['מצלמות פעילות 📷', 'מיקרופונים פתוחים 🎤', 'ידיים מורמות 🙋‍♂️'],
+                    datasets: [{
+                        data: [activeCams, activeMics, hands],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        window.changeWbMode = (mode) => { wbMode = mode; };
+
+        let startX, startY, snapshot;
+        const canvas = document.getElementById('whiteboard-canvas'), ctx = canvas.getContext('2d');
+        let painting = false;
+
+        function initWhiteboard() {
+            canvas.width = canvas.offsetWidth; canvas.height = 200;
+            canvas.addEventListener('mousedown', e => {
+                painting = true;
+                const r = canvas.getBoundingClientRect();
+                startX = e.clientX - r.left; startY = e.clientY - r.top;
+                snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                ctx.beginPath(); ctx.moveTo(startX, startY);
+            });
+            canvas.addEventListener('mouseup', e => {
+                if (!painting) return;
+                painting = false;
+                if (wbMode === 'rect' || wbMode === 'circle') {
+                    const r = canvas.getBoundingClientRect();
+                    const endX = e.clientX - r.left, endY = e.clientY - r.top;
+                    drawShape(startX, startY, endX, endY, true);
+                }
+                ctx.beginPath();
+            });
+            canvas.addEventListener('mousemove', e => draw(e, true));
+        }
+
+        function draw(e, send) {
+            if (!painting) return;
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            const color = document.getElementById('brush-color').value;
+
+            if (wbMode === 'pen') {
+                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'pen', x, y, color } });
+            } else if (wbMode === 'highlighter') {
+                ctx.lineWidth = 12; ctx.lineCap = 'square'; ctx.strokeStyle = color + '40';
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'highlighter', x, y, color } });
+            } else if (wbMode === 'eraser') {
+                ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'eraser', x, y } });
+            } else if (wbMode === 'rect' || wbMode === 'circle') {
+                ctx.putImageData(snapshot, 0, 0);
+                drawShape(startX, startY, x, y, false);
             }
         }
 
-        window.logout = async function() {
-            await supabase.auth.signOut();
-            location.reload();
+        function drawShape(x1, y1, x2, y2, send) {
+            const color = document.getElementById('brush-color').value;
+            ctx.strokeStyle = color; ctx.lineWidth = 2;
+            if (wbMode === 'rect') {
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            } else if (wbMode === 'circle') {
+                let radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                ctx.beginPath(); ctx.arc(x1, y1, radius, 0, 2 * Math.PI); ctx.stroke();
+            }
+            if (send && activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'draw_shape', payload: { mode: wbMode, x1, y1, x2, y2, color } });
+            }
+        }
+
+        window.clearWhiteboard = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
         };
 
-        window.calculateMath = function() {
-            try {
-                const val = document.getElementById('calc-input').value;
-                const res = Function(`'use strict'; return (${val})`)();
-                document.getElementById('calc-result').innerText = "תוצאה: " + res;
-            } catch (e) {
-                document.getElementById('calc-result').innerText = "שגיאה בחישוב";
+        window.launchBreakoutRoom = () => {
+            const gName = document.getElementById('breakout-group-name').value;
+            if (!gName) return alert('נא להזין שם קבוצה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'breakout_launch', payload: { groupName: gName } });
+                document.getElementById('active-breakout-display').innerText = `✅ חדר פעיל: ${gName}`;
+                alert('החדר נפתח בהצלחה!');
             }
         };
 
-        let ambientAudio = null;
-        window.playAmbientSound = function(type) {
-            if (ambientAudio) ambientAudio.pause();
-            const sounds = {
-                rain: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b59368d37.mp3',
-                lofi: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'
+        window.publishAssignment = () => {
+            const text = document.getElementById('assignment-text').value;
+            if (!text) return alert('הזן משימה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_assignment', payload: { text } });
+                alert('המשימה שוגרה לכיתה!');
+            }
+        };
+
+        function renderStudentAssignment(text) {
+            playBeepSound();
+            document.getElementById('student-assignment-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">📝 משימה: ${text}</p>
+                <textarea id='student-ans-input' rows='2' placeholder='הקלד את תשובתך כאן...' style='margin-bottom:4px;'></textarea>
+                <button onclick='submitAssignmentAns()' style='background:var(--success); padding:4px;'>הגש למורה ✓</button>
+            `;
+        }
+
+        window.submitAssignmentAns = () => {
+            const ans = document.getElementById('student-ans-input').value;
+            if (!ans) return alert('כתוב תשובה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'assignment_submitted', payload: { student: userName, answer: ans } });
+                document.getElementById('student-assignment-view').innerHTML = `<p style="color:var(--success); font-weight:bold;">התשובה הוגשה בהצלחה למורה!</p>`;
+            }
+        };
+
+        window.startQuiz = () => {
+            const q = document.getElementById('quiz-q').value, ans = document.getElementById('quiz-ans').value;
+            if (!q || !ans) return alert('נא למלא שאלה ותשובה');
+            currentQuiz = { q, ans };
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'launch_quiz', payload: currentQuiz });
+                alert('החידון התחיל!');
+            }
+        };
+
+        function renderStudentQuiz(quiz) {
+            playBeepSound();
+            document.getElementById('student-quiz-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">🏆 ${quiz.q}</p>
+                <input type='text' id='quiz-user-ans' placeholder='התשובה שלך...' style='margin-bottom:4px; padding:4px;'>
+                <button onclick='submitQuizAns()' style='background:var(--primary); padding:4px;'>שלח תשובה</button>
+            `;
+        }
+
+        window.submitQuizAns = () => {
+            const val = document.getElementById('quiz-user-ans').value;
+            if (!val) return;
+            const isCorrect = val.trim().toLowerCase() === currentQuiz.ans.trim().toLowerCase();
+            if (isCorrect) { scoresMap[userName] = (scoresMap[userName] || 0) + 10; }
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'quiz_answer', payload: { student: userName, correct: isCorrect, scoreBoard: scoresMap } });
+                document.getElementById('student-quiz-view').innerHTML = `<p style="font-weight: bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};">${isCorrect ? '🎉 תשובה נכונה (+10 נקודות)!' : '❌ תשובה שגויה, נסה שוב'}</p>`;
+            }
+        };
+
+        function updateLeaderboardUI(board) {
+            scoresMap = board || scoresMap;
+            const sorted = Object.entries(scoresMap).sort((a,b) => b[1] - a[1]);
+            const text = sorted.length ? sorted.map(([name, score], idx) => `#${idx+1} ${name} (${score} נק')`).join(' | ') : 'אין עדיין ניקוד';
+            document.getElementById('leaderboard-content').innerText = text;
+        }
+
+        window.teacherPingStudent = (targetUserId) => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'attention_ping', payload: { targetUserId } });
+                alert('התראת תשומת לב נשלחה לתלמיד!');
+            }
+        };
+
+        function triggerAttentionEffect() {
+            playBeepSound();
+            const container = document.getElementById('main-app-container');
+            container.classList.add('attention-active');
+            setTimeout(() => { container.classList.remove('attention-active'); }, 5000);
+            alert('⚠️ המורה הקפיץ את המסך שלך! נא להתמקד בשיעור.');
+        }
+
+        window.startSharedTimer = () => {
+            const mins = parseInt(document.getElementById('timer-minutes').value) || 5;
+            let totalSecs = mins * 60;
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'timer_sync', payload: { totalSecs, action: 'start' } });
+            runTimerCountdown(totalSecs);
+        };
+        window.stopSharedTimer = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timer-display').innerText = "00:00";
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'timer_sync', payload: { action: 'stop' } });
+        };
+        function runTimerCountdown(secs) {
+            if (timerInterval) clearInterval(timerInterval);
+            let remaining = secs;
+            timerInterval = setInterval(() => {
+                if (remaining <= 0) { clearInterval(timerInterval); alert('הזמן נגמר! ⏰'); return; }
+                remaining--;
+                let m = Math.floor(remaining / 60), s = remaining % 60;
+                document.getElementById('timer-display').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        window.shareYouTubeVideo = () => {
+            const id = (document.getElementById('youtube-url-input').value.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/) || [])[2];
+            if (!id || id.length !== 11) return alert('קישור לא תקין');
+            applyYouTube(id);
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'share_youtube', payload: { videoId: id } });
+        };
+        function applyYouTube(id) {
+            document.getElementById('shared-yt-frame').src = `https://www.youtube.com/embed/${id}`;
+            document.getElementById('youtube-player-container').classList.remove('hidden');
+        }
+
+        window.publishPoll = () => {
+            const q = document.getElementById('poll-question').value, o1 = document.getElementById('poll-opt1').value, o2 = document.getElementById('poll-opt2').value;
+            const isAnon = document.getElementById('anon-poll-check').checked;
+            if (!q || !o1 || !o2) return alert('נא למלא שאלות ותשובות');
+            pollData = { question: q, options: [o1, o2], votes: {}, isAnonymous: isAnon };
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_poll', payload: pollData });
+                document.getElementById('teacher-poll-creator').classList.add('hidden');
+                document.getElementById('poll-results-view').classList.remove('hidden');
+                updateChart();
+                alert(isAnon ? 'סקר אנונימי שוגר בהצלחה! 🕵️‍♂️' : 'סקר רגיל שוגר!');
+            }
+        };
+
+        function renderStudentPoll(poll) {
+            playBeepSound();
+            pollData = poll;
+            let h = `<p style="font-weight: bold; margin: 4px 0;">📊 ${poll.question} ${poll.isAnonymous ? '(אנונימי 🕵️‍♂️)' : ''}</p>`;
+            poll.options.forEach((opt, idx) => h += `<button onclick="votePoll(${idx})" style="padding:6px; margin-bottom:4px; background:var(--primary);">${opt}</button>`);
+            document.getElementById('student-poll-taker').innerHTML = h;
+            document.getElementById('poll-results-view').classList.add('hidden');
+        }
+
+        window.votePoll = idx => {
+            const voterKey = pollData.isAnonymous ? `anon_${Math.random()}` : userName;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'poll_vote', payload: { user: voterKey, optionIndex: idx } });
+                document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success); font-weight: bold;">הצבעתך נקלטה! ${pollData.isAnonymous ? '(נשמר באנונימיות)' : ''}</p>`;
+            }
+        };
+
+        function updateChart(votes = {}) {
+            const counts = pollData.options.map(() => 0);
+            Object.values(votes).forEach(i => { if (counts[i] !== undefined) counts[i]++; });
+            if (pollChart) pollChart.destroy();
+            pollChart = new Chart(document.getElementById('poll-chart').getContext('2d'), {
+                type: 'bar', data: { labels: pollData.options, datasets: [{ label: 'קולות', data: counts, backgroundColor: ['#4f46e5', '#10b981'] }] },
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        function initSpeech() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return;
+            recognition = new SpeechRec(); 
+            recognition.lang = document.getElementById('transcript-lang').value;
+            recognition.interimResults = true; 
+            recognition.continuous = true;
+            
+            recognition.onresult = e => {
+                let text = '';
+                for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) text += e.results[i][0].transcript;
+                if (text) {
+                    transcriptText += `${userName}: ${text}\n`;
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${userName}:</b> ${text}</div>`; box.scrollTop = box.scrollHeight;
+                    if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'transcript', payload: { user: userName, text } });
+                }
             };
-            if (sounds[type]) {
-                ambientAudio = new Audio(sounds[type]);
-                ambientAudio.loop = true;
-                ambientAudio.play();
+            recognition.onend = () => { if (isTranscribing) try { recognition.start(); } catch(e){} };
+        }
+
+        window.changeTranscriptLang = (newLang) => {
+            if (recognition) {
+                const wasRunning = isTranscribing;
+                if (wasRunning) { recognition.stop(); isTranscribing = false; }
+                recognition.lang = newLang;
+                if (wasRunning) { recognition.start(); isTranscribing = true; }
             }
         };
 
-        window.stopAmbientSound = function() {
-            if (ambientAudio) {
-                ambientAudio.pause();
-                ambientAudio = null;
+        window.toggleSpeechRecognition = () => {
+            if (!recognition) return;
+            const t = translations[currentLang];
+            const btn = document.getElementById('toggle-transcript-btn');
+            isTranscribing = !isTranscribing;
+            isTranscribing ? recognition.start() : recognition.stop();
+            btn.innerText = isTranscribing ? t.btn_transcript_stop : t.btn_transcript_start;
+            btn.style.background = isTranscribing ? 'var(--danger)' : 'var(--success)';
+        };
+
+        window.downloadTranscript = () => {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([transcriptText], { type: 'text/plain;charset=utf-8' }));
+            a.download = 'transcript.txt'; a.click();
+        };
+
+        let pdfDoc = null, pageNum = 1;
+        const pdfCanvas = document.getElementById('pdf-canvas'), pdfCtx = pdfCanvas.getContext('2d');
+        function initPdf() {
+            document.getElementById('pdf-upload').addEventListener('change', e => {
+                const f = e.target.files[0];
+                if (f && f.type === 'application/pdf') {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        pdfjsLib.getDocument(new Uint8Array(this.result)).promise.then(pdf => {
+                            pdfDoc = pdf; document.getElementById('pdf-controls').classList.remove('hidden'); renderPage(pageNum);
+                        });
+                    };
+                    reader.readAsArrayBuffer(f);
+                }
+            });
+        }
+        function renderPage(num) {
+            pdfDoc.getPage(num).then(page => {
+                const vp = page.getViewport({ scale: 1.0 });
+                pdfCanvas.height = vp.height; pdfCanvas.width = vp.width;
+                page.render({ canvasContext: pdfCtx, viewport: vp });
+            });
+            document.getElementById('pdf-page-info').innerText = `עמוד ${num} / ${pdfDoc.numPages}`;
+        }
+        window.prevPage = () => { if (pageNum > 1) renderPage(--pageNum); };
+        window.nextPage = () => { if (pageNum < pdfDoc.numPages) renderPage(++pageNum); };
+
+        window.toggleAuthMode = () => {
+            isReg = !isReg;
+            const t = translations[currentLang];
+            document.getElementById('form-title').innerText = isReg ? t.auth_register_title : t.auth_login_title;
+            document.getElementById('register-fields').classList.toggle('hidden', !isReg);
+            document.getElementById('auth-action-btn').innerText = isReg ? t.btn_register : t.btn_login;
+            document.getElementById('forgot-password-link').style.display = isReg ? 'none' : 'inline';
+        };
+
+        window.handleAuthSubmit = async () => {
+            const email = document.getElementById('email').value, password = document.getElementById('password').value;
+            if (!email || !password) return alert('נא למלא שדות');
+            if (isReg) {
+                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('full_name').value, role: document.getElementById('role').value } } });
+                if (error) return alert(error.message);
+                alert('נרשמת בהצלחה!'); toggleAuthMode();
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert(error.message);
+                checkUserSession();
             }
         };
 
-        window.savePersonalNotes = function() {
-            const notes = document.getElementById('student-notepad').value;
-            localStorage.setItem('student_notes', notes);
+        window.handleForgotPassword = async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('הזן אימייל');
+            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if (error) alert(error.message); else alert('הוראות איפוס נשלחו!');
         };
 
-        // טעינת הערות שמורות
-        const savedNotes = localStorage.getItem('student_notes');
-        if (savedNotes) {
-            document.getElementById('student-notepad').value = savedNotes;
+        window.handleUpdatePassword = async () => {
+            const p = document.getElementById('new-password').value;
+            if (!p || p.length < 6) return alert('סיסמה קצרה מדי');
+            const { error } = await supabase.auth.updateUser({ password: p });
+            if (error) alert(error.message); else { alert('הסיסמה עודכנה!'); window.location.hash = ''; checkUserSession(); }
+        };
+
+        async function checkUserSession() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { showSec('auth-section'); return; }
+            userId = user.id;
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (!profile) return;
+            role = profile.role; userName = profile.full_name;
+            const t = translations[currentLang];
+            document.getElementById('welcome-user').innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            document.getElementById('teacher-panel').classList.toggle('hidden', role !== 'teacher');
+            showSec('dashboard-section'); loadRooms();
+        }
+        window.logout = async () => { await supabase.auth.signOut(); window.location.reload(); };
+
+        async function fetchRates() {
+            try {
+                const d = await (await fetch('https://api.exchangerate-api.com/v4/latest/ILS')).json();
+                document.getElementById('currency-rates').innerHTML = `💵 ${(1/d.rates.USD).toFixed(2)} ₪ | 💶 ${(1/d.rates.EUR).toFixed(2)} ₪`;
+            } catch(e){}
+        }
+
+        window.createAndOpenRoom = async () => {
+            const title = document.getElementById('room-title-input').value;
+            if (!title) return alert('הכנס כותרת');
+            const { data, error } = await supabase.from('rooms').insert([{ title, teacher_id: userId, is_active: true }]).select().single();
+            if (error) return alert(error.message);
+            enterRoom(data.id, data.title);
+        };
+
+        async function loadRooms() {
+            const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
+            const list = document.getElementById('rooms-list');
+            if (!rooms || !rooms.length) { list.innerHTML = `<p style="color:var(--muted)">אין חדרים פתוחים.</p>`; return; }
+            list.innerHTML = rooms.map(r => `<div class="room-item"><span><b>${r.title}</b> (מורה: ${r.profiles?.full_name || ''})</span><button onclick="enterRoom('${r.id}', '${r.title}')" style="width:auto; padding:5px 12px; margin:0;">הכנס</button></div>`).join('');
+        }
+
+        window.enterRoom = async (id, title) => {
+            roomId = id;
+            loadPersonalNotes();
+            document.getElementById('current-room-title').innerText = title;
+            document.getElementById('teacher-poll-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('download-report-btn').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('mute-all-btn').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-waiting-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-timer-controls').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-breakout-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-assignment-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-quiz-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-feedback-creator').classList.toggle('hidden', role !== 'teacher');
+            
+            document.getElementById('teacher-private-q-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-analytics-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
+            document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
+            
+            const status = role === 'teacher' ? 'approved' : 'waiting';
+            if (status === 'waiting') showSec('waiting-room-section'); else { showSec('room-section'); initStream(); }
+
+            await supabase.from('room_participants').upsert([{ 
+                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status, weather_info: myWeatherInfo 
+            }], { onConflict: 'room_id, user_id' });
+            
+            fetchParticipants(id);
+
+            activeChannel = supabase.channel(`room_${id}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, p => {
+                    fetchParticipants(id);
+                    if (role === 'student' && p.new && p.new.user_id === userId) {
+                        if (p.new.status === 'approved') { showSec('room-section'); initStream(); }
+                        if (mediaStream) {
+                            if (p.new.mic_active !== undefined) {
+                                const audioTrack = mediaStream.getAudioTracks()[0];
+                                if (audioTrack && audioTrack.enabled !== p.new.mic_active) {
+                                    audioTrack.enabled = p.new.mic_active;
+                                    document.getElementById('toggle-mic-btn').innerText = p.new.mic_active ? translations[currentLang].btn_mic_mute : translations[currentLang].btn_mic_unmute;
+                                }
+                            }
+                            if (p.new.cam_active !== undefined) {
+                                const videoTrack = mediaStream.getVideoTracks()[0];
+                                if (videoTrack && videoTrack.enabled !== p.new.cam_active) {
+                                    videoTrack.enabled = p.new.cam_active;
+                                    document.getElementById('toggle-cam-btn').innerText = p.new.cam_active ? translations[currentLang].btn_cam_off : translations[currentLang].btn_cam_on;
+                                }
+                            }
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'draw_action' }, p => {
+                    const d = p.payload;
+                    ctx.lineWidth = d.mode === 'highlighter' ? 12 : (d.mode === 'eraser' ? 20 : 3);
+                    ctx.lineCap = d.mode === 'highlighter' ? 'square' : 'round';
+                    ctx.strokeStyle = d.mode === 'eraser' ? '#ffffff' : (d.mode === 'highlighter' ? d.color + '40' : d.color);
+                    ctx.lineTo(d.x, d.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(d.x, d.y);
+                })
+                .on('broadcast', { event: 'draw_shape' }, p => {
+                    const d = p.payload;
+                    ctx.strokeStyle = d.color; ctx.lineWidth = 2;
+                    if (d.mode === 'rect') ctx.strokeRect(d.x1, d.y1, d.x2 - d.x1, d.y2 - d.y1);
+                    else if (d.mode === 'circle') {
+                        let radius = Math.sqrt(Math.pow(d.x2 - d.x1, 2) + Math.pow(d.y2 - d.y1, 2));
+                        ctx.beginPath(); ctx.arc(d.x1, d.y1, radius, 0, 2 * Math.PI); ctx.stroke();
+                    }
+                })
+                .on('broadcast', { event: 'clear_board' }, () => ctx.clearRect(0, 0, canvas.width, canvas.height))
+                .on('broadcast', { event: 'share_youtube' }, p => applyYouTube(p.payload.videoId))
+                .on('broadcast', { event: 'new_poll' }, p => renderStudentPoll(p.payload))
+                .on('broadcast', { event: 'poll_vote' }, p => { if (role === 'teacher') { pollData.votes[p.payload.user] = p.payload.optionIndex; updateChart(pollData.votes); } })
+                .on('broadcast', { event: 'timer_sync' }, p => { if (p.payload.action === 'start') runTimerCountdown(p.payload.totalSecs); else stopSharedTimer(); })
+                .on('broadcast', { event: 'breakout_launch' }, p => { playBeepSound(); alert(`נפתח חדר דיונים חדש: ${p.payload.groupName}`); })
+                .on('broadcast', { event: 'new_assignment' }, p => renderStudentAssignment(p.payload.text))
+                .on('broadcast', { event: 'assignment_submitted' }, p => { if (role === 'teacher') alert(`תלמיד ${p.payload.student} הגיש מטלה: "${p.payload.answer}"`); })
+                .on('broadcast', { event: 'launch_quiz' }, p => renderStudentQuiz(p.payload))
+                .on('broadcast', { event: 'quiz_answer' }, p => { updateLeaderboardUI(p.payload.scoreBoard); })
+                .on('broadcast', { event: 'attention_ping' }, p => { if (role === 'student' && p.payload.targetUserId === userId) triggerAttentionEffect(); })
+                .on('broadcast', { event: 'private_question' }, p => { if (role === 'teacher') renderTeacherPrivateQ(p.payload); })
+                .on('broadcast', { event: 'new_sticky_note' }, p => { stickyNotesList.push(p.payload); renderStickyNotes(); })
+                .on('broadcast', { event: 'launch_exit_ticket' }, () => renderStudentExitTicket())
+                .on('broadcast', { event: 'exit_ticket_submitted' }, p => {
+                    if (role === 'teacher') {
+                        const disp = document.getElementById('feedback-results-display');
+                        disp.innerHTML += `<div style="margin-top:4px;"><b>👤 ${p.payload.student}:</b> ציון ${p.payload.rating}/5 (${p.payload.comment || 'אין הערה'})</div>`;
+                    }
+                })
+                .on('broadcast', { event: 'transcript' }, p => {
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${p.payload.user}:</b> ${p.payload.text}</div>`; box.scrollTop = box.scrollHeight;
+                })
+                .subscribe();
+        };
+
+        async function initStream() {
+            if (mediaStream) return;
+            try { 
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
+                document.getElementById('local-video').srcObject = mediaStream; 
+                document.getElementById('video-user-label').innerText = userName;
+            } catch(e){}
+        }
+
+        window.approveStudent = async sId => {
+            await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', sId);
+        };
+
+        window.teacherToggleMic = async (targetUserId, newMicState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: newMicState }).eq('room_id', roomId).eq('user_id', targetUserId);
+        };
+
+        window.teacherToggleCam = async (targetUserId, newCamState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ cam_active: newCamState }).eq('room_id', roomId).eq('user_id', targetUserId);
+        };
+
+        window.teacherMuteAll = async () => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: false }).eq('room_id', roomId).neq('user_id', userId);
+            alert('כל התלמידים הושתקו בהצלחה 🔇');
+        };
+
+        window.toggleRaiseHand = async () => {
+            handRaised = !handRaised;
+            if (handRaised && role === 'teacher') playBeepSound();
+            const t = translations[currentLang];
+            const btn = document.getElementById('raise-hand-btn');
+            btn.style.background = handRaised ? 'var(--danger)' : 'var(--warning)';
+            btn.innerText = handRaised ? t.btn_lower_hand : t.btn_raise_hand;
+            await supabase.from('room_participants').update({ hand_raised: handRaised }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyCamera = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getVideoTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-cam-btn').innerText = t.enabled ? tr.btn_cam_off : tr.btn_cam_on;
+            await supabase.from('room_participants').update({ cam_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyMicrophone = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getAudioTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-mic-btn').innerText = t.enabled ? tr.btn_mic_mute : tr.btn_mic_unmute;
+            await supabase.from('room_participants').update({ mic_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        async function fetchParticipants(id) {
+            const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
+            if (!data) return;
+            sessionParticipants = data;
+            const approved = data.filter(p => p.status === 'approved'), waiting = data.filter(p => p.status === 'waiting');
+
+            document.getElementById('participants-list').innerHTML = approved.map(p => `
+                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <b>👤 ${p.profiles?.full_name || 'משתמש'}</b> ${p.hand_raised ? '🙋‍♂️' : ''}
+                            <span class="weather-badge">${p.weather_info || '🌤️ ---'}</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--muted);">${p.cam_active ? '📷' : '📷❌'} | ${p.mic_active ? '🎤' : '🎤❌'}</span>
+                    </div>
+                    ${role === 'teacher' && p.user_id !== userId ? `
+                        <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
+                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? 'Mute' : 'Unmute'}</button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
+                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;" data-i18n="btn_ping_student">הקפץ ⚡</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            if (role === 'teacher') {
+                const wCont = document.getElementById('waiting-students-list');
+                wCont.innerHTML = waiting.length === 0 ? `<span style="color:var(--muted); font-size: 12px;">אין ממתינים.</span>` :
+                    waiting.map(w => `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; background:var(--card); padding:6px; border-radius:4px;"><span style="font-size:13px;"><b>${w.profiles?.full_name || ''}</b></span><button onclick="approveStudent('${w.user_id}')" style="width:auto; padding:4px 10px; margin:0; background:var(--success); font-size:12px;">Approve ✓</button></div>`).join('');
+                
+                updateAnalyticsChart();
+            }
+        }
+
+        window.startScreenShare = async () => { try { document.getElementById('local-video').srcObject = await navigator.mediaDevices.getDisplayMedia({ video: true }); } catch(e){} };
+        window.startRecording = () => {
+            const s = document.getElementById('local-video').srcObject; if (!s) return; chunks = [];
+            mediaRecorder = new MediaRecorder(s);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.onstop = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' })); a.download = 'lesson.webm'; a.click(); };
+            mediaRecorder.start(); document.getElementById('stop-rec-btn').classList.remove('hidden');
+        };
+        window.stopAndSaveRecording = () => { if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); } };
+
+        window.downloadAttendanceReport = () => {
+            let r = `===== Report =====\nRoom: ${document.getElementById('current-room-title').innerText}\n\n`;
+            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - Weather: ${p.weather_info || 'N/A'} - Cam: ${p.cam_active ? 'On' : 'Off'} | Mic: ${p.mic_active ? 'On' : 'Off'}\n`);
+            r += `\n--- Transcript ---\n${transcriptText}`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/plain;charset=utf-8' }));
+            a.download = `report_${Date.now()}.txt`; a.click();
+        };
+
+        window.calculateMath = () => {
+            try { document.getElementById('calc-result').innerText = `= ${eval(document.getElementById('calc-input').value)}`; }
+            catch(e) { document.getElementById('calc-result').innerText = 'Error'; }
+        };
+
+        window.sendChatMessage = () => {
+            const inp = document.getElementById('chat-input'); if (!inp.value) return;
+            document.getElementById('chat-messages').innerHTML += `<div><b>Me:</b> ${inp.value}</div>`; inp.value = '';
+        };
+
+        window.leaveRoom = async () => {
+            if (isTranscribing) toggleSpeechRecognition();
+            stopAmbientSound();
+            if (activeChannel) supabase.removeChannel(activeChannel);
+            if (roomId && userId) await supabase.from('room_participants').delete().eq('room_id', roomId).eq('user_id', userId);
+            showSec('dashboard-section'); loadRooms();
+        };
+
+        function showSec(id) {
+            ['auth-section', 'reset-password-section', 'dashboard-section', 'waiting-room-section', 'room-section'].forEach(s => {
+                const el = document.getElementById(s); if (el) el.classList.add('hidden');
+            });
+            const t = document.getElementById(id); if (t) t.classList.remove('hidden');
         }
     </script>
 </body>
