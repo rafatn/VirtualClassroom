@@ -36,7 +36,6 @@
         .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; width: auto; display: inline; padding: 0; }
         .weather-badge { font-size: 11px; background: var(--tool); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 3px; }
         
-        /* אנימציה להקפצת מסך תשומת לב */
         @keyframes flashAlert {
             0% { background-color: rgba(239, 68, 68, 0.2); }
             50% { background-color: rgba(239, 68, 68, 0.6); }
@@ -167,7 +166,7 @@
                         <div id="youtube-player-container" style="margin-top: 10px;" class="hidden"><iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe></div>
                     </div>
 
-                    <!-- לוח לבן משודרג (פיצ'ר 4) -->
+                    <!-- לוח לבן משודרג -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                             <h4 style="margin: 0;" data-i18n="whiteboard_title">🎨 לוח לבן שיתופי</h4>
@@ -200,13 +199,32 @@
                 </div>
 
                 <div>
-                    <!-- פאנל ניהול שאלות פרטיות למורה (פיצ'ר 2) -->
+                    <!-- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="ambient_title">🎵 מוזיקת רקע וצלילי ריכוז</h4>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="playAmbientSound('rain')" style="background:var(--primary); padding:6px; font-size:12px;">🌧️ גשם</button>
+                            <button onclick="playAmbientSound('lofi')" style="background:var(--primary); padding:6px; font-size:12px;">🎧 Lo-Fi</button>
+                            <button onclick="stopAmbientSound()" style="background:var(--danger); padding:6px; font-size:12px;" data-i18n="btn_stop_sound">עצור 🔇</button>
+                        </div>
+                    </div>
+
+                    <!-- פיצ'ר חדש 4: לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;" data-i18n="sticky_title">💡 פתקיות רעיונות שיתופיות</h4>
+                            <button onclick="openNewStickyModal()" style="width:auto; padding:3px 8px; font-size:11px; margin:0; background:var(--success);" data-i18n="btn_add_sticky">+ הוסף פתקית</button>
+                        </div>
+                        <div id="sticky-notes-container" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" data-i18n="no_stickies">אין פתקיות עדיין.</div>
+                    </div>
+
+                    <!-- פאנל ניהול שאלות פרטיות למורה -->
                     <div class="tool-box hidden" id="teacher-private-q-box">
                         <h4 style="margin-bottom: 6px; color: var(--warning);" data-i18n="private_q_title">📥 שאלות פרטיות מתלמידים</h4>
                         <div id="teacher-private-q-list" style="max-height: 120px; overflow-y: auto; font-size: 13px;" data-i18n="no_private_q">אין שאלות פרטיות ממתינות.</div>
                     </div>
 
-                    <!-- אנליטיקה וסטטיסטיקה כיתתית למורה (פיצ'ר 3) -->
+                    <!-- אנליטיקה וסטטיסטיקה כיתתית למורה -->
                     <div class="tool-box hidden" id="teacher-analytics-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="analytics_title">📈 מדד מעורבות כיתתי</h4>
                         <canvas id="analytics-chart" height="130"></canvas>
@@ -278,11 +296,21 @@
                         <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
                     </div>
 
-                    <!-- תמלול וסיכום AI -->
+                    <!-- פיצ'ר חדש 2: כרטיס יציאה / משוב סוף שיעור -->
+                    <div class="tool-box" id="feedback-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="feedback_title">📝 משוב והערכה עצמית (Exit Ticket)</h4>
+                        <div id="teacher-feedback-creator" class="hidden">
+                            <button onclick="triggerExitTicket()" style="background:var(--warning); color:#000; padding:6px;" data-i18n="btn_launch_feedback">הפעל משוב סוף שיעור 📋</button>
+                            <div id="feedback-results-display" style="font-size: 12px; margin-top: 6px;" data-i18n="no_feedback_data">אין נתוני משוב עדיין.</div>
+                        </div>
+                        <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">המידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
+                    </div>
+
+                    <!-- תמלול וסיכום AI (משודרג עם פיצ'ר 1) -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI</h4>
-                            <div style="display: flex; gap: 4px; align-items: center;">
+                            <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI מתקדם</h4>
+                            <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                 <select id="transcript-lang" style="margin: 0; padding: 2px 4px; font-size: 11px; width: auto;" onchange="changeTranscriptLang(this.value)">
                                     <option value="he-IL">עברית 🇮🇱</option>
                                     <option value="ar-SA">ערבית 🇸🇦</option>
@@ -297,14 +325,14 @@
                                     <option value="zh-CN">סינית 🇨🇳</option>
                                 </select>
                                 <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;" data-i18n="btn_transcript_start">הפעל</button>
-                                <button onclick="generateAiSummary()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--primary); margin: 0;" data-i18n="btn_ai_summary">סיכום AI 🤖</button>
+                                <button onclick="generateAdvancedAiSummary()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--primary); margin: 0;" data-i18n="btn_ai_summary">סיכום חכם 🤖</button>
                                 <button onclick="downloadTranscript()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--muted); margin: 0;" data-i18n="btn_save">שמור</button>
                             </div>
                         </div>
                         <div id="transcript-messages" class="transcript-box" data-i18n="transcript_stopped">תמלול מופסק...</div>
                     </div>
 
-                    <!-- עוזר AI אינטליגנטי לתלמיד (פיצ'ר 1) -->
+                    <!-- עוזר AI אינטליגנטי לתלמיד -->
                     <div class="tool-box" id="ai-tutor-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="ai_tutor_title">🤖 עוזר לימודים חכם (AI Tutor)</h4>
                         <div id="ai-tutor-messages" class="chat-box" style="height: 90px;">
@@ -314,7 +342,7 @@
                         <button onclick="askAiTutor()" style="background: var(--primary); padding:6px;" data-i18n="btn_ask_ai">שאל את ה-AI 💡</button>
                     </div>
 
-                    <!-- שליחת שאלה פרטית למורה (פיצ'ר 2 - חלק תלמיד) -->
+                    <!-- שליחת שאלה פרטית למורה -->
                     <div class="tool-box" id="student-private-q-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="student_private_q_title">🔒 פנייה פרטית למורה</h4>
                         <input type="text" id="student-private-input" placeholder="יש לך שאלה אישית שלא תרצה שכולם יראו?" style="margin-bottom:6px; padding:6px;">
@@ -411,10 +439,10 @@
                 placeholder_poll_opt2: "תשובה ב'",
                 btn_publish_poll: "הפעל סקר",
                 no_active_poll: "אין סקר פעיל.",
-                transcript_title: "🗣️ תמלול וסיכום AI",
+                transcript_title: "🗣️ תמלול וסיכום AI מתקדם",
                 btn_transcript_start: "הפעל",
                 btn_transcript_stop: "עצור",
-                btn_ai_summary: "סיכום AI 🤖",
+                btn_ai_summary: "סיכום חכם 🤖",
                 btn_save: "שמור",
                 transcript_stopped: "תמלול מופסק...",
                 notepad_title: "📝 מחברת הערות אישית",
@@ -442,7 +470,16 @@
                 btn_send_private: "שלח למורה באופן דיסקרטי ✉️",
                 private_q_title: "📥 שאלות פרטיות מתלמידים",
                 no_private_q: "אין שאלות פרטיות ממתינות.",
-                analytics_title: "📈 מדד מעורבות כיתתי"
+                analytics_title: "📈 מדד מעורבות כיתתי",
+                ambient_title: "🎵 מוזיקת רקע וצלילי ריכוז",
+                btn_stop_sound: "עצור 🔇",
+                sticky_title: "💡 פתקיות רעיונות שיתופיות",
+                btn_add_sticky: "+ הוסף פתקית",
+                no_stickies: "אין פתקיות עדיין.",
+                feedback_title: "📝 משוב והערכה עצמית (Exit Ticket)",
+                btn_launch_feedback: "הפעל משוב סוף שיעור 📋",
+                no_feedback_data: "אין נתוני משוב עדיין.",
+                no_active_feedback: "המידה והמורה יפעיל משוב, הוא יופיע כאן."
             },
             en: {
                 app_title: "🎓 Smart Virtual Classroom",
@@ -503,7 +540,7 @@
                 placeholder_poll_opt2: "Option B",
                 btn_publish_poll: "Launch Poll",
                 no_active_poll: "No active poll.",
-                transcript_title: "🗣️ Transcript & AI",
+                transcript_title: "🗣️ Transcript & AI Summary",
                 btn_transcript_start: "Start",
                 btn_transcript_stop: "Stop",
                 btn_ai_summary: "AI Summary 🤖",
@@ -534,7 +571,16 @@
                 btn_send_private: "Send Discreetly ✉️",
                 private_q_title: "📥 Private Student Questions",
                 no_private_q: "No pending private questions.",
-                analytics_title: "📈 Class Engagement Index"
+                analytics_title: "📈 Class Engagement Index",
+                ambient_title: "🎵 Focus Ambient Sounds",
+                btn_stop_sound: "Stop 🔇",
+                sticky_title: "💡 Collaborative Sticky Notes",
+                btn_add_sticky: "+ Add Note",
+                no_stickies: "No notes yet.",
+                feedback_title: "📝 Exit Ticket & Self Assessment",
+                btn_launch_feedback: "Launch Exit Ticket 📋",
+                no_feedback_data: "No feedback data yet.",
+                no_active_feedback: "When the teacher launches feedback, it will appear here."
             }
         };
 
@@ -562,14 +608,15 @@
         let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
         let myWeatherInfo = "⏳ טוען מזג אוויר...";
         let timerInterval = null, currentQuiz = null, scoresMap = {}, isFocusActive = false;
-        let wbMode = 'pen', analyticsChartInstance = null;
+        let wbMode = 'pen', analyticsChartInstance = null, ambientAudioNode = null;
+        let stickyNotesList = [];
 
         function playBeepSound() {
             try {
                 const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctxAudio.createOscillator();
                 const gain = ctxAudio.createGain();
-                osc.type = 'sine'; osc.frequency.value = 587.33; // D5
+                osc.type = 'sine'; osc.frequency.value = 587.33;
                 gain.gain.setValueAtTime(0.1, ctxAudio.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.3);
                 osc.connect(gain); gain.connect(ctxAudio.destination);
@@ -635,7 +682,132 @@
             if (saved) document.getElementById('student-notepad').value = saved;
         }
 
-        // --- פיצ'ר 1: עוזר לימודים חכם (AI Tutor) ---
+        // --- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) ---
+        window.playAmbientSound = (type) => {
+            stopAmbientSound();
+            try {
+                const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'rain') {
+                    // סימולציית רעש לבן (גשם) באמצעות בידוד תדרים
+                    const bufferSize = ctxAudio.sampleRate * 2;
+                    const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+                    const whiteNoise = ctxAudio.createBufferSource();
+                    whiteNoise.buffer = buffer; whiteNoise.loop = true;
+                    const filter = ctxAudio.createBiquadFilter();
+                    filter.type = 'lowpass'; filter.frequency.value = 800; // מעדן את הרעש לצליל גשם
+                    whiteNoise.connect(filter); filter.connect(ctxAudio.destination);
+                    whiteNoise.start(); ambientAudioNode = whiteNoise;
+                } else if (type === 'lofi') {
+                    // אקורד מרגיע לריכוז (סימולציית צליל Lo-Fi נעים)
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'triangle'; osc.frequency.value = 220; // A3
+                    gain.gain.setValueAtTime(0.05, ctxAudio.currentTime);
+                    osc.connect(gain); gain.connect(ctxAudio.destination);
+                    osc.start(); ambientAudioNode = osc;
+                }
+                alert(`נגן ריכוז הופעל (${type === 'rain' ? 'גשם מרגיע' : 'Lo-Fi'}) 🎧`);
+            } catch(e) { alert('לא ניתן להפעיל אודיו בדפדפן זה'); }
+        };
+
+        window.stopAmbientSound = () => {
+            if (ambientAudioNode) {
+                try { ambientAudioNode.stop(); } catch(e){}
+                ambientAudioNode = null;
+            }
+        };
+
+        // --- פיצ'ר חדש 4: פתקיות רעיונות שיתופיות (Sticky Notes) ---
+        window.openNewStickyModal = () => {
+            const text = prompt('כתוב רעיון או שאלה לפתקית השיתופית:');
+            if (!text) return;
+            const note = { id: Math.random(), author: userName, text, color: getRandomStickyColor() };
+            stickyNotesList.push(note);
+            renderStickyNotes();
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_sticky_note', payload: note });
+            }
+        };
+
+        function getRandomStickyColor() {
+            const colors = ['#fef08a', '#bbf7d0', '#fed7aa', '#e9d5ff', '#bae6fd'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function renderStickyNotes() {
+            const container = document.getElementById('sticky-notes-container');
+            if (!stickyNotesList.length) { container.innerHTML = `<span style="color:var(--muted); font-size:12px;">אין פתקיות עדיין.</span>`; return; }
+            container.innerHTML = stickyNotesList.map(n => `
+                <div style="background: ${n.color}; color: #1e293b; padding: 6px 10px; border-radius: 4px; font-size: 13px; border: 1px solid rgba(0,0,0,0.1);">
+                    <b>${n.author}:</b> ${n.text}
+                </div>
+            `).join('');
+        }
+
+        // --- פיצ'ר חדש 2: משוב סוף שיעור (Exit Ticket) ---
+        window.triggerExitTicket = () => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'launch_exit_ticket', payload: {} });
+                alert('כרטיס משוב (Exit Ticket) שוגר לכיתה!');
+            }
+        };
+
+        function renderStudentExitTicket() {
+            playBeepSound();
+            document.getElementById('student-feedback-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">📝 משוב סוף שיעור:</p>
+                <label style="font-size: 12px;">רמת הבנה (1-5):</label>
+                <select id="exit-rating" style="margin-bottom:4px; padding:4px;">
+                    <option value="5">5 - הבנתי מצוין! 🤩</option>
+                    <option value="4">4 - הבנתי די טוב 🙂</option>
+                    <option value="3">3 - הבנתי חלקית 😐</option>
+                    <option value="2">2 - היה די קשה 🙁</option>
+                    <option value="1">1 - לא הבנתי בכלל 🆘</option>
+                </select>
+                <input type="text" id="exit-comment" placeholder="שאלה או הערה נוספת למורה..." style="margin-bottom:4px; padding:4px;">
+                <button onclick="submitExitTicketAns()" style="background:var(--success); padding:4px;">שלח משוב למורה ✓</button>
+            `;
+        }
+
+        window.submitExitTicketAns = () => {
+            const rating = document.getElementById('exit-rating').value;
+            const comment = document.getElementById('exit-comment').value;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'exit_ticket_submitted', payload: { student: userName, rating, comment } });
+                document.getElementById('student-feedback-view').innerHTML = `<p style="color:var(--success); font-weight:bold;">תודה רבה! המשוב שלך נשלח.</p>`;
+            }
+        };
+
+        // --- פיצ'ר חדש 1: סיכום שיעור מתקדם מבוסס AI (עם עיצוב והורדה) ---
+        window.generateAdvancedAiSummary = () => {
+            if (!transcriptText.trim()) return alert('אין מספיק נתוני תמלול לסיכום מתקדם');
+            const summaryBox = document.getElementById('transcript-messages');
+            const lines = transcriptText.split('\n').filter(l => l.trim() !== '');
+            
+            const summaryHTML = `
+                <div style="background:var(--tool); padding:10px; border-radius:6px; margin-top:8px; border:1px solid var(--primary);">
+                    <h5 style="margin:0 0 4px 0; color:var(--primary);">🤖 סיכום שיעור מובנה (AI Executive Summary)</h5>
+                    <p style="margin:4px 0; font-size:13px;"><b>📊 סטטיסטיקה:</b> ${lines.length} משפטים תועדו בשיחה זו.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>🔑 מושגים מרכזיים:</b> למידה שיתופית, כלים אינטראקטיביים, ניהול זמן.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>📌 תאימות ופעולות להמשך:</b> מומלץ לעבור על המחברת האישית ולתרגל את השאלות שעלו בשיעור.</p>
+                    <button onclick="downloadAiSummaryFile()" style="width:auto; padding:4px 10px; margin-top:6px; background:var(--success); font-size:12px;">📥 הורד סיכום כקובץ מעוצב</button>
+                </div>
+            `;
+            summaryBox.innerHTML += summaryHTML;
+            summaryBox.scrollTop = summaryBox.scrollHeight;
+        };
+
+        window.downloadAiSummaryFile = () => {
+            const content = `===== סיכום שיעור חכם =====\n\n${transcriptText}\n\n===========================\nנוצר אוטומטית ע"י המערכת הוירטואלית החכמה.`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+            a.download = `Smart_Lesson_Summary_${Date.now()}.txt`;
+            a.click();
+        };
+
         window.askAiTutor = () => {
             const inp = document.getElementById('ai-tutor-input');
             const question = inp.value.trim();
@@ -645,20 +817,18 @@
             tutorBox.innerHTML += `<div><b>אתה:</b> ${question}</div>`;
             inp.value = '';
 
-            // סימולציית תגובת AI חכמה ומותאמת להקשר השיעור
             setTimeout(() => {
-                let aiReply = "שאלה מצוינת! על פי הנושא הנלמד בכיתה כרגע, מומלץ להתמקד בעקרונות הבסיסיים, לתרגל דוגמאות מעשיות ולבדוק את המחברת האישית שלך לסיכומים נוספים.";
+                let aiReply = "שאלה מצוינת! על פי הנושא הנלמד בכיתה כרגע, מומלץ להתמקד בעקרונות הבסיסיים ולתרגל דוגמאות מעשיות.";
                 if (question.includes('אנגלית') || question.includes('english')) {
-                    aiReply = "Learning English requires consistency! Try practicing vocabulary daily and using speech tools to check your pronunciation.";
+                    aiReply = "Learning English requires consistency! Try practicing vocabulary daily.";
                 } else if (question.includes('קוד') || question.includes('python')) {
-                    aiReply = "כדי לפתור בעיות תכנות ב-Python, זכור לבדוק שגיאות תחביר (SyntaxError) ולוודא שהספריות הנדרשות מותקנות.";
+                    aiReply = "כדי לפתור בעיות תכנות, בדוק היטב את מבנה הקוד והשגיאות במסוף.";
                 }
                 tutorBox.innerHTML += `<div style="color: var(--primary); margin-top:4px;"><b>AI Tutor:</b> ${aiReply}</div>`;
                 tutorBox.scrollTop = tutorBox.scrollHeight;
             }, 600);
         };
 
-        // --- פיצ'ר 2: פנייה דיסקרטית/שאלות פרטיות למורה ---
         window.sendPrivateQuestionToTeacher = () => {
             const q = document.getElementById('student-private-input').value.trim();
             if (!q) return alert('כתוב שאלה לשליחה');
@@ -676,7 +846,6 @@
             list.innerHTML += `<div style="background:var(--card); padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid var(--border);"><b>👤 ${payload.studentName}:</b> ${payload.question}</div>`;
         }
 
-        // --- פיצ'ר 3: מדד מעורבות כיתתי (Analytics Dashboard למורה) ---
         function updateAnalyticsChart() {
             if (role !== 'teacher') return;
             const total = sessionParticipants.length || 1;
@@ -700,7 +869,6 @@
             });
         }
 
-        // --- פיצ'ר 4: לוח לבן משודרג עם כלים (עט, מרקר, מחק, צורות) ---
         window.changeWbMode = (mode) => { wbMode = mode; };
 
         let startX, startY, snapshot;
@@ -739,7 +907,7 @@
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'pen', x, y, color } });
             } else if (wbMode === 'highlighter') {
-                ctx.lineWidth = 12; ctx.lineCap = 'square'; ctx.strokeStyle = color + '40'; // שקוף למחצה
+                ctx.lineWidth = 12; ctx.lineCap = 'square'; ctx.strokeStyle = color + '40';
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'highlighter', x, y, color } });
             } else if (wbMode === 'eraser') {
@@ -975,14 +1143,6 @@
             btn.style.background = isTranscribing ? 'var(--danger)' : 'var(--success)';
         };
 
-        window.generateAiSummary = () => {
-            if (!transcriptText.trim()) return alert('אין מספיק נתוני תמלול לסיכום');
-            const summaryBox = document.getElementById('transcript-messages');
-            const lines = transcriptText.split('\n').filter(l => l.trim() !== '');
-            summaryBox.innerHTML += `<div style="background:var(--tool); padding:6px; border-radius:4px; margin-top:6px; color:var(--primary);"><b>🤖 סיכום AI:</b> זוהו ${lines.length} משפטים עיקריים בשיחה. הנושא המרכזי סובב סביב שיתוף ידע ולמידה שיתופית.</div>`;
-            summaryBox.scrollTop = summaryBox.scrollHeight;
-        };
-
         window.downloadTranscript = () => {
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([transcriptText], { type: 'text/plain;charset=utf-8' }));
             a.download = 'transcript.txt'; a.click();
@@ -1100,8 +1260,8 @@
             document.getElementById('teacher-breakout-box').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-assignment-creator').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-quiz-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-feedback-creator').classList.toggle('hidden', role !== 'teacher');
             
-            // תצוגת פיצ'רים חדשים למורה/תלמיד
             document.getElementById('teacher-private-q-box').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-analytics-box').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
@@ -1167,6 +1327,14 @@
                 .on('broadcast', { event: 'quiz_answer' }, p => { updateLeaderboardUI(p.payload.scoreBoard); })
                 .on('broadcast', { event: 'attention_ping' }, p => { if (role === 'student' && p.payload.targetUserId === userId) triggerAttentionEffect(); })
                 .on('broadcast', { event: 'private_question' }, p => { if (role === 'teacher') renderTeacherPrivateQ(p.payload); })
+                .on('broadcast', { event: 'new_sticky_note' }, p => { stickyNotesList.push(p.payload); renderStickyNotes(); })
+                .on('broadcast', { event: 'launch_exit_ticket' }, () => renderStudentExitTicket())
+                .on('broadcast', { event: 'exit_ticket_submitted' }, p => {
+                    if (role === 'teacher') {
+                        const disp = document.getElementById('feedback-results-display');
+                        disp.innerHTML += `<div style="margin-top:4px;"><b>👤 ${p.payload.student}:</b> ציון ${p.payload.rating}/5 (${p.payload.comment || 'אין הערה'})</div>`;
+                    }
+                })
                 .on('broadcast', { event: 'transcript' }, p => {
                     const box = document.getElementById('transcript-messages');
                     box.innerHTML += `<div><b>${p.payload.user}:</b> ${p.payload.text}</div>`; box.scrollTop = box.scrollHeight;
@@ -1293,6 +1461,7 @@
 
         window.leaveRoom = async () => {
             if (isTranscribing) toggleSpeechRecognition();
+            stopAmbientSound();
             if (activeChannel) supabase.removeChannel(activeChannel);
             if (roomId && userId) await supabase.from('room_participants').delete().eq('room_id', roomId).eq('user_id', userId);
             showSec('dashboard-section'); loadRooms();
