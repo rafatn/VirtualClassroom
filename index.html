@@ -28,7 +28,7 @@
         @media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } }
         .tool-box { background: var(--tool); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border); }
         .room-item, .participant-card { background: var(--card); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        video { width: 100%; max-height: 220px; background: #000; border-radius: 6px 6px 0 0; object-fit: cover; }
+        video { width: 100%; max-height: 220px; background: #000; border-radius: 6px; object-fit: cover; }
         .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
         hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
@@ -42,29 +42,6 @@
             100% { background-color: rgba(239, 68, 68, 0.2); }
         }
         .attention-active { animation: flashAlert 1s infinite; border: 2px solid var(--danger) !important; }
-
-        /* סגנונות חדשים עבור צבעי משתתפים */
-        .participant-name {
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .participant-color-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        #video-user-label {
-            background: rgba(0,0,0,0.85);
-            padding: 8px;
-            font-weight: bold;
-            text-align: center;
-            font-size: 14px;
-            border-radius: 0 0 6px 6px;
-            transition: color 0.3s;
-        }
     </style>
 </head>
 <body>
@@ -83,7 +60,7 @@
                     <option value="de">🇩🇪 Deutsch</option>
                     <option value="it">🇮🇹 Italiano</option>
                     <option value="pt">🇧🇷 Português</option>
-                    <option value="am">🇪🇹 አማርኛ</option>
+                    <option value="am">🇪🇹 አማרኛ</option>
                     <option value="zh">🇨🇳 中文</option>
                 </select>
                 <button class="top-bar-btn" onclick="toggleTheme()" data-i18n="toggle_theme">🌓 מצב כהה / בהיר</button>
@@ -170,7 +147,7 @@
                 <div>
                     <div style="background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
                         <video id="local-video" autoplay muted></video>
-                        <div id="video-user-label">טוען שם...</div>
+                        <div id="video-user-label" style="background: rgba(0,0,0,0.85); color: #fff; padding: 8px; font-weight: bold; text-align: center; font-size: 14px;">טוען שם...</div>
                     </div>
                     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                         <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning); color: #000; padding: 8px;" data-i18n="btn_cam_off">📷 כבה מצלמה</button>
@@ -189,7 +166,7 @@
                         <div id="youtube-player-container" style="margin-top: 10px;" class="hidden"><iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe></div>
                     </div>
 
-                    <!-- לוח לבן -->
+                    <!-- לוח לבן משודרג -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                             <h4 style="margin: 0;" data-i18n="whiteboard_title">🎨 לוח לבן שיתופי</h4>
@@ -222,7 +199,7 @@
                 </div>
 
                 <div>
-                    <!-- מוזיקת רקע -->
+                    <!-- נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="ambient_title">🎵 מוזיקת רקע וצלילי ריכוז</h4>
                         <div style="display: flex; gap: 6px;">
@@ -232,7 +209,7 @@
                         </div>
                     </div>
 
-                    <!-- פתקיות שיתופיות -->
+                    <!-- לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="sticky_title">💡 פתקיות רעיונות שיתופיות</h4>
@@ -241,13 +218,13 @@
                         <div id="sticky-notes-container" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" data-i18n="no_stickies">אין פתקיות עדיין.</div>
                     </div>
 
-                    <!-- שאלות פרטיות למורה -->
+                    <!-- פאנל ניהול שאלות פרטיות למורה -->
                     <div class="tool-box hidden" id="teacher-private-q-box">
                         <h4 style="margin-bottom: 6px; color: var(--warning);" data-i18n="private_q_title">📥 שאלות פרטיות מתלמידים</h4>
                         <div id="teacher-private-q-list" style="max-height: 120px; overflow-y: auto; font-size: 13px;" data-i18n="no_private_q">אין שאלות פרטיות ממתינות.</div>
                     </div>
 
-                    <!-- אנליטיקה -->
+                    <!-- אנליטיקה וסטטיסטיקה כיתתית למורה -->
                     <div class="tool-box hidden" id="teacher-analytics-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="analytics_title">📈 מדד מעורבות כיתתי</h4>
                         <canvas id="analytics-chart" height="130"></canvas>
@@ -258,7 +235,7 @@
                         <div id="waiting-students-list" data-i18n="no_waiting_students">אין תלמידים ממתינים.</div>
                     </div>
 
-                    <!-- חדרי דיונים -->
+                    <!-- חדרי דיונים (Breakout Rooms) -->
                     <div class="tool-box hidden" id="teacher-breakout-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="breakout_title">🔀 פיצול לחדרי דיונים</h4>
                         <input type="text" id="breakout-group-name" placeholder="שם הקבוצה (למשל: קבוצה א')" style="margin:0 0 6px 0; padding:6px;">
@@ -276,7 +253,7 @@
                         <div id="student-assignment-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_assignment">אין מטלה פעילה כרגע.</p></div>
                     </div>
 
-                    <!-- חידון מהיר -->
+                    <!-- חידון מהיר (Quiz) + Leaderboard -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="quiz_title">🏆 חידון מהיר & טבלת מובילים</h4>
                         <div id="teacher-quiz-creator" class="hidden">
@@ -290,7 +267,6 @@
                         </div>
                     </div>
 
-                    <!-- רשימת משתתפים -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <h4 style="margin: 0;" data-i18n="participants_title">👥 משתתפים וחיוויי שליטה</h4>
@@ -302,7 +278,7 @@
                         <div id="participants-list" style="max-height: 150px; overflow-y: auto;"></div>
                     </div>
 
-                    <!-- סקרים -->
+                    <!-- סקרים ואנונימיות -->
                     <div class="tool-box" id="poll-container">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="poll_title">📊 סקר כיתתי חי</h4>
@@ -320,17 +296,17 @@
                         <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
                     </div>
 
-                    <!-- משוב -->
+                    <!-- כרטיס יציאה / משוב סוף שיעור -->
                     <div class="tool-box" id="feedback-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="feedback_title">📝 משוב והערכה עצמית (Exit Ticket)</h4>
                         <div id="teacher-feedback-creator" class="hidden">
                             <button onclick="triggerExitTicket()" style="background:var(--warning); color:#000; padding:6px;" data-i18n="btn_launch_feedback">הפעל משוב סוף שיעור 📋</button>
                             <div id="feedback-results-display" style="font-size: 12px; margin-top: 6px;" data-i18n="no_feedback_data">אין נתוני משוב עדיין.</div>
                         </div>
-                        <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">במידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
+                        <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">המידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
                     </div>
 
-                    <!-- תמלול -->
+                    <!-- תמלול וסיכום AI -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI מתקדם</h4>
@@ -356,7 +332,7 @@
                         <div id="transcript-messages" class="transcript-box" data-i18n="transcript_stopped">תמלול מופסק...</div>
                     </div>
 
-                    <!-- עוזר AI -->
+                    <!-- עוזר AI אינטליגנטי לתלמיד -->
                     <div class="tool-box" id="ai-tutor-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="ai_tutor_title">🤖 עוזר לימודים חכם (AI Tutor)</h4>
                         <div id="ai-tutor-messages" class="chat-box" style="height: 90px;">
@@ -366,14 +342,14 @@
                         <button onclick="askAiTutor()" style="background: var(--primary); padding:6px;" data-i18n="btn_ask_ai">שאל את ה-AI 💡</button>
                     </div>
 
-                    <!-- שאלה פרטית -->
+                    <!-- שליחת שאלה פרטית למורה -->
                     <div class="tool-box" id="student-private-q-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="student_private_q_title">🔒 פנייה פרטית למורה</h4>
                         <input type="text" id="student-private-input" placeholder="יש לך שאלה אישית שלא תרצה שכולם יראו?" style="margin-bottom:6px; padding:6px;">
                         <button onclick="sendPrivateQuestionToTeacher()" style="background: var(--warning); color:#000; padding:6px;" data-i18n="btn_send_private">שלח למורה באופן דיסקרטי ✉️</button>
                     </div>
 
-                    <!-- מחברת הערות -->
+                    <!-- מחברת אישית לתלמיד -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="notepad_title">📝 מחברת הערות אישית</h4>
                         <textarea id="student-notepad" rows="3" data-i18n-placeholder="placeholder_notepad" placeholder="כתוב כאן את הסיכומים שלך..." oninput="savePersonalNotes()"></textarea>
@@ -403,58 +379,320 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         const supabase = createClient('https://ufivtmlumzhdsljjckqv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaXZ0bWx1bXpoZHNsampja3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIxMjEsImV4cCI6MjEwMzUwODEyMX0.qW-A_JdOZifQtkAmPku6XJWDV-_AVfI8M8GGMdSNLIw');
 
-        // פונקציה לייצור צבע ייחודי ועקבי לפי שם המשתתף/מזהה
-        function getUserColor(identifier) {
-            if (!identifier) return '#4f46e5';
-            let hash = 0;
-            for (let i = 0; i < identifier.length; i++) {
-                hash = identifier.charCodeAt(i) + ((hash << 5) - hash);
+        const translations = {
+            he: {
+                app_title: "🎓 כיתה וירטואלית חכמה",
+                toggle_theme: "🌓 מצב כהה / בהיר",
+                auth_login_title: "התחברות למערכת",
+                auth_register_title: "הרשמה למערכת",
+                placeholder_email: "אימייל",
+                placeholder_password: "סיסמה",
+                placeholder_fullname: "שם מלא",
+                role_student: "תלמיד 👨‍🎓",
+                role_teacher: "מורה 👨‍🏫",
+                btn_login: "התחבר",
+                btn_register: "הירשם",
+                link_forgot: "שכחת סיסמה?",
+                btn_toggle_auth: "עבור להרשמה / התחברות",
+                reset_title: "הגדרת סיסמה חדשה",
+                placeholder_new_password: "סיסמה חדשה (לפחות 6 תווים)",
+                btn_save_password: "שמור סיסמה",
+                btn_logout: "התנתק",
+                currency_title: "💱 שערי מטבעות חיים",
+                loading_rates: "טוען שערים...",
+                teacher_open_room: "👨‍🏫 פתיחת חדר חדש",
+                placeholder_room_title: "שם השיעור",
+                btn_open_room: "פתח חדר",
+                active_rooms: "🏫 חדרים פעילים",
+                loading_rooms: "טוען חדרים...",
+                waiting_teacher_approval: "⏳ ממתין לאישור המורה...",
+                btn_cancel_leave: "בטל ועזוב",
+                btn_focus_mode: "🎯 מצב פוקוס",
+                btn_raise_hand: "🙋‍♂️ הרם יד",
+                btn_leave_room: "צא מהחדר 🚪",
+                btn_start_timer: "הפעל",
+                btn_stop_timer: "אפס",
+                btn_cam_off: "📷 כבה מצלמה",
+                btn_mic_mute: "🎤 השתק מיקרופון",
+                btn_share_screen: "🖥️ שתף מסך",
+                btn_record: "🔴 הקלטה",
+                btn_stop_record: "⏹️ עצור הקלטה",
+                youtube_title: "📺 שיתוף סרטון YouTube",
+                placeholder_yt: "קישור YouTube...",
+                btn_show: "הצג",
+                whiteboard_title: "🎨 לוח לבן שיתופי",
+                btn_clear: "נקה",
+                pdf_title: "📄 הצגת PDF",
+                btn_pdf_prev: "◀ קודם",
+                btn_pdf_next: "הבא ▶",
+                ambient_title: "🎵 מוזיקת רקע וצלילי ריכוז",
+                btn_stop_sound: "עצור 🔇",
+                sticky_title: "💡 פתקיות רעיונות שיתופיות",
+                btn_add_sticky: "+ הוסף פתקית",
+                no_stickies: "אין פתקיות עדיין.",
+                private_q_title: "📥 שאלות פרטיות מתלמידים",
+                no_private_q: "אין שאלות פרטיות ממתינות.",
+                analytics_title: "📈 מדד מעורבות כיתתי",
+                waiting_students_title: "⏳ תלמידים ממתינים",
+                no_waiting_students: "אין תלמידים ממתינים.",
+                breakout_title: "🔀 פיצול לחדרי דיונים",
+                btn_create_breakout: "צור חדר דיונים",
+                assignment_title: "📋 מטלת כיתה",
+                btn_pub_assignment: "פרסם מטלה",
+                no_active_assignment: "אין מטלה פעילה כרגע.",
+                quiz_title: "🏆 חידון מהיר & טבלת מובילים",
+                btn_start_quiz: "הפעל חידון",
+                no_active_quiz: "אין חידון פעיל.",
+                participants_title: "👥 משתתפים וחיוויי שליטה",
+                btn_mute_all: "השתק הכל 🔇",
+                btn_report: "הפק דוח 📊",
+                poll_title: "📊 סקר כיתתי חי",
+                placeholder_poll_q: "שאלה",
+                placeholder_poll_opt1: "תשובה א'",
+                placeholder_poll_opt2: "תשובה ב'",
+                btn_publish_poll: "הפעל סקר",
+                no_active_poll: "אין סקר פעיל.",
+                feedback_title: "📝 משוב והערכה עצמית (Exit Ticket)",
+                btn_launch_feedback: "הפעל משוב סוף שיעור 📋",
+                no_feedback_data: "אין נתוני משוב עדיין.",
+                no_active_feedback: "המידה והמורה יפעיל משוב, הוא יופיע כאן.",
+                transcript_title: "🗣️ תמלול וסיכום AI מתקדם",
+                btn_transcript_start: "הפעל",
+                btn_ai_summary: "סיכום חכם 🤖",
+                btn_save: "שמור",
+                transcript_stopped: "תמלול מופסק...",
+                ai_tutor_title: "🤖 עוזר לימודים חכם (AI Tutor)",
+                placeholder_ai_tutor: "שאל שאלה את עוזר ה-AI...",
+                btn_ask_ai: "שאל את ה-AI 💡",
+                student_private_q_title: "🔒 פנייה פרטית למורה",
+                btn_send_private: "שלח למורה באופן דיסקרטי ✉️",
+                notepad_title: "📝 מחברת הערות אישית",
+                placeholder_notepad: "כתוב כאן את הסיכומים שלך...",
+                chat_title: "💬 צ'אט כיתתי",
+                placeholder_chat: "הקלד הודעה...",
+                btn_send: "שלח",
+                calc_title: "🧮 מחשבון מדעי",
+                placeholder_calc: "למשל: Math.sqrt(144)",
+                btn_calc: "חשב"
+            },
+            en: {
+                app_title: "🎓 Smart Virtual Classroom",
+                toggle_theme: "🌓 Toggle Theme",
+                auth_login_title: "Login",
+                auth_register_title: "Register",
+                placeholder_email: "Email",
+                placeholder_password: "Password",
+                placeholder_fullname: "Full Name",
+                role_student: "Student 👨‍🎓",
+                role_teacher: "Teacher 👨‍🏫",
+                btn_login: "Login",
+                btn_register: "Register",
+                link_forgot: "Forgot Password?",
+                btn_toggle_auth: "Switch to Register / Login",
+                reset_title: "Set New Password",
+                placeholder_new_password: "New Password (min 6 chars)",
+                btn_save_password: "Save Password",
+                btn_logout: "Logout",
+                currency_title: "💱 Live Exchange Rates",
+                loading_rates: "Loading rates...",
+                teacher_open_room: "👨‍🏫 Open New Room",
+                placeholder_room_title: "Lesson Name",
+                btn_open_room: "Open Room",
+                active_rooms: "🏫 Active Rooms",
+                loading_rooms: "Loading rooms...",
+                waiting_teacher_approval: "⏳ Waiting for teacher approval...",
+                btn_cancel_leave: "Cancel & Leave",
+                btn_focus_mode: "🎯 Focus Mode",
+                btn_raise_hand: "🙋‍♂️ Raise Hand",
+                btn_leave_room: "Leave Room 🚪",
+                btn_start_timer: "Start",
+                btn_stop_timer: "Reset",
+                btn_cam_off: "📷 Turn Off Cam",
+                btn_mic_mute: "🎤 Mute Mic",
+                btn_share_screen: "🖥️ Share Screen",
+                btn_record: "🔴 Record",
+                btn_stop_record: "⏹️ Stop Recording",
+                youtube_title: "📺 Share YouTube Video",
+                placeholder_yt: "YouTube Link...",
+                btn_show: "Show",
+                whiteboard_title: "🎨 Collaborative Whiteboard",
+                btn_clear: "Clear",
+                pdf_title: "📄 PDF Viewer",
+                btn_pdf_prev: "◀ Prev",
+                btn_pdf_next: "Next ▶",
+                ambient_title: "🎵 Focus Ambient Sounds",
+                btn_stop_sound: "Stop 🔇",
+                sticky_title: "💡 Idea Sticky Notes",
+                btn_add_sticky: "+ Add Note",
+                no_stickies: "No sticky notes yet.",
+                private_q_title: "📥 Private Student Questions",
+                no_private_q: "No pending questions.",
+                analytics_title: "📈 Engagement Index",
+                waiting_students_title: "⏳ Waiting Students",
+                no_waiting_students: "No waiting students.",
+                breakout_title: "🔀 Breakout Rooms",
+                btn_create_breakout: "Create Room",
+                assignment_title: "📋 Class Assignment",
+                btn_pub_assignment: "Publish",
+                no_active_assignment: "No active assignment.",
+                quiz_title: "🏆 Quick Quiz & Leaderboard",
+                btn_start_quiz: "Start Quiz",
+                no_active_quiz: "No active quiz.",
+                participants_title: "👥 Participants",
+                btn_mute_all: "Mute All 🔇",
+                btn_report: "Report 📊",
+                poll_title: "📊 Live Poll",
+                placeholder_poll_q: "Question",
+                placeholder_poll_opt1: "Option A",
+                placeholder_poll_opt2: "Option B",
+                btn_publish_poll: "Start Poll",
+                no_active_poll: "No active poll.",
+                feedback_title: "📝 Exit Ticket",
+                btn_launch_feedback: "Launch Exit Ticket 📋",
+                no_feedback_data: "No feedback data yet.",
+                no_active_feedback: "Feedback will appear here when launched.",
+                transcript_title: "🗣️ AI Live Transcript",
+                btn_transcript_start: "Start",
+                btn_ai_summary: "AI Summary 🤖",
+                btn_save: "Save",
+                transcript_stopped: "Transcript stopped...",
+                ai_tutor_title: "🤖 AI Study Tutor",
+                placeholder_ai_tutor: "Ask the AI tutor...",
+                btn_ask_ai: "Ask AI 💡",
+                student_private_q_title: "🔒 Private Note to Teacher",
+                btn_send_private: "Send Discreely ✉️",
+                notepad_title: "📝 Personal Notepad",
+                placeholder_notepad: "Type your notes here...",
+                chat_title: "💬 Class Chat",
+                placeholder_chat: "Type a message...",
+                btn_send: "Send",
+                calc_title: "🧮 Calculator",
+                placeholder_calc: "e.g., Math.sqrt(144)",
+                btn_calc: "Calculate"
             }
-            const h = Math.abs(hash) % 360;
-            return `hsl(${h}, 70%, 45%)`;
-        }
-
-        // עדכון התווית מתחת לוידאו של המשתמש הנוכחי
-        function updateVideoUserLabel(name, role) {
-            const labelEl = document.getElementById('video-user-label');
-            if (labelEl) {
-                const userColor = getUserColor(name);
-                const roleIcon = role === 'teacher' ? '👨‍🏫' : '👨‍🎓';
-                labelEl.style.color = userColor;
-                labelEl.innerHTML = `<span style="border-bottom: 2px solid ${userColor}">${roleIcon} ${name}</span>`;
-            }
-        }
-
-        // הדגמה של רינדור רשימת המשתתפים עם הצבעים הייחודיים
-        window.renderParticipantsList = function(participants) {
-            const listContainer = document.getElementById('participants-list');
-            if (!listContainer) return;
-            
-            listContainer.innerHTML = '';
-            participants.forEach(p => {
-                const pColor = getUserColor(p.full_name || p.email);
-                const card = document.createElement('div');
-                card.className = 'participant-card';
-                card.innerHTML = `
-                    <div class="participant-name" style="color: ${pColor};">
-                        <span class="participant-color-dot" style="background-color: ${pColor};"></span>
-                        ${p.role === 'teacher' ? '👨‍🏫' : '👨‍🎓'} ${p.full_name || p.email}
-                    </div>
-                    <span style="font-size: 12px; color: var(--muted);">${p.role === 'teacher' ? 'מורה' : 'תלמיד'}</span>
-                `;
-                listContainer.appendChild(card);
-            });
         };
 
-        // דוגמת הפעלה
-        const currentUser = { full_name: "ישראל ישראלי", role: "teacher" };
-        updateVideoUserLabel(currentUser.full_name, currentUser.role);
+        // --- שיתוף פונקציות לגלובל (Window) ---
+        window.toggleTheme = function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+        };
 
-        window.renderParticipantsList([
-            { full_name: "ישראל ישראלי", role: "teacher", email: "teacher@test.com" },
-            { full_name: "דני כהן", role: "student", email: "dani@test.com" },
-            { full_name: "מיכל לוי", role: "student", email: "michal@test.com" }
-        ]);
+        window.changeAppLanguage = function(lang) {
+            const dict = translations[lang] || translations.he;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.textContent = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) el.placeholder = dict[key];
+            });
+            document.documentElement.dir = (lang === 'he' || lang === 'ar') ? 'rtl' : 'ltr';
+        };
+
+        let isRegister = false;
+        window.toggleAuthMode = function() {
+            isRegister = !isRegister;
+            document.getElementById('register-fields').classList.toggle('hidden', !isRegister);
+            document.getElementById('form-title').innerText = isRegister ? 
+                (translations[document.getElementById('global-lang-select').value]?.auth_register_title || "הרשמה למערכת") : 
+                (translations[document.getElementById('global-lang-select').value]?.auth_login_title || "התחברות למערכת");
+            document.getElementById('auth-action-btn').innerText = isRegister ? "הירשם" : "התחבר";
+        };
+
+        window.handleAuthSubmit = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) return alert("נא למלא אימייל וסיסמה");
+
+            if (isRegister) {
+                const fullName = document.getElementById('full_name').value;
+                const role = document.getElementById('role').value;
+                const { data, error } = await supabase.auth.signUp({
+                    email, password,
+                    options: { data: { full_name: fullName, role: role } }
+                });
+                if (error) alert("שגיאה בהרשמה: " + error.message);
+                else alert("הרשמה בוצעה בהצלחה! התחבר כעת.");
+            } else {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) alert("שגיאה בהתחברות: " + error.message);
+                else initDashboard(data.user);
+            }
+        };
+
+        function initDashboard(user) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('welcome-user').innerText = `שלום, ${user.user_metadata?.full_name || user.email}`;
+            
+            const isTeacher = user.user_metadata?.role === 'teacher';
+            document.getElementById('teacher-panel').classList.toggle('hidden', !isTeacher);
+            fetchCurrencyRates();
+        }
+
+        async function fetchCurrencyRates() {
+            try {
+                const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                const data = await res.json();
+                if (data && data.rates) {
+                    const ils = data.rates.ILS ? data.rates.ILS.toFixed(2) : 'N/A';
+                    const eur = data.rates.EUR ? data.rates.EUR.toFixed(2) : 'N/A';
+                    document.getElementById('currency-rates').innerText = `1 USD = ${ils} ILS | 1 USD = ${eur} EUR`;
+                }
+            } catch (e) {
+                document.getElementById('currency-rates').innerText = "לא ניתן לטעון שערי מטבע";
+            }
+        }
+
+        window.logout = async function() {
+            await supabase.auth.signOut();
+            location.reload();
+        };
+
+        window.calculateMath = function() {
+            try {
+                const val = document.getElementById('calc-input').value;
+                const res = Function(`'use strict'; return (${val})`)();
+                document.getElementById('calc-result').innerText = "תוצאה: " + res;
+            } catch (e) {
+                document.getElementById('calc-result').innerText = "שגיאה בחישוב";
+            }
+        };
+
+        let ambientAudio = null;
+        window.playAmbientSound = function(type) {
+            if (ambientAudio) ambientAudio.pause();
+            const sounds = {
+                rain: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b59368d37.mp3',
+                lofi: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'
+            };
+            if (sounds[type]) {
+                ambientAudio = new Audio(sounds[type]);
+                ambientAudio.loop = true;
+                ambientAudio.play();
+            }
+        };
+
+        window.stopAmbientSound = function() {
+            if (ambientAudio) {
+                ambientAudio.pause();
+                ambientAudio = null;
+            }
+        };
+
+        window.savePersonalNotes = function() {
+            const notes = document.getElementById('student-notepad').value;
+            localStorage.setItem('student_notes', notes);
+        };
+
+        // טעינת הערות שמורות
+        const savedNotes = localStorage.getItem('student_notes');
+        if (savedNotes) {
+            document.getElementById('student-notepad').value = savedNotes;
+        }
     </script>
 </body>
 </html>
