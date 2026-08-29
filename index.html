@@ -30,7 +30,6 @@
         .room-item, .participant-card { background: var(--card); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         video { width: 100%; height: 140px; background: #000; border-radius: 6px; object-fit: cover; }
         
-        /* רשת וידאו חדשה למשתתפים */
         .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .video-tile { background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 2px solid var(--border); }
         .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -861,18 +860,27 @@
         let painting = false;
 
         function initWhiteboard() {
-            canvas.width = canvas.offsetWidth; canvas.height = 200;
+            canvas.width = canvas.offsetWidth || 600; 
+            canvas.height = 200;
+            
             canvas.addEventListener('mousedown', e => {
+                // ודא שלקנבס יש רוחב תקין לפני פעולת ציור
+                if (canvas.width === 0 || canvas.height === 0) return;
                 painting = true;
                 const r = canvas.getBoundingClientRect();
                 startX = e.clientX - r.left; startY = e.clientY - r.top;
-                snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                try {
+                    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                } catch(err) {
+                    // הגנה מפני שגיאת רוחב 0
+                    snapshot = null;
+                }
                 ctx.beginPath(); ctx.moveTo(startX, startY);
             });
             canvas.addEventListener('mouseup', e => {
                 if (!painting) return;
                 painting = false;
-                if (wbMode === 'rect' || wbMode === 'circle') {
+                if ((wbMode === 'rect' || wbMode === 'circle') && snapshot) {
                     const r = canvas.getBoundingClientRect();
                     const endX = e.clientX - r.left, endY = e.clientY - r.top;
                     drawShape(startX, startY, endX, endY, true);
@@ -899,7 +907,7 @@
                 ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'eraser', x, y } });
-            } else if (wbMode === 'rect' || wbMode === 'circle') {
+            } else if ((wbMode === 'rect' || wbMode === 'circle') && snapshot) {
                 ctx.putImageData(snapshot, 0, 0);
                 drawShape(startX, startY, x, y, false);
             }
@@ -920,7 +928,9 @@
         }
 
         window.clearWhiteboard = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (canvas.width > 0 && canvas.height > 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
             if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
         };
 
@@ -1155,7 +1165,7 @@
                 pdfCanvas.height = vp.height; pdfCanvas.width = vp.width;
                 page.render({ canvasContext: pdfCtx, viewport: vp });
             });
-            document.getElementById('pdf-page-info').innerText = `עמוד ${num} / ${pdfDoc.numPages}`;
+            document.getElementById('pdf-page-info',).innerText = `עמוד ${num} / ${pdfDoc.numPages}`;
         }
         window.prevPage = () => { if (pageNum > 1) renderPage(--pageNum); };
         window.nextPage = () => { if (pageNum < pdfDoc.numPages) renderPage(++pageNum); };
@@ -1252,6 +1262,13 @@
             document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
             
             showSec('room-section'); 
+            
+            // עדכון גודל הקנבס לאחר שהחלון גלוי לגמרי
+            setTimeout(() => {
+                canvas.width = canvas.offsetWidth || 600;
+                canvas.height = 200;
+            }, 100);
+
             initStream();
 
             await supabase.from('room_participants').upsert([{ 
@@ -1298,7 +1315,9 @@
                         ctx.beginPath(); ctx.arc(d.x1, d.y1, radius, 0, 2 * Math.PI); ctx.stroke();
                     }
                 })
-                .on('broadcast', { event: 'clear_board' }, () => ctx.clearRect(0, 0, canvas.width, canvas.height))
+                .on('broadcast', { event: 'clear_board' }, () => {
+                    if (canvas.width > 0 && canvas.height > 0) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                })
                 .on('broadcast', { event: 'share_youtube' }, p => applyYouTube(p.payload.videoId))
                 .on('broadcast', { event: 'new_poll' }, p => renderStudentPoll(p.payload))
                 .on('broadcast', { event: 'poll_vote' }, p => { if (role === 'teacher') { pollData.votes[p.payload.user] = p.payload.optionIndex; updateChart(pollData.votes); } })
@@ -1329,7 +1348,8 @@
             if (mediaStream) return;
             try { 
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
-                document.getElementById('local-video').srcObject = mediaStream; 
+                const localVideoEl = document.getElementById('local-video');
+                if (localVideoEl) localVideoEl.srcObject = mediaStream; 
                 document.getElementById('video-user-label').innerText = userName + " (את/ה)";
             } catch(e){}
         }
@@ -1382,7 +1402,6 @@
             sessionParticipants = data;
             const approved = data.filter(p => p.status === 'approved');
 
-            // עדכון רשת הוידאו של המשתתפים
             const gridContainer = document.getElementById('video-grid-container');
             gridContainer.innerHTML = approved.map(p => {
                 const isMe = p.user_id === userId;
@@ -1394,7 +1413,6 @@
                 `;
             }).join('');
 
-            // חיבור מחדש של הזרם המקומי למסך שלו בתוך הרשת
             if (mediaStream) {
                 const localVidEl = document.getElementById('local-video');
                 if (localVidEl) localVidEl.srcObject = mediaStream;
@@ -1412,7 +1430,7 @@
                     ${role === 'teacher' && p.user_id !== userId ? `
                         <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
                             <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? 'Mute' : 'Unmute'}</button>
-                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.warning ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
                             <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;" data-i18n="btn_ping_student">הקפץ ⚡</button>
                         </div>
                     ` : ''}
