@@ -27,7 +27,7 @@
         .grid-container { display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px; }
         @media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } }
         .tool-box { background: var(--tool); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .room-item, .participant-card { background: var(--card); padding: 12px 16px; margin-bottom: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .room-item, .participant-card { background: var(--card); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         video { width: 100%; max-height: 220px; background: #000; border-radius: 6px; object-fit: cover; }
         .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
@@ -158,10 +158,10 @@
 
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h4 style="margin: 0;">👥 משתתפים</h4>
+                            <h4 style="margin: 0;">👥 משתתפים וחיוויי שליטה</h4>
                             <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;">הפק דוח 📊</button>
                         </div>
-                        <div id="participants-list" style="max-height: 130px; overflow-y: auto;"></div>
+                        <div id="participants-list" style="max-height: 180px; overflow-y: auto;"></div>
                     </div>
 
                     <!-- סקרים -->
@@ -448,8 +448,27 @@
             activeChannel = supabase.channel(`room_${id}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, p => {
                     fetchParticipants(id);
-                    if (role === 'student' && p.new && p.new.user_id === userId && p.new.status === 'approved') {
-                        showSec('room-section'); initStream();
+                    if (role === 'student' && p.new && p.new.user_id === userId) {
+                        if (p.new.status === 'approved') {
+                            showSec('room-section'); initStream();
+                        }
+                        // עדכון סטטוס מקומי אם המורה שינה למשתמש את השמע או המצלמה
+                        if (mediaStream) {
+                            if (p.new.mic_active !== undefined) {
+                                const audioTrack = mediaStream.getAudioTracks()[0];
+                                if (audioTrack && audioTrack.enabled !== p.new.mic_active) {
+                                    audioTrack.enabled = p.new.mic_active;
+                                    document.getElementById('toggle-mic-btn').innerText = p.new.mic_active ? '🎤 השתק מיקרופון' : '🎤 הפעל מיקרופון';
+                                }
+                            }
+                            if (p.new.cam_active !== undefined) {
+                                const videoTrack = mediaStream.getVideoTracks()[0];
+                                if (videoTrack && videoTrack.enabled !== p.new.cam_active) {
+                                    videoTrack.enabled = p.new.cam_active;
+                                    document.getElementById('toggle-cam-btn').innerText = p.new.cam_active ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
+                                }
+                            }
+                        }
                     }
                 })
                 .on('broadcast', { event: 'draw_line' }, p => {
@@ -469,11 +488,26 @@
 
         async function initStream() {
             if (mediaStream) return;
-            try { mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); document.getElementById('local-video').srcObject = mediaStream; } catch(e){}
+            try { 
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
+                document.getElementById('local-video').srcObject = mediaStream; 
+                document.getElementById('video-user-label').innerText = userName;
+            } catch(e){}
         }
 
         window.approveStudent = async sId => {
             await supabase.from('room_participants').update({ status: 'approved' }).match({ room_id: roomId, user_id: sId });
+        };
+
+        // פונקציות שליטת מורה על תלמידים מרשימת המשתתפים
+        window.teacherToggleMic = async (targetUserId, newMicState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: newMicState }).match({ room_id: roomId, user_id: targetUserId });
+        };
+
+        window.teacherToggleCam = async (targetUserId, newCamState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ cam_active: newCamState }).match({ room_id: roomId, user_id: targetUserId });
         };
 
         window.toggleRaiseHand = async () => {
@@ -504,8 +538,28 @@
             sessionParticipants = data;
             const approved = data.filter(p => p.status === 'approved'), waiting = data.filter(p => p.status === 'waiting');
 
+            // הצגת רשימת מאושרים עם חיוויי מצלמה/שמע וכפתורי ניהול למורה
             document.getElementById('participants-list').innerHTML = approved.map(p => `
-                <div class="participant-card"><div><b>👤 ${p.profiles?.full_name || 'משתמש'} ${p.hand_raised ? '🙋‍♂️' : ''}</b></div></div>
+                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <b>👤 ${p.profiles?.full_name || 'משתמש'}</b> ${p.hand_raised ? '🙋‍♂️' : ''}
+                        </div>
+                        <span style="font-size: 11px; color: var(--muted);">
+                            ${p.cam_active ? '📷 פעילה' : '📷 כבויה'} | ${p.mic_active ? '🎤 פתוח' : '🎤 מושתק'}
+                        </span>
+                    </div>
+                    ${role === 'teacher' && p.user_id !== userId ? `
+                        <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
+                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">
+                                ${p.mic_active ? 'השתק שמע' : 'הפעל שמע'}
+                            </button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">
+                                ${p.cam_active ? 'כבה מצלמה' : 'הפעל מצלמה'}
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
             `).join('');
 
             if (role === 'teacher') {
@@ -527,7 +581,7 @@
 
         window.downloadAttendanceReport = () => {
             let r = `===== דוח נוכחות =====\nכותרת: ${document.getElementById('current-room-title').innerText}\n\n`;
-            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''}\n`);
+            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - מצלמה: ${p.cam_active ? 'פעילה' : 'כבויה'} | שמע: ${p.mic_active ? 'פעיל' : 'מושתק'}\n`);
             r += `\n--- תמלול ---\n${transcriptText}`;
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/plain;charset=utf-8' }));
             a.download = `report_${Date.now()}.txt`; a.click();
