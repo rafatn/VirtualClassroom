@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - מצב כהה/בהיר</title>
+    <title>כיתה וירטואלית חכמה - תיקון נתוני משתמש</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* הגדרת ערכות נושא: בהיר (Light) וכהה (Dark) */
         :root[data-theme="light"] {
             --primary-color: #4f46e5;
             --primary-hover: #4338ca;
@@ -300,7 +299,6 @@
         let recordedChunks = [];
         let activeChart = null;
 
-        // ניהול מעבר בין מצב בהיר לכהה
         window.toggleTheme = function() {
             const htmlEl = document.documentElement;
             const currentTheme = htmlEl.getAttribute('data-theme');
@@ -309,7 +307,6 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // טעינת ההעדפה השמורה בדפדפן בעליית העמוד
         window.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -417,7 +414,43 @@
             queueRenderPage(pageNum);
         }
 
-        // ניהול משתמשים וחדרים
+        // זיהוי מטא-דאטה משופר ובטוח (מונע undefined)
+        async function getClientMetadata() {
+            const ua = navigator.userAgent;
+            let browser = "דפדפן לא ידוע";
+            let os = "מערכת הפעלה לא ידועה";
+
+            if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+            else if (ua.indexOf("Edg") > -1) browser = "Microsoft Edge";
+            else if (ua.indexOf("Chrome") > -1) browser = "Google Chrome";
+            else if (ua.indexOf("Safari") > -1) browser = "Apple Safari";
+            else if (ua.indexOf("OPR") > -1) browser = "Opera";
+
+            if (ua.indexOf("Win") > -1) os = "Windows";
+            else if (ua.indexOf("Mac") > -1) os = "macOS";
+            else if (ua.indexOf("Linux") > -1) os = "Linux";
+            else if (ua.indexOf("Android") > -1) os = "Android";
+            else if (ua.indexOf("like Mac") > -1 || ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS / iPadOS";
+
+            let locationStr = "ישראל";
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                if (ipRes.ok) {
+                    const ipData = await ipRes.json();
+                    if (ipData.city && ipData.country_name) {
+                        locationStr = `${ipData.city}, ${ipData.country_name}`;
+                    } else if (ipData.country_name) {
+                        locationStr = ipData.country_name;
+                    }
+                }
+            } catch (e) {
+                // במידה ויש חסימת רשת או שגיאה, משתמש בברירת מחדל תקינה
+            }
+
+            const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId ? currentUserId.charCodeAt(0) : 1) * 16777215)).toString(16);
+            return { browser, os, location: locationStr, color: colorHash };
+        }
+
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
@@ -471,25 +504,6 @@
                     💷 פאונד: ${(1 / data.rates.GBP).toFixed(2)} ₪
                 `;
             } catch (e) { document.getElementById('currency-rates').innerText = 'שערי מטבעות לא זמינים.'; }
-        }
-
-        async function getClientMetadata() {
-            const ua = navigator.userAgent;
-            let browser = "Chrome", os = "Windows";
-            if (ua.indexOf("Firefox") > -1) browser = "Firefox";
-            else if (ua.indexOf("Safari") > -1) browser = "Safari";
-            if (ua.indexOf("Mac") > -1) os = "MacOS";
-            else if (ua.indexOf("Android") > -1) os = "Android";
-
-            let locationStr = "ישראל (מקומי)";
-            try {
-                const ipRes = await fetch('https://ipapi.co/json/');
-                const ipData = await ipRes.json();
-                if (ipData.city && ipData.country_name) locationStr = `${ipData.city}, ${ipData.country_name}`;
-            } catch (e) {}
-
-            const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId.charCodeAt(0)) * 16777215)).toString(16);
-            return { browser, os, location: locationStr, color: colorHash };
         }
 
         window.createAndOpenRoom = async function() {
@@ -549,7 +563,7 @@
             ul.innerHTML = data.map(p => `
                 <li style="color: ${p.color || '#000'}; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
                     👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})<br>
-                    <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">🌍 ${p.location} | 💻 ${p.browser}</span>
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">🌍 ${p.location || 'ישראל'} | 💻 ${p.browser || 'Chrome'} / ${p.os || 'Windows'}</span>
                 </li>
             `).join('');
         }
