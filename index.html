@@ -191,6 +191,7 @@
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
         </div>
 
+        <!-- חלון התחברות / הרשמה -->
         <div id="auth-section" style="max-width: 400px; margin: 0 auto;">
             <h3 id="form-title" style="text-align: center;">התחברות למערכת</h3>
             <input type="email" id="email" placeholder="אימייל">
@@ -211,6 +212,14 @@
             <button onclick="toggleAuthMode()" style="background: var(--text-muted);">עבור להרשמה / התחברות</button>
         </div>
 
+        <!-- חלון איפוס סיסמה חדשה (מופיע אוטומטית בלחיצה על הקישור במייל) -->
+        <div id="reset-password-section" class="hidden" style="max-width: 400px; margin: 0 auto;">
+            <h3 style="text-align: center;">הגדרת סיסמה חדשה</h3>
+            <input type="password" id="new-password" placeholder="הקלד סיסמה חדשה (לפחות 6 תווים)">
+            <button onclick="handleUpdatePassword()" style="background: var(--success-color);">שמור סיסמה חדשה</button>
+        </div>
+
+        <!-- לוח הבקרה הראשי -->
         <div id="dashboard-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; background: var(--tool-bg); padding: 15px; border-radius: 8px;">
                 <h3 id="welcome-user" style="margin: 0;">שלום, משתמש</h3>
@@ -236,6 +245,7 @@
             </div>
         </div>
 
+        <!-- חלון השיעור / הכיתה הווירטואלית -->
         <div id="room-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="current-room-title" style="margin: 0; color: var(--primary-color);">שם החדר</h3>
@@ -370,6 +380,14 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // זיהוי הגעה מקישור איפוס סיסמה במייל
+            const hash = window.location.hash;
+            if (hash && hash.includes('type=recovery')) {
+                showSection('reset-password-section');
+                return;
+            }
+
             checkUserSession();
             fetchCurrencyRates();
             initWhiteboard();
@@ -588,10 +606,22 @@
             const email = document.getElementById('email').value;
             if (!email) return alert('נא להזין תחילה את כתובת האימייל שלך בשדה האימייל למעלה');
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.href, // יחזיר את המשתמש לכאן כדי לאפס סיסמה
+                redirectTo: window.location.href,
             });
             if (error) return alert(error.message);
             alert('הוראות לאיפוס הסיסמה נשלחו אל האימייל שלך!');
+        }
+
+        window.handleUpdatePassword = async function() {
+            const newPassword = document.getElementById('new-password').value;
+            if (!newPassword || newPassword.length < 6) return alert('הסיסמה חייבת להכיל לפחות 6 תווים');
+            
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) return alert('שגיאה בעדכון הסיסמה: ' + error.message);
+            
+            alert('הסיסמה עודכנה בהצלחה! מעביר אותך למערכת...');
+            window.location.hash = ''; // ניקוי ה-URL
+            checkUserSession();
         }
 
         async function checkUserSession() {
@@ -754,8 +784,12 @@
         }
 
         function showSection(id) {
-            ['auth-section', 'dashboard-section', 'room-section'].forEach(sec => document.getElementById(sec).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(sec => {
+                const el = document.getElementById(sec);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
         }
     </script>
 </body>
