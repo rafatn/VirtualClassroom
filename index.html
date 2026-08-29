@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - גרסה מלאה ומתקדמת</title>
+    <title>כיתה וירטואלית חכמה - גרסת פרימיום מתקדמת</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -187,7 +187,7 @@
 
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="color: var(--primary-color); margin: 0;">🎓 כיתה וירטואלית חכמה (מתקדמת)</h2>
+            <h2 style="color: var(--primary-color); margin: 0;">🎓 כיתה וירטואלית חכמה (גרסת פרימיום)</h2>
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
         </div>
 
@@ -212,7 +212,7 @@
             <button onclick="toggleAuthMode()" style="background: var(--text-muted);">עבור להרשמה / התחברות</button>
         </div>
 
-        <!-- חלון איפוס סיסמה חדשה (מופיע אוטומטית בלחיצה על הקישור במייל) -->
+        <!-- חלון איפוס סיסמה חדשה -->
         <div id="reset-password-section" class="hidden" style="max-width: 400px; margin: 0 auto;">
             <h3 style="text-align: center;">הגדרת סיסמה חדשה</h3>
             <input type="password" id="new-password" placeholder="הקלד סיסמה חדשה (לפחות 6 תווים)">
@@ -235,7 +235,7 @@
 
             <div id="teacher-panel" class="hidden tool-box">
                 <h4>👨‍🏫 פתיחת חדר חדש</h4>
-                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: פיזיקה מתקדמת)">
+                <input type="text" id="room-title-input" placeholder="שם השיעור (למשל: מתמטיקה מתקדמת)">
                 <button onclick="createAndOpenRoom()" style="background: var(--success-color);">פתח חדר</button>
             </div>
 
@@ -275,6 +275,18 @@
                         <button onclick="stopAndSaveRecording()" style="background: var(--danger-color); padding: 8px;" class="hidden" id="stop-rec-btn">⏹️ עצור הקלטה</button>
                     </div>
 
+                    <!-- פיצ'ר 2: שיתוף סרטוני YouTube -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 8px;">📺 שיתוף סרטון YouTube לכיתה</h4>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="youtube-url-input" placeholder="הדבק קישור סרטון YouTube כאן..." style="margin:0;">
+                            <button onclick="shareYouTubeVideo()" style="width: auto; margin:0; background: var(--danger-color);">הצג לכיתה</button>
+                        </div>
+                        <div id="youtube-player-container" style="margin-top: 10px;" class="hidden">
+                            <iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe>
+                        </div>
+                    </div>
+
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <h4 style="margin: 0;">🎨 לוח לבן שיתופי (חי)</h4>
@@ -302,20 +314,29 @@
 
                 <div>
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0;">👥 משתתפים מחוברים</h4>
+                            <!-- פיצ'ר 4: הורדת דוח נוכחות למורה -->
+                            <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success-color); margin: 0;">הפק דוח שיעור 📊</button>
+                        </div>
                         <div id="participants-list" style="max-height: 130px; overflow-y: auto;"></div>
                     </div>
 
-                    <div class="tool-box" id="quiz-container">
-                        <h4 style="margin-bottom: 6px;">📝 בוחן כיתתי חי</h4>
-                        <div id="teacher-quiz-creator" class="hidden">
-                            <input type="text" id="quiz-question" placeholder="שאלה לתלמידים">
-                            <input type="text" id="quiz-opt1" placeholder="אפשרות א'">
-                            <input type="text" id="quiz-opt2" placeholder="אפשרות ב'">
-                            <button onclick="publishQuiz()" style="background: var(--success-color); padding: 6px;">שלח בוחן לכיתה</button>
+                    <!-- פיצ'ר 3: סקרים חיים עם גרפים (Chart.js) -->
+                    <div class="tool-box" id="poll-container">
+                        <h4 style="margin-bottom: 6px;">📊 סקר כיתתי חי</h4>
+                        <div id="teacher-poll-creator" class="hidden">
+                            <input type="text" id="poll-question" placeholder="שאלת הסקר">
+                            <input type="text" id="poll-opt1" placeholder="תשובה א'">
+                            <input type="text" id="poll-opt2" placeholder="תשובה ב'">
+                            <input type="text" id="poll-opt3" placeholder="תשובה ג' (אופציונלי)">
+                            <button onclick="publishPoll()" style="background: var(--success-color); padding: 6px;">הפעל סקר לכיתה</button>
                         </div>
-                        <div id="student-quiz-taker">
-                            <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 6px 0;">אין בוחן פעיל כרגע.</p>
+                        <div id="student-poll-taker">
+                            <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 6px 0;">אין סקר פעיל כרגע.</p>
+                        </div>
+                        <div id="poll-results-view" class="hidden" style="margin-top: 10px;">
+                            <canvas id="poll-chart" height="150"></canvas>
                         </div>
                     </div>
 
@@ -368,6 +389,8 @@
         let isTranscribing = false;
         let fullTranscriptText = "";
         let handRaised = false;
+        let pollChartInstance = null;
+        let currentPollData = { question: '', options: [], votes: {} };
 
         window.toggleTheme = function() {
             const htmlEl = document.documentElement;
@@ -381,7 +404,6 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
 
-            // זיהוי הגעה מקישור איפוס סיסמה במייל
             const hash = window.location.hash;
             if (hash && hash.includes('type=recovery')) {
                 showSection('reset-password-section');
@@ -395,7 +417,7 @@
             initSpeechRecognition();
         });
 
-        // לוח לבן משותף עם שידור בזמן אמת
+        // לוח לבן משותף
         const canvas = document.getElementById('whiteboard-canvas');
         const ctx = canvas.getContext('2d');
         let painting = false;
@@ -436,7 +458,7 @@
                 currentActiveChannel.send({
                     type: 'broadcast',
                     event: 'draw_line',
-                    payload: { x, y, color, prev: false }
+                    payload: { x, y, color }
                 });
             }
         }
@@ -446,6 +468,120 @@
             if (currentActiveChannel) {
                 currentActiveChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
             }
+        }
+
+        // פיצ'ר 2: שיתוף סרטון YouTube
+        window.shareYouTubeVideo = function() {
+            const urlInput = document.getElementById('youtube-url-input').value;
+            const videoId = extractYouTubeId(urlInput);
+            if (!videoId) return alert('נא להכניס קישור תקין של YouTube');
+
+            applyYouTubeVideo(videoId);
+            if (currentActiveChannel) {
+                currentActiveChannel.send({ type: 'broadcast', event: 'share_youtube', payload: { videoId } });
+            }
+        }
+
+        function extractYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function applyYouTubeVideo(videoId) {
+            const container = document.getElementById('youtube-player-container');
+            const iframe = document.getElementById('shared-yt-frame');
+            iframe.src = `https://www.youtube.com/embed/${videoId}`;
+            container.classList.remove('hidden');
+        }
+
+        // פיצ'ר 3: סקרים חיים וגרפים באמצעות Chart.js
+        window.publishPoll = function() {
+            const question = document.getElementById('poll-question').value;
+            const opt1 = document.getElementById('poll-opt1').value;
+            const opt2 = document.getElementById('poll-opt2').value;
+            const opt3 = document.getElementById('poll-opt3').value;
+            if (!question || !opt1 || !opt2) return alert('נא למלא לפחות שאלה ושתי אפשרויות');
+
+            const options = [opt1, opt2];
+            if (opt3) options.push(opt3);
+
+            currentPollData = { question, options, votes: {} };
+
+            if (currentActiveChannel) {
+                currentActiveChannel.send({ type: 'broadcast', event: 'new_poll', payload: currentPollData });
+                showPollResultsForTeacher();
+                alert('הסקר שוגר בהצלחה לכיתה!');
+            }
+        }
+
+        function renderStudentPoll(poll) {
+            currentPollData = poll;
+            const container = document.getElementById('student-poll-taker');
+            let html = `<p style="font-weight: bold; margin: 4px 0;">📊 ${poll.question}</p>`;
+            poll.options.forEach((opt, idx) => {
+                html += `<button onclick="votePoll(${idx})" style="padding:6px; margin-bottom:4px; background:var(--primary-color);">${opt}</button>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('poll-results-view').classList.add('hidden');
+        }
+
+        window.votePoll = function(optionIndex) {
+            if (currentActiveChannel) {
+                currentActiveChannel.send({ type: 'broadcast', event: 'poll_vote', payload: { user: currentUserName, optionIndex } });
+                document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success-color); font-weight: bold;">תודה! הצבעתך נקלטה בהצלחה.</p>`;
+            }
+        }
+
+        function showPollResultsForTeacher() {
+            document.getElementById('teacher-poll-creator').classList.add('hidden');
+            document.getElementById('poll-results-view').classList.remove('hidden');
+            updatePollChart();
+        }
+
+        function updatePollChart(votesObj = {}) {
+            const counts = currentPollData.options.map(() => 0);
+            Object.values(votesObj).forEach(optIdx => {
+                if (counts[optIdx] !== undefined) counts[optIdx]++;
+            });
+
+            const ctxChart = document.getElementById('poll-chart').getContext('2d');
+            if (pollChartInstance) pollChartInstance.destroy();
+
+            pollChartInstance = new Chart(ctxChart, {
+                type: 'bar',
+                data: {
+                    labels: currentPollData.options,
+                    datasets: [{
+                        label: 'מספר קולות',
+                        data: counts,
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+        // פיצ'ר 4: דוח נוכחות וסיכום שיעור למורה
+        let sessionParticipantsList = [];
+        window.downloadAttendanceReport = function() {
+            let reportContent = `===== דוח נוכחות וסיכום שיעור =====\n`;
+            reportContent += `כותרת החדר: ${document.getElementById('current-room-title').innerText}\n`;
+            reportContent += `תאריך ושעה: ${new Date().toLocaleString('he-IL')}\n\n`;
+            reportContent += `משתתפים שהיו בשיעור:\n`;
+            sessionParticipantsList.forEach((p, idx) => {
+                reportContent += `${idx + 1}. ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'}) - מיקום: ${p.location || 'ישראל'}\n`;
+            });
+            reportContent += `\n--- תמלול השיעור ---\n${fullTranscriptText || 'לא היה תמלול בשיעור זה.'}`;
+
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `lesson_report_${Date.now()}.txt`;
+            a.click();
         }
 
         // תמלול חי
@@ -501,26 +637,12 @@
             a.click();
         }
 
-        // הרמת יד
         window.toggleRaiseHand = async function() {
             handRaised = !handRaised;
             const btn = document.getElementById('raise-hand-btn');
             btn.style.background = handRaised ? 'var(--danger-color)' : 'var(--warning-color)';
             btn.innerText = handRaised ? '🙋‍♂️ הורד יד' : '🙋‍♂️ הרם יד';
             await supabase.from('room_participants').update({ hand_raised: handRaised }).match({ room_id: currentRoomId, user_id: currentUserId });
-        }
-
-        // בוחן חי (Quiz)
-        window.publishQuiz = function() {
-            const question = document.getElementById('quiz-question').value;
-            const opt1 = document.getElementById('quiz-opt1').value;
-            const opt2 = document.getElementById('quiz-opt2').value;
-            if (!question) return alert('הכנס שאלה');
-
-            if (currentActiveChannel) {
-                currentActiveChannel.send({ type: 'broadcast', event: 'new_quiz', payload: { question, opt1, opt2 } });
-                alert('הבוחן שוגר בהצלחה לכיתה!');
-            }
         }
 
         // PDF Viewer
@@ -620,7 +742,7 @@
             if (error) return alert('שגיאה בעדכון הסיסמה: ' + error.message);
             
             alert('הסיסמה עודכנה בהצלחה! מעביר אותך למערכת...');
-            window.location.hash = ''; // ניקוי ה-URL
+            window.location.hash = '';
             checkUserSession();
         }
 
@@ -635,7 +757,6 @@
             currentUserName = profile.full_name;
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
-            document.getElementById('teacher-quiz-creator').classList.toggle('hidden', profile.role !== 'teacher');
             showSection('dashboard-section');
             loadActiveRooms();
         }
@@ -674,6 +795,8 @@
             currentRoomId = roomId;
             showSection('room-section');
             document.getElementById('current-room-title').innerText = roomTitle;
+            document.getElementById('teacher-poll-creator').classList.toggle('hidden', currentUserRole !== 'teacher');
+            document.getElementById('download-report-btn').classList.toggle('hidden', currentUserRole !== 'teacher');
 
             const meta = await getClientMetadata();
             document.getElementById('video-user-label').innerText = `${currentUserName} (${currentUserRole === 'teacher' ? 'מורה' : 'תלמיד'})`;
@@ -692,17 +815,18 @@
                     ctx.lineTo(payload.payload.x, payload.payload.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(payload.payload.x, payload.payload.y);
                 })
                 .on('broadcast', { event: 'clear_board' }, () => ctx.clearRect(0, 0, canvas.width, canvas.height))
+                .on('broadcast', { event: 'share_youtube' }, payload => applyYouTubeVideo(payload.payload.videoId))
+                .on('broadcast', { event: 'new_poll' }, payload => renderStudentPoll(payload.payload))
+                .on('broadcast', { event: 'poll_vote' }, payload => {
+                    if (currentUserRole === 'teacher') {
+                        currentPollData.votes[payload.payload.user] = payload.payload.optionIndex;
+                        updatePollChart(currentPollData.votes);
+                    }
+                })
                 .on('broadcast', { event: 'transcript' }, payload => {
                     const box = document.getElementById('transcript-messages');
                     box.innerHTML += `<div><b>${payload.payload.user}:</b> ${payload.payload.text}</div>`;
                     box.scrollTop = box.scrollHeight;
-                })
-                .on('broadcast', { event: 'new_quiz' }, payload => {
-                    document.getElementById('student-quiz-taker').innerHTML = `
-                        <p style="font-weight: bold; margin: 4px 0;">שאלה: ${payload.payload.question}</p>
-                        <button onclick="alert('תשובתך נקלטה!')" style="padding:4px; margin-bottom:4px;">1. ${payload.payload.opt1}</button>
-                        <button onclick="alert('תשובתך נקלטה!')" style="padding:4px;">2. ${payload.payload.opt2}</button>
-                    `;
                 })
                 .subscribe();
 
@@ -732,6 +856,7 @@
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', roomId);
             const listContainer = document.getElementById('participants-list');
             if (!data) return;
+            sessionParticipantsList = data; // שמירה לדוח נוכחות
 
             listContainer.innerHTML = data.map(p => `
                 <div class="participant-card">
@@ -785,8 +910,8 @@
 
         function showSection(id) {
             ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(sec => {
-                const el = document.getElementById(sec);
-                if (el) el.classList.add('hidden');
+                TheEl = document.getElementById(sec);
+                if (TheEl) TheEl.classList.add('hidden');
             });
             const target = document.getElementById(id);
             if (target) target.classList.remove('hidden');
