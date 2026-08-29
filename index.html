@@ -156,6 +156,7 @@
                         <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning); color: #000; padding: 8px;" data-i18n="btn_cam_off">📷 כבה מצלמה</button>
                         <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning); color: #000; padding: 8px;" data-i18n="btn_mic_mute">🎤 השתק מיקרופון</button>
                     </div>
+					<video id="local-video" autoplay muted playsinline></video>
                     <div style="display: flex; gap: 8px; margin-bottom: 15px;">
                         <button onclick="startScreenShare()" style="padding: 8px;" data-i18n="btn_share_screen">🖥️ שתף מסך</button>
                         <button onclick="startRecording()" style="background: var(--success); padding: 8px;" data-i18n="btn_record">🔴 הקלטה</button>
@@ -942,6 +943,7 @@
             }
         };
 
+
         window.publishAssignment = () => {
             const text = document.getElementById('assignment-text').value;
             if (!text) return alert('הזן משימה');
@@ -1404,7 +1406,7 @@
                 const isMe = p.user_id === userId;
                 return `
                     <div class="video-tile">
-                        ${isMe ? `<video id="local-video" autoplay muted></video>` : `<video autoplay playsinline></video>`}
+                        ${isMe ? `<video id="local-video" autoplay muted playsinline></video>` : `<video autoplay playsinline></video>`}
                         <div class="video-user-label">${p.profiles?.full_name || 'משתמש'} ${isMe ? '(את/ה)' : ''}</div>
                     </div>
                 `;
