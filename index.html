@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - פרימיום מתקדם</title>
+    <title>כיתה וירטואלית חכמה - פרימיום אולטימטיבי</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -17,12 +17,12 @@
             --text: #f8fafc; --muted: #94a3b8; --border: #334155; --tool: #111827;
             --danger: #f87171; --success: #34d399; --warning: #fbbf24;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: background 0.3s; }
         .container { max-width: 1200px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         h2, h3, h4 { color: var(--text); margin-top: 0; }
         .hidden { display: none !important; }
         input, select, button, textarea { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 15px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; background: var(--card); color: var(--text); outline: none; }
-        button { background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        button { background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
         button:hover { background: var(--primary-hover); }
         .grid-container { display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px; }
         @media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } }
@@ -35,10 +35,18 @@
         .top-bar-btn { background: var(--muted); color: #fff; padding: 6px 12px; border-radius: 6px; width: auto; display: inline-block; font-size: 14px; }
         .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; width: auto; display: inline; padding: 0; }
         .weather-badge { font-size: 11px; background: var(--tool); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 3px; }
+        
+        /* אנימציה להקפצת מסך תשומת לב */
+        @keyframes flashAlert {
+            0% { background-color: rgba(239, 68, 68, 0.2); }
+            50% { background-color: rgba(239, 68, 68, 0.6); }
+            100% { background-color: rgba(239, 68, 68, 0.2); }
+        }
+        .attention-active { animation: flashAlert 1s infinite; border: 2px solid var(--danger) !important; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="main-app-container">
         <!-- סרגל עליון -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="color: var(--primary); margin: 0;" data-i18n="app_title">🎓 כיתה וירטואלית חכמה</h2>
@@ -117,6 +125,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="current-room-title" style="margin: 0; color: var(--primary);">שם החדר</h3>
                 <div>
+                    <button onclick="toggleFocusMode()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--primary); margin-left: 8px;" data-i18n="btn_focus_mode">🎯 מצב פוקוס</button>
                     <button id="raise-hand-btn" onclick="toggleRaiseHand()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--warning); color: #000;" data-i18n="btn_raise_hand">🙋‍♂️ הרם יד</button>
                     <button onclick="leaveRoom()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--danger); margin-left: 8px;" data-i18n="btn_leave_room">צא מהחדר 🚪</button>
                 </div>
@@ -189,7 +198,7 @@
                         <div id="waiting-students-list" data-i18n="no_waiting_students">אין תלמידים ממתינים.</div>
                     </div>
 
-                    <!-- פאנל ניהול קבוצות / חדרי דיונים (Breakout Rooms) -->
+                    <!-- חדרי דיונים (Breakout Rooms) -->
                     <div class="tool-box hidden" id="teacher-breakout-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="breakout_title">🔀 פיצול לחדרי דיונים</h4>
                         <input type="text" id="breakout-group-name" placeholder="שם הקבוצה (למשל: קבוצה א')" style="margin:0 0 6px 0; padding:6px;">
@@ -197,7 +206,7 @@
                         <div id="active-breakout-display" style="font-size: 13px; margin-top: 6px; color:var(--primary);"></div>
                     </div>
 
-                    <!-- פיצ'ר הגשת מטלות חיות -->
+                    <!-- מטלות כיתה -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="assignment_title">📋 מטלת כיתה</h4>
                         <div id="teacher-assignment-creator" class="hidden">
@@ -207,16 +216,18 @@
                         <div id="student-assignment-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_assignment">אין מטלה פעילה כרגע.</p></div>
                     </div>
 
-                    <!-- פיצ'ר חידון מהיר (Quiz / Gamification) -->
+                    <!-- חידון מהיר (Quiz) + Leaderboard -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 6px;" data-i18n="quiz_title">🏆 חידון מהיר (Quiz)</h4>
+                        <h4 style="margin-bottom: 6px;" data-i18n="quiz_title">🏆 חידון מהיר & טבלת מובילים</h4>
                         <div id="teacher-quiz-creator" class="hidden">
                             <input type="text" id="quiz-q" placeholder="שאלה מהירה..." style="margin:0 0 4px 0; padding:6px;">
                             <input type="text" id="quiz-ans" placeholder="תשובה נכונה..." style="margin:0 0 6px 0; padding:6px;">
                             <button onclick="startQuiz()" style="background:var(--warning); color:#000; padding:6px;" data-i18n="btn_start_quiz">הפעל חידון</button>
                         </div>
                         <div id="student-quiz-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_quiz">אין חידון פעיל.</p></div>
-                        <div id="quiz-scores" style="font-size: 13px; margin-top: 6px; font-weight: bold; color: var(--success);"></div>
+                        <div id="class-leaderboard" style="font-size: 12px; margin-top: 8px; background:var(--card); padding:6px; border-radius:4px; border:1px solid var(--border);">
+                            <b>🏅 מובילים בכיתה:</b> <span id="leaderboard-content">אין עדיין ניקוד</span>
+                        </div>
                     </div>
 
                     <div class="tool-box">
@@ -230,9 +241,14 @@
                         <div id="participants-list" style="max-height: 150px; overflow-y: auto;"></div>
                     </div>
 
-                    <!-- סקרים -->
+                    <!-- סקרים ואנונימיות -->
                     <div class="tool-box" id="poll-container">
-                        <h4 style="margin-bottom: 6px;" data-i18n="poll_title">📊 סקר כיתתי חי</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;" data-i18n="poll_title">📊 סקר כיתתי חי</h4>
+                            <label style="font-size: 11px; display: flex; align-items: center; gap: 4px;" id="anon-label-wrapper">
+                                <input type="checkbox" id="anon-poll-check" style="width:auto; margin:0;"> אנונימי 🕵️‍♂️
+                            </label>
+                        </div>
                         <div id="teacher-poll-creator" class="hidden">
                             <input type="text" id="poll-question" data-i18n-placeholder="placeholder_poll_q" placeholder="שאלה">
                             <input type="text" id="poll-opt1" data-i18n-placeholder="placeholder_poll_opt1" placeholder="תשובה א'">
@@ -330,6 +346,7 @@
                 btn_cancel_leave: "בטל ועזוב",
                 btn_raise_hand: "🙋‍♂️ הרם יד",
                 btn_lower_hand: "🙋‍♂️ הורד יד",
+                btn_focus_mode: "🎯 מצב פוקוס",
                 btn_leave_room: "צא מהחדר 🚪",
                 btn_cam_off: "📷 כבה מצלמה",
                 btn_cam_on: "📷 הפעל מצלמה",
@@ -350,6 +367,7 @@
                 no_waiting_students: "אין תלמידים ממתינים.",
                 participants_title: "👥 משתתפים וחיוויי שליטה",
                 btn_mute_all: "השתק הכל 🔇",
+                btn_ping_student: "הקפץ מסך ⚡",
                 btn_report: "הפק דוח 📊",
                 poll_title: "📊 סקר כיתתי חי",
                 placeholder_poll_q: "שאלה",
@@ -378,7 +396,7 @@
                 assignment_title: "📋 מטלת כיתה",
                 btn_pub_assignment: "פרסם מטלה",
                 no_active_assignment: "אין מטלה פעילה כרגע.",
-                quiz_title: "🏆 חידון מהיר (Quiz)",
+                quiz_title: "🏆 חידון מהיר & טבלת מובילים",
                 btn_start_quiz: "הפעל חידון",
                 no_active_quiz: "אין חידון פעיל."
             },
@@ -412,6 +430,7 @@
                 btn_cancel_leave: "Cancel & Leave",
                 btn_raise_hand: "🙋‍♂️ Raise Hand",
                 btn_lower_hand: "🙋‍♂️ Lower Hand",
+                btn_focus_mode: "🎯 Focus Mode",
                 btn_leave_room: "Leave Room 🚪",
                 btn_cam_off: "📷 Turn Off Camera",
                 btn_cam_on: "📷 Turn On Camera",
@@ -432,6 +451,7 @@
                 no_waiting_students: "No waiting students.",
                 participants_title: "👥 Participants & Controls",
                 btn_mute_all: "Mute All 🔇",
+                btn_ping_student: "Ping Screen ⚡",
                 btn_report: "Get Report 📊",
                 poll_title: "📊 Live Class Poll",
                 placeholder_poll_q: "Question",
@@ -460,7 +480,7 @@
                 assignment_title: "📋 Class Assignment",
                 btn_pub_assignment: "Publish Assignment",
                 no_active_assignment: "No active assignment.",
-                quiz_title: "🏆 Live Quiz",
+                quiz_title: "🏆 Live Quiz & Leaderboard",
                 btn_start_quiz: "Start Quiz",
                 no_active_quiz: "No active quiz."
             }
@@ -489,9 +509,8 @@
         let mediaStream = null, mediaRecorder, chunks = [], recognition = null, isTranscribing = false, transcriptText = "";
         let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
         let myWeatherInfo = "⏳ טוען מזג אוויר...";
-        let timerInterval = null, currentQuiz = null;
+        let timerInterval = null, currentQuiz = null, scoresMap = {}, isFocusActive = false;
 
-        // צליל התראה חלומי קצר באמצעות Web Audio API (ללא קבצים חיצוניים)
         function playBeepSound() {
             try {
                 const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
@@ -527,6 +546,23 @@
             localStorage.setItem('theme', next);
         };
 
+        // פיצ'ר 2: מצב פוקוס (Focus Mode)
+        window.toggleFocusMode = () => {
+            isFocusActive = !isFocusActive;
+            const boxes = document.querySelectorAll('.tool-box');
+            boxes.forEach(box => {
+                // שומר רק על וידאו וכלים מרכזיים, או מכבה את השאר
+                if(isFocusActive) {
+                    if(!box.contains(document.getElementById('local-video')) && !box.contains(document.getElementById('whiteboard-canvas'))) {
+                        box.classList.add('hidden');
+                    }
+                } else {
+                    box.classList.remove('hidden');
+                }
+            });
+            alert(isפוקוס_active_msg = isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
             if (window.location.hash.includes('type=recovery')) { showSec('reset-password-section'); return; }
@@ -548,7 +584,6 @@
             if (saved) document.getElementById('student-notepad').value = saved;
         }
 
-        // חדרי דיונים קטנים (Breakout Rooms)
         window.launchBreakoutRoom = () => {
             const gName = document.getElementById('breakout-group-name').value;
             if (!gName) return alert('נא להזין שם קבוצה');
@@ -559,7 +594,6 @@
             }
         };
 
-        // מטלות כיתה
         window.publishAssignment = () => {
             const text = document.getElementById('assignment-text').value;
             if (!text) return alert('הזן משימה');
@@ -585,7 +619,6 @@
             }
         };
 
-        // חידון מהיר (Quiz)
         window.startQuiz = () => {
             const q = document.getElementById('quiz-q').value, ans = document.getElementById('quiz-ans').value;
             if (!q || !ans) return alert('נא למלא שאלה ותשובה');
@@ -607,11 +640,37 @@
             const val = document.getElementById('quiz-user-ans').value;
             if (!val) return;
             const isCorrect = val.trim().toLowerCase() === currentQuiz.ans.trim().toLowerCase();
+            if (isCorrect) {
+                scoresMap[userName] = (scoresMap[userName] || 0) + 10;
+            }
             if (activeChannel) {
-                activeChannel.send({ type: 'broadcast', event: 'quiz_answer', payload: { student: userName, correct: isCorrect } });
-                document.getElementById('student-quiz-view').innerHTML = `<p style="font-weight: bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};">${isCorrect ? '🎉 תשובה נכונה כל הכבוד!' : '❌ תשובה שגעה, נסה שוב'}</p>`;
+                activeChannel.send({ type: 'broadcast', event: 'quiz_answer', payload: { student: userName, correct: isCorrect, scoreBoard: scoresMap } });
+                document.getElementById('student-quiz-view').innerHTML = `<p style="font-weight: bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};">${isCorrect ? '🎉 תשובה נכונה (+10 נקודות)!' : '❌ תשובה שגויה, נסה שוב'}</p>`;
             }
         };
+
+        function updateLeaderboardUI(board) {
+            scoresMap = board || scoresMap;
+            const sorted = Object.entries(scoresMap).sort((a,b) => b[1] - a[1]);
+            const text = sorted.length ? sorted.map(([name, score], idx) => `#${idx+1} ${name} (${score} נק')`).join(' | ') : 'אין עדיין ניקוד';
+            document.getElementById('leaderboard-content').innerText = text;
+        }
+
+        // פיצ'ר 3: שליחת הקפצת מסך (Attention Ping)
+        window.teacherPingStudent = (targetUserId) => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'attention_ping', payload: { targetUserId } });
+                alert('התראת תשומת לב נשלחה לתלמיד!');
+            }
+        };
+        function triggerAttentionEffect() {
+            playBeepSound();
+            const container = document.getElementById('main-app-container');
+            container.classList.add('attention-active');
+            setTimeout(() => { container.classList.remove('attention-active'); }, 5000);
+            alert('⚠️ המורה הקפיץ את המסך שלך! נא להתמקד בשיעור.');
+        }
 
         window.startSharedTimer = () => {
             const mins = parseInt(document.getElementById('timer-minutes').value) || 5;
@@ -669,30 +728,33 @@
             document.getElementById('youtube-player-container').classList.remove('hidden');
         }
 
+        // פיצ'ר 1: סקר אנונימי / הצבעה חשאית
         window.publishPoll = () => {
             const q = document.getElementById('poll-question').value, o1 = document.getElementById('poll-opt1').value, o2 = document.getElementById('poll-opt2').value;
+            const isAnon = document.getElementById('anon-poll-check').checked;
             if (!q || !o1 || !o2) return alert('נא למלא שאלות ותשובות');
-            pollData = { question: q, options: [o1, o2], votes: {} };
+            pollData = { question: q, options: [o1, o2], votes: {}, isAnonymous: isAnon };
             if (activeChannel) {
                 activeChannel.send({ type: 'broadcast', event: 'new_poll', payload: pollData });
                 document.getElementById('teacher-poll-creator').classList.add('hidden');
                 document.getElementById('poll-results-view').classList.remove('hidden');
                 updateChart();
-                alert('הסקר שוגר!');
+                alert(isAnon ? 'סקר אנונימי שוגר בהצלחה! 🕵️‍♂️' : 'סקר רגיל שוגר!');
             }
         };
         function renderStudentPoll(poll) {
             playBeepSound();
             pollData = poll;
-            let h = `<p style="font-weight: bold; margin: 4px 0;">📊 ${poll.question}</p>`;
+            let h = `<p style="font-weight: bold; margin: 4px 0;">📊 ${poll.question} ${poll.isAnonymous ? '(אנונימי 🕵️‍♂️)' : ''}</p>`;
             poll.options.forEach((opt, idx) => h += `<button onclick="votePoll(${idx})" style="padding:6px; margin-bottom:4px; background:var(--primary);">${opt}</button>`);
             document.getElementById('student-poll-taker').innerHTML = h;
             document.getElementById('poll-results-view').classList.add('hidden');
         }
         window.votePoll = idx => {
+            const voterKey = pollData.isAnonymous ? `anon_${Math.random()}` : userName;
             if (activeChannel) {
-                activeChannel.send({ type: 'broadcast', event: 'poll_vote', payload: { user: userName, optionIndex: idx } });
-                document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success); font-weight: bold;">הצבעתך נקלטה!</p>`;
+                activeChannel.send({ type: 'broadcast', event: 'poll_vote', payload: { user: voterKey, optionIndex: idx } });
+                document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success); font-weight: bold;">הצבעתך נקלטה! ${pollData.isAnonymous ? '(נשמר באנונימיות)' : ''}</p>`;
             }
         };
         function updateChart(votes = {}) {
@@ -912,7 +974,10 @@
                 .on('broadcast', { event: 'new_assignment' }, p => renderStudentAssignment(p.payload.text))
                 .on('broadcast', { event: 'assignment_submitted' }, p => { if (role === 'teacher') alert(`תלמיד ${p.payload.student} הגיש מטלה: "${p.payload.answer}"`); })
                 .on('broadcast', { event: 'launch_quiz' }, p => renderStudentQuiz(p.payload))
-                .on('broadcast', { event: 'quiz_answer' }, p => { if (role === 'teacher') document.getElementById('quiz-scores').innerText = `תשובה אחרונה מ-${p.payload.student}: ${p.payload.correct ? 'נכון ✔' : 'שגוי ✘'}`; })
+                .on('broadcast', { event: 'quiz_answer' }, p => { 
+                    updateLeaderboardUI(p.payload.scoreBoard);
+                })
+                .on('broadcast', { event: 'attention_ping' }, p => { if (role === 'student' && p.payload.targetUserId === userId) triggerAttentionEffect(); })
                 .on('broadcast', { event: 'transcript' }, p => {
                     const box = document.getElementById('transcript-messages');
                     box.innerHTML += `<div><b>${p.payload.user}:</b> ${p.payload.text}</div>`; box.scrollTop = box.scrollHeight;
@@ -994,6 +1059,7 @@
                         <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
                             <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? 'Mute' : 'Unmute'}</button>
                             <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
+                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;" data-i18n="btn_ping_student">הקפץ ⚡</button>
                         </div>
                     ` : ''}
                 </div>
