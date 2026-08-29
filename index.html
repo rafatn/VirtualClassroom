@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - תיקון מלא לנתוני משתמש</title>
-    <!-- טעינת ספריות PDF.js ו-Chart.js -->
+    <title>כיתה וירטואלית חכמה - כולל תמלול חי</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -122,8 +121,8 @@
             object-fit: cover;
         }
 
-        .chat-box {
-            height: 130px;
+        .chat-box, .transcript-box {
+            height: 110px;
             overflow-y: auto;
             border: 1px solid var(--border-color);
             padding: 8px;
@@ -178,7 +177,6 @@
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
         </div>
 
-        <!-- ========== 1. מסך התחברות / הרשמה ========== -->
         <div id="auth-section" style="max-width: 400px; margin: 0 auto;">
             <h3 id="form-title" style="text-align: center;">התחברות למערכת</h3>
             <input type="email" id="email" placeholder="אימייל">
@@ -196,7 +194,6 @@
             <button onclick="toggleAuthMode()" style="background: var(--text-muted);">עבור להרשמה / התחברות</button>
         </div>
 
-        <!-- ========== 2. מסך לוח בקרה (Dashboard) ========== -->
         <div id="dashboard-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; background: var(--tool-bg); padding: 15px; border-radius: 8px;">
                 <h3 id="welcome-user" style="margin: 0;">שלום, משתמש</h3>
@@ -222,7 +219,6 @@
             </div>
         </div>
 
-        <!-- ========== 3. מסך בתוך החדר (Classroom) ========== -->
         <div id="room-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="current-room-title" style="margin: 0; color: var(--primary-color);">שם החדר</h3>
@@ -230,7 +226,6 @@
             </div>
             
             <div class="grid-container">
-                <!-- צד שמאל -->
                 <div>
                     <div style="background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
                         <video id="local-video" autoplay muted></video>
@@ -239,7 +234,6 @@
                         </div>
                     </div>
 
-                    <!-- כפתורי שליטה במצלמה ובמיקרופון העצמי -->
                     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                         <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning-color); color: #000; padding: 8px;">📷 כבה מצלמה</button>
                         <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning-color); color: #000; padding: 8px;">🎤 הַשְׁתֵּק מיקרופון</button>
@@ -251,7 +245,6 @@
                         <button onclick="stopAndSaveRecording()" style="background: var(--danger-color); padding: 8px;" class="hidden" id="stop-rec-btn">⏹️ עצור הקלטה</button>
                     </div>
 
-                    <!-- לוח לבן -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <h4 style="margin: 0;">🎨 לוח לבן שיתופי</h4>
@@ -263,7 +256,6 @@
                         <canvas id="whiteboard-canvas" height="220"></canvas>
                     </div>
 
-                    <!-- מציג PDF -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">📄 הצגת חומרי לימוד (PDF)</h4>
                         <input type="file" id="pdf-upload" accept="application/pdf" style="margin-bottom: 8px; padding: 6px;">
@@ -278,11 +270,18 @@
                     </div>
                 </div>
 
-                <!-- צד ימין -->
                 <div>
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים ושליטה</h4>
-                        <div id="participants-list" style="max-height: 180px; overflow-y: auto;"></div>
+                        <div id="participants-list" style="max-height: 150px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;">🗣️ תמלול חי (Live Transcript)</h4>
+                            <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 4px 10px; margin: 0; font-size: 12px; background: var(--success-color);">הפעל תמלול</button>
+                        </div>
+                        <div id="transcript-messages" class="transcript-box">ממתין להפעלת תמלול...</div>
                     </div>
 
                     <div class="tool-box">
@@ -310,7 +309,6 @@
         </div>
     </div>
 
-    <!-- לוגיקה וסקריפטים -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -323,10 +321,15 @@
         let currentRoomId = null;
         let currentActiveChannel = null;
         let currentUserRole = 'student';
+        let currentUserName = 'משתמש';
         let mediaStream = null;
         let mediaRecorder;
         let recordedChunks = [];
         let activeChart = null;
+
+        // משתני זיהוי דיבור (תמלול חי)
+        let recognition = null;
+        let isTranscribing = false;
 
         window.toggleTheme = function() {
             const htmlEl = document.documentElement;
@@ -344,7 +347,85 @@
             fetchCurrencyRates();
             initWhiteboard();
             initPdfUploader();
+            initSpeechRecognition();
         });
+
+        // אתחול תמלול חי באמצעות Web Speech API
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('transcript-messages').innerText = 'הדפדפן שלך אינו תומך בתמלול חי (נסה ב-Google Chrome).';
+                document.getElementById('toggle-transcript-btn').disabled = true;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'he-IL';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    const transcriptBox = document.getElementById('transcript-messages');
+                    transcriptBox.innerHTML += `<div><b>${currentUserName}:</b> ${finalTranscript}</div>`;
+                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+
+                    // שליחת הודעת תמלול גם ל-Supabase ששאר המשתתפים יראו (אופציונלי / דרך ערוץ החדר)
+                    if (currentActiveChannel) {
+                        currentActiveChannel.send({
+                            type: 'broadcast',
+                            event: 'transcript',
+                            payload: { user: currentUserName, text: finalTranscript }
+                        });
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+            };
+
+            recognition.onend = () => {
+                if (isTranscribing) {
+                    try { recognition.start(); } catch (e) {}
+                }
+            };
+        }
+
+        window.toggleSpeechRecognition = function() {
+            if (!recognition) return;
+            const btn = document.getElementById('toggle-transcript-btn');
+            const box = document.getElementById('transcript-messages');
+
+            if (isTranscribing) {
+                isTranscribing = false;
+                recognition.stop();
+                btn.innerText = 'הפעל תמלול';
+                btn.style.background = 'var(--success-color)';
+                box.innerHTML += '<div style="color: var(--text-muted); font-size: 12px;">[התמלול הופסק]</div>';
+            } else {
+                isTranscribing = true;
+                try {
+                    recognition.start();
+                    btn.innerText = 'עצור תמלול';
+                    btn.style.background = 'var(--danger-color)';
+                    box.innerHTML = '<div style="color: var(--success-color); font-size: 12px;">[התמלול הופל פעיל...]</div>';
+                } catch (e) {
+                    isTranscribing = false;
+                }
+            }
+        }
 
         // לוח לבן
         const canvas = document.getElementById('whiteboard-canvas');
@@ -443,7 +524,6 @@
             queueRenderPage(pageNum);
         }
 
-        // פונקציית מטא-דאטה מוגנת לחלוטין מ-undefined
         async function getClientMetadata() {
             const ua = navigator.userAgent;
             let browser = "Google Chrome";
@@ -472,9 +552,7 @@
                         locationStr = ipData.country_name;
                     }
                 }
-            } catch (e) {
-                // ברירת מחדל בטוחה במקרה של חסימת רשת
-            }
+            } catch (e) {}
 
             const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId ? currentUserId.charCodeAt(0) : 1) * 16777215)).toString(16);
             return { browser, os, location: locationStr, color: colorHash };
@@ -516,6 +594,7 @@
             if (!profile) return;
 
             currentUserRole = profile.role;
+            currentUserName = profile.full_name;
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
             showSection('dashboard-section');
@@ -583,6 +662,7 @@
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
+            
             currentActiveChannel = supabase.channel(`room_${roomId}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, (payload) => {
                     if (payload.new && payload.new.user_id === currentUserId) {
@@ -604,6 +684,11 @@
                         }
                     }
                     fetchParticipants(roomId);
+                })
+                .on('broadcast', { event: 'transcript' }, payload => {
+                    const transcriptBox = document.getElementById('transcript-messages');
+                    transcriptBox.innerHTML += `<div><b>${payload.payload.user}:</b> ${payload.payload.text}</div>`;
+                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
                 })
                 .subscribe();
 
@@ -730,6 +815,7 @@
         }
 
         window.leaveRoom = async function() {
+            if (isTranscribing) toggleSpeechRecognition();
             if (currentActiveChannel) supabase.removeChannel(currentActiveChannel);
             if (currentRoomId && currentUserId) await supabase.from('room_participants').delete().match({ room_id: currentRoomId, user_id: currentUserId });
             showSection('dashboard-section');
