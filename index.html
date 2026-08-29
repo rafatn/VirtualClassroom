@@ -167,6 +167,20 @@
             align-items: center;
             font-size: 13px;
         }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            width: auto;
+            display: inline;
+            font-size: 14px;
+            margin: 5px 0 12px 0;
+        }
+        .link-btn:hover { background: none; color: var(--primary-hover); }
     </style>
 </head>
 <body>
@@ -191,6 +205,9 @@
             </div>
 
             <button id="auth-action-btn" onclick="handleAuthSubmit()">התחבר</button>
+            <div style="text-align: center;">
+                <button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()">שכחת סיסמה?</button>
+            </div>
             <button onclick="toggleAuthMode()" style="background: var(--text-muted);">עבור להרשמה / התחברות</button>
         </div>
 
@@ -546,6 +563,7 @@
             document.getElementById('form-title').innerText = isRegisterMode ? 'הרשמה למערכת' : 'התחברות למערכת';
             document.getElementById('register-fields').classList.toggle('hidden', !isRegisterMode);
             document.getElementById('auth-action-btn').innerText = isRegisterMode ? 'הירשם' : 'התחבר';
+            document.getElementById('forgot-password-link').style.display = isRegisterMode ? 'none' : 'inline';
         }
 
         window.handleAuthSubmit = async function() {
@@ -564,6 +582,16 @@
                 if (error) return alert(error.message);
                 checkUserSession();
             }
+        }
+
+        window.handleForgotPassword = async function() {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('נא להזין תחילה את כתובת האימייל שלך בשדה האימייל למעלה');
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.href, // יחזיר את המשתמש לכאן כדי לאפס סיסמה
+            });
+            if (error) return alert(error.message);
+            alert('הוראות לאיפוס הסיסמה נשלחו אל האימייל שלך!');
         }
 
         async function checkUserSession() {
