@@ -181,7 +181,20 @@
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;">🗣️ תמלול</h4>
-                            <div>
+                            <div style="display: flex; gap: 4px; align-items: center;">
+                                <select id="transcript-lang" style="margin: 0; padding: 2px 4px; font-size: 11px; width: auto;" onchange="changeTranscriptLang(this.value)">
+                                    <option value="he-IL">עברית 🇮🇱</option>
+                                    <option value="ar-SA">ערבית 🇸🇦</option>
+                                    <option value="en-US">אנגלית 🇺🇸</option>
+                                    <option value="ru-RU">רוסית 🇷🇺</option>
+                                    <option value="es-ES">ספרדית 🇪🇸</option>
+                                    <option value="fr-FR">צרפתית 🇫🇷</option>
+                                    <option value="am-ET">אמהרית 🇪🇹</option>
+                                    <option value="de-DE">גרמנית 🇩🇪</option>
+                                    <option value="it-IT">איטלקית 🇮🇹</option>
+                                    <option value="pt-BR">פורטוגזית 🇧🇷</option>
+                                    <option value="zh-CN">סינית 🇨🇳</option>
+                                </select>
                                 <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;">הפעל</button>
                                 <button onclick="downloadTranscript()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--muted); margin: 0;">שמור</button>
                             </div>
@@ -306,11 +319,18 @@
             });
         }
 
-        // תמלול
+        // תמלול עם תמיכה בשפות מרובות
         function initSpeech() {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRec) return;
-            recognition = new SpeechRec(); recognition.lang = 'he-IL'; recognition.interimResults = true; recognition.continuous = true;
+            recognition = new SpeechRec(); 
+            
+            const langSelect = document.getElementById('transcript-lang');
+            recognition.lang = langSelect ? langSelect.value : 'he-IL';
+            
+            recognition.interimResults = true; 
+            recognition.continuous = true;
+            
             recognition.onresult = e => {
                 let text = '';
                 for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) text += e.results[i][0].transcript;
@@ -323,6 +343,22 @@
             };
             recognition.onend = () => { if (isTranscribing) try { recognition.start(); } catch(e){} };
         }
+
+        window.changeTranscriptLang = (newLang) => {
+            if (recognition) {
+                const wasRunning = isTranscribing;
+                if (wasRunning) {
+                    recognition.stop();
+                    isTranscribing = false;
+                }
+                recognition.lang = newLang;
+                if (wasRunning) {
+                    recognition.start();
+                    isTranscribing = true;
+                }
+            }
+        };
+
         window.toggleSpeechRecognition = () => {
             if (!recognition) return;
             const btn = document.getElementById('toggle-transcript-btn');
@@ -331,6 +367,7 @@
             btn.innerText = isTranscribing ? 'עצור' : 'הפעל';
             btn.style.background = isTranscribing ? 'var(--danger)' : 'var(--success)';
         };
+
         window.downloadTranscript = () => {
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([transcriptText], { type: 'text/plain;charset=utf-8' }));
             a.download = 'transcript.txt'; a.click();
@@ -494,7 +531,6 @@
             } catch(e){}
         }
 
-        // [עדכון] תיקון פונקציית האישור לשימוש ב- .eq() במקום .match() התומך ב-Supabase v2
         window.approveStudent = async sId => {
             const { error } = await supabase.from('room_participants')
                 .update({ status: 'approved' })
