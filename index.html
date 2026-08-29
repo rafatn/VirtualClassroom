@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כיתה וירטואלית חכמה - תיקון נתוני משתמש</title>
+    <title>כיתה וירטואלית חכמה - שליטה מלאה במיקרופון ומצלמה</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -155,6 +155,18 @@
             display: inline-block;
             margin: 0;
         }
+
+        .participant-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -222,6 +234,11 @@
                         </div>
                     </div>
 
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning-color); color: #000; padding: 8px;">📷 כבה מצלמה</button>
+                        <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning-color); color: #000; padding: 8px;">🎤 הַשְׁתֵּק מיקרופון</button>
+                    </div>
+
                     <div style="display: flex; gap: 8px; margin-bottom: 15px;">
                         <button onclick="startScreenShare()" style="padding: 8px;">🖥️ שתף מסך</button>
                         <button onclick="startRecording()" style="background: var(--success-color); padding: 8px;">🔴 הקלטה</button>
@@ -255,8 +272,8 @@
 
                 <div>
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים</h4>
-                        <ul id="participants-list" style="padding-right: 15px; font-size: 13px; list-style-type: none; margin: 0; max-height: 130px; overflow-y: auto;"></ul>
+                        <h4 style="margin-bottom: 8px;">👥 משתתפים מחוברים ושליטה</h4>
+                        <div id="participants-list" style="max-height: 180px; overflow-y: auto;"></div>
                     </div>
 
                     <div class="tool-box">
@@ -295,6 +312,8 @@
         let currentUserId = null;
         let currentRoomId = null;
         let currentActiveChannel = null;
+        let currentUserRole = 'student';
+        let mediaStream = null;
         let mediaRecorder;
         let recordedChunks = [];
         let activeChart = null;
@@ -414,38 +433,29 @@
             queueRenderPage(pageNum);
         }
 
-        // זיהוי מטא-דאטה משופר ובטוח (מונע undefined)
         async function getClientMetadata() {
             const ua = navigator.userAgent;
-            let browser = "דפדפן לא ידוע";
-            let os = "מערכת הפעלה לא ידועה";
+            let browser = "דפדפן לא ידוע", os = "מערכת הפעלה לא ידועה";
 
             if (ua.indexOf("Firefox") > -1) browser = "Firefox";
             else if (ua.indexOf("Edg") > -1) browser = "Microsoft Edge";
             else if (ua.indexOf("Chrome") > -1) browser = "Google Chrome";
             else if (ua.indexOf("Safari") > -1) browser = "Apple Safari";
-            else if (ua.indexOf("OPR") > -1) browser = "Opera";
 
             if (ua.indexOf("Win") > -1) os = "Windows";
             else if (ua.indexOf("Mac") > -1) os = "macOS";
             else if (ua.indexOf("Linux") > -1) os = "Linux";
             else if (ua.indexOf("Android") > -1) os = "Android";
-            else if (ua.indexOf("like Mac") > -1 || ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS / iPadOS";
+            else if (ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS";
 
             let locationStr = "ישראל";
             try {
                 const ipRes = await fetch('https://ipapi.co/json/');
                 if (ipRes.ok) {
                     const ipData = await ipRes.json();
-                    if (ipData.city && ipData.country_name) {
-                        locationStr = `${ipData.city}, ${ipData.country_name}`;
-                    } else if (ipData.country_name) {
-                        locationStr = ipData.country_name;
-                    }
+                    if (ipData.city && ipData.country_name) locationStr = `${ipData.city}, ${ipData.country_name}`;
                 }
-            } catch (e) {
-                // במידה ויש חסימת רשת או שגיאה, משתמש בברירת מחדל תקינה
-            }
+            } catch (e) {}
 
             const colorHash = '#' + Math.floor(Math.abs(Math.sin(currentUserId ? currentUserId.charCodeAt(0) : 1) * 16777215)).toString(16);
             return { browser, os, location: locationStr, color: colorHash };
@@ -486,6 +496,7 @@
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
             if (!profile) return;
 
+            currentUserRole = profile.role;
             document.getElementById('welcome-user').innerText = `שלום, ${profile.full_name} (${profile.role === 'teacher' ? 'מורה 👨‍🏫' : 'תלמיד 👨‍🎓'})`;
             document.getElementById('teacher-panel').classList.toggle('hidden', profile.role !== 'teacher');
             showSection('dashboard-section');
@@ -540,31 +551,94 @@
             }
 
             await supabase.from('room_participants').upsert([
-                { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color }
+                { room_id: roomId, user_id: currentUserId, browser: meta.browser, os: meta.os, location: meta.location, color: meta.color, cam_active: true, mic_active: true }
             ], { onConflict: 'room_id, user_id' });
 
             fetchParticipants(roomId);
             currentActiveChannel = supabase.channel(`room_${roomId}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, () => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${roomId}` }, (payload) => {
+                    // בדיקה האם המורה כיבה לנו את המצלמה/מיקרופון מרחוק
+                    if (payload.new && payload.new.user_id === currentUserId) {
+                        if (mediaStream) {
+                            if (payload.new.cam_active === false) {
+                                mediaStream.getVideoTracks().forEach(t => t.enabled = false);
+                                document.getElementById('toggle-cam-btn').innerText = '📷 הפעל מצלמה';
+                            }
+                            if (payload.new.mic_active === false) {
+                                mediaStream.getAudioTracks().forEach(t => t.enabled = false);
+                                document.getElementById('toggle-mic-btn').innerText = '🎤 הפעל מיקרופון';
+                            }
+                        }
+                    }
                     fetchParticipants(roomId);
                 })
                 .subscribe();
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                document.getElementById('local-video').srcObject = stream;
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = mediaStream;
             } catch (e) {}
+        }
+
+        // שליטה מקומית במצלמה ומיקרופון
+        window.toggleMyCamera = async function() {
+            if (!mediaStream) return;
+            const videoTrack = mediaStream.getVideoTracks()[0];
+            if (!videoTrack) return;
+            videoTrack.enabled = !videoTrack.enabled;
+            const isEnabled = videoTrack.enabled;
+            document.getElementById('toggle-cam-btn').innerText = isEnabled ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
+
+            await supabase.from('room_participants').update({ cam_active: isEnabled }).match({ room_id: currentRoomId, user_id: currentUserId });
+        }
+
+        window.toggleMyMicrophone = async function() {
+            if (!mediaStream) return;
+            const audioTrack = mediaStream.getAudioTracks()[0];
+            if (!audioTrack) return;
+            audioTrack.enabled = !audioTrack.enabled;
+            const isEnabled = audioTrack.enabled;
+            document.getElementById('toggle-mic-btn').innerText = isEnabled ? '🎤 הַשְׁתֵּק מיקרופון' : '🎤 הפעל מיקרופון';
+
+            await supabase.from('room_participants').update({ mic_active: isEnabled }).match({ room_id: currentRoomId, user_id: currentUserId });
+        }
+
+        // פעולות ניהול של המורה על תלמידים אחרים
+        window.teacherToggleUserCam = async function(targetUserId, currentCamState) {
+            if (currentUserRole !== 'teacher') return;
+            await supabase.from('room_participants').update({ cam_active: !currentCamState }).match({ room_id: currentRoomId, user_id: targetUserId });
+        }
+
+        window.teacherToggleUserMic = async function(targetUserId, currentMicState) {
+            if (currentUserRole !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: !currentMicState }).match({ room_id: currentRoomId, user_id: targetUserId });
         }
 
         async function fetchParticipants(roomId) {
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', roomId);
-            const ul = document.getElementById('participants-list');
+            const listContainer = document.getElementById('participants-list');
             if (!data) return;
-            ul.innerHTML = data.map(p => `
-                <li style="color: ${p.color || '#000'}; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
-                    👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})<br>
-                    <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">🌍 ${p.location || 'ישראל'} | 💻 ${p.browser || 'Chrome'} / ${p.os || 'Windows'}</span>
-                </li>
+
+            listContainer.innerHTML = data.map(p => `
+                <div class="participant-card">
+                    <div>
+                        <b style="color: ${p.color || '#000'}">👤 ${p.profiles?.full_name || 'משתמש'} (${p.profiles?.role === 'teacher' ? 'מורה' : 'תלמיד'})</b><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">
+                            🌍 ${p.location} | 💻 ${p.browser}<br>
+                            מצלמה: ${p.cam_active !== false ? '🟢 פתוחה' : '🔴 כבויה'} | מיקרופון: ${p.mic_active !== false ? '🟢 פעיל' : '🔴 מושתק'}
+                        </span>
+                    </div>
+                    ${currentUserRole === 'teacher' && p.user_id !== currentUserId ? `
+                        <div style="display: flex; gap: 4px; flex-direction: column;">
+                            <button onclick="teacherToggleUserCam('${p.user_id}', ${p.cam_active !== false})" style="font-size: 11px; padding: 4px 8px; margin: 0; background: ${p.cam_active !== false ? 'var(--danger-color)' : 'var(--success-color)'};">
+                                ${p.cam_active !== false ? 'כבה מצלמה' : 'הפעל מצלמה'}
+                            </button>
+                            <button onclick="teacherToggleUserMic('${p.user_id}', ${p.mic_active !== false})" style="font-size: 11px; padding: 4px 8px; margin: 0; background: ${p.mic_active !== false ? 'var(--danger-color)' : 'var(--success-color)'};">
+                                ${p.mic_active !== false ? 'השתק מיקרופון' : 'הפעל מיקרופון'}
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
             `).join('');
         }
 
