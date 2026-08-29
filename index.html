@@ -17,7 +17,7 @@
             --text: #f8fafc; --muted: #94a3b8; --border: #334155; --tool: #111827;
             --danger: #f87171; --success: #34d399; --warning: #fbbf24;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; direction: rtl; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         h2, h3, h4 { color: var(--text); margin-top: 0; }
         .hidden { display: none !important; }
@@ -32,64 +32,83 @@
         .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
         hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-        .theme-btn { background: var(--muted); color: #fff; padding: 6px 12px; border-radius: 6px; width: auto; display: inline-block; }
+        .top-bar-btn { background: var(--muted); color: #fff; padding: 6px 12px; border-radius: 6px; width: auto; display: inline-block; font-size: 14px; }
         .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; width: auto; display: inline; padding: 0; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- סרגל עליון: בחירת שפה ומצב תצוגה -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="color: var(--primary); margin: 0;">🎓 כיתה וירטואלית חכמה</h2>
-            <button class="theme-btn" onclick="toggleTheme()">🌓 מצב כהה / בהיר</button>
+            <h2 style="color: var(--primary); margin: 0;" data-i18n="app_title">🎓 כיתה וירטואלית חכמה</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="global-lang-select" class="top-bar-btn" style="margin:0; padding: 5px 10px;" onchange="changeAppLanguage(this.value)">
+                    <option value="he">🇮🇱 עברית</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇧🇷 Português</option>
+                    <option value="am">🇪🇹 አማርኛ</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+                <button class="top-bar-btn" onclick="toggleTheme()" data-i18n="toggle_theme">🌓 מצב כהה / בהיר</button>
+            </div>
         </div>
 
         <!-- התחברות -->
         <div id="auth-section" style="max-width: 400px; margin: 0 auto;">
-            <h3 id="form-title" style="text-align: center;">התחברות למערכת</h3>
-            <input type="email" id="email" placeholder="אימייל">
-            <input type="password" id="password" placeholder="סיסמה">
+            <h3 id="form-title" style="text-align: center;" data-i18n="auth_login_title">התחברות למערכת</h3>
+            <input type="email" id="email" data-i18n-placeholder="placeholder_email" placeholder="אימייל">
+            <input type="password" id="password" data-i18n-placeholder="placeholder_password" placeholder="סיסמה">
             <div id="register-fields" class="hidden">
-                <input type="text" id="full_name" placeholder="שם מלא">
-                <select id="role"><option value="student">תלמיד 👨‍🎓</option><option value="teacher">מורה 👨‍🏫</option></select>
+                <input type="text" id="full_name" data-i18n-placeholder="placeholder_fullname" placeholder="שם מלא">
+                <select id="role">
+                    <option value="student" data-i18n="role_student">תלמיד 👨‍🎓</option>
+                    <option value="teacher" data-i18n="role_teacher">מורה 👨‍🏫</option>
+                </select>
             </div>
-            <button id="auth-action-btn" onclick="handleAuthSubmit()">התחבר</button>
-            <div style="text-align: center;"><button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()">שכחת סיסמה?</button></div>
-            <button onclick="toggleAuthMode()" style="background: var(--muted);">עבור להרשמה / התחברות</button>
+            <button id="auth-action-btn" onclick="handleAuthSubmit()" data-i18n="btn_login">התחבר</button>
+            <div style="text-align: center;"><button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()" data-i18n="link_forgot">שכחת סיסמה?</button></div>
+            <button onclick="toggleAuthMode()" style="background: var(--muted);" data-i18n="btn_toggle_auth">עבור להרשמה / התחברות</button>
         </div>
 
         <!-- איפוס סיסמה -->
         <div id="reset-password-section" class="hidden" style="max-width: 400px; margin: 0 auto;">
-            <h3 style="text-align: center;">הגדרת סיסמה חדשה</h3>
-            <input type="password" id="new-password" placeholder="סיסמה חדשה (לפחות 6 תווים)">
-            <button onclick="handleUpdatePassword()" style="background: var(--success);">שמור סיסמה</button>
+            <h3 style="text-align: center;" data-i18n="reset_title">הגדרת סיסמה חדשה</h3>
+            <input type="password" id="new-password" data-i18n-placeholder="placeholder_new_password" placeholder="סיסמה חדשה (לפחות 6 תווים)">
+            <button onclick="handleUpdatePassword()" style="background: var(--success);" data-i18n="btn_save_password">שמור סיסמה</button>
         </div>
 
         <!-- לוח בקרה ראשי -->
         <div id="dashboard-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; background: var(--tool); padding: 15px; border-radius: 8px;">
                 <h3 id="welcome-user" style="margin: 0;">שלום</h3>
-                <button onclick="logout()" style="background: var(--danger); width: auto; padding: 6px 14px; margin: 0;">התנתק</button>
+                <button onclick="logout()" style="background: var(--danger); width: auto; padding: 6px 14px; margin: 0;" data-i18n="btn_logout">התנתק</button>
             </div>
             <hr>
             <div class="tool-box" style="text-align: center;">
-                <h4 style="margin-bottom: 6px;">💱 שערי מטבעות חיים</h4>
-                <div id="currency-rates" style="font-weight: 600; color: var(--primary);">טוען שערים...</div>
+                <h4 style="margin-bottom: 6px;" data-i18n="currency_title">💱 שערי מטבעות חיים</h4>
+                <div id="currency-rates" style="font-weight: 600; color: var(--primary);" data-i18n="loading_rates">טוען שערים...</div>
             </div>
             <div id="teacher-panel" class="hidden tool-box">
-                <h4>👨‍🏫 פתיחת חדר חדש</h4>
-                <input type="text" id="room-title-input" placeholder="שם השיעור">
-                <button onclick="createAndOpenRoom()" style="background: var(--success);">פתח חדר</button>
+                <h4 data-i18n="teacher_open_room">👨‍🏫 פתיחת חדר חדש</h4>
+                <input type="text" id="room-title-input" data-i18n-placeholder="placeholder_room_title" placeholder="שם השיעור">
+                <button onclick="createAndOpenRoom()" style="background: var(--success);" data-i18n="btn_open_room">פתח חדר</button>
             </div>
             <div id="student-panel">
-                <h4>🏫 חדרים פעילים</h4>
-                <div id="rooms-list">טוען חדרים...</div>
+                <h4 data-i18n="active_rooms">🏫 חדרים פעילים</h4>
+                <div id="rooms-list" data-i18n="loading_rooms">טוען חדרים...</div>
             </div>
         </div>
 
         <!-- חדר המתנה -->
         <div id="waiting-room-section" class="hidden" style="text-align: center; padding: 40px;">
-            <h3 style="color: var(--warning);">⏳ ממתין לאישור המורה...</h3>
-            <button onclick="leaveRoom()" style="max-width: 200px; margin: 20px auto; background: var(--danger);">בטל ועזוב</button>
+            <h3 style="color: var(--warning);" data-i18n="waiting_teacher_approval">⏳ ממתין לאישור המורה...</h3>
+            <button onclick="leaveRoom()" style="max-width: 200px; margin: 20px auto; background: var(--danger);" data-i18n="btn_cancel_leave">בטל ועזוב</button>
         </div>
 
         <!-- חלון השיעור -->
@@ -97,8 +116,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 id="current-room-title" style="margin: 0; color: var(--primary);">שם החדר</h3>
                 <div>
-                    <button id="raise-hand-btn" onclick="toggleRaiseHand()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--warning); color: #000;">🙋‍♂️ הרם יד</button>
-                    <button onclick="leaveRoom()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--danger); margin-left: 8px;">צא מהחדר 🚪</button>
+                    <button id="raise-hand-btn" onclick="toggleRaiseHand()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--warning); color: #000;" data-i18n="btn_raise_hand">🙋‍♂️ הרם יד</button>
+                    <button onclick="leaveRoom()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--danger); margin-left: 8px;" data-i18n="btn_leave_room">צא מהחדר 🚪</button>
                 </div>
             </div>
             
@@ -109,29 +128,29 @@
                         <div id="video-user-label" style="background: rgba(0,0,0,0.85); color: #fff; padding: 8px; font-weight: bold; text-align: center; font-size: 14px;">טוען שם...</div>
                     </div>
                     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                        <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning); color: #000; padding: 8px;">📷 כבה מצלמה</button>
-                        <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning); color: #000; padding: 8px;">🎤 השתק מיקרופון</button>
+                        <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning); color: #000; padding: 8px;" data-i18n="btn_cam_off">📷 כבה מצלמה</button>
+                        <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning); color: #000; padding: 8px;" data-i18n="btn_mic_mute">🎤 השתק מיקרופון</button>
                     </div>
                     <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                        <button onclick="startScreenShare()" style="padding: 8px;">🖥️ שתף מסך</button>
-                        <button onclick="startRecording()" style="background: var(--success); padding: 8px;">🔴 הקלטה</button>
-                        <button onclick="stopAndSaveRecording()" style="background: var(--danger); padding: 8px;" class="hidden" id="stop-rec-btn">⏹️ עצור הקלטה</button>
+                        <button onclick="startScreenShare()" style="padding: 8px;" data-i18n="btn_share_screen">🖥️ שתף מסך</button>
+                        <button onclick="startRecording()" style="background: var(--success); padding: 8px;" data-i18n="btn_record">🔴 הקלטה</button>
+                        <button onclick="stopAndSaveRecording()" style="background: var(--danger); padding: 8px;" class="hidden" id="stop-rec-btn" data-i18n="btn_stop_record">⏹️ עצור הקלטה</button>
                     </div>
 
                     <!-- יוטיוב -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">📺 שיתוף סרטון YouTube</h4>
-                        <div style="display: flex; gap: 8px;"><input type="text" id="youtube-url-input" placeholder="קישור YouTube..." style="margin:0;"><button onclick="shareYouTubeVideo()" style="width: auto; margin:0; background: var(--danger);">הצג</button></div>
+                        <h4 style="margin-bottom: 8px;" data-i18n="youtube_title">📺 שיתוף סרטון YouTube</h4>
+                        <div style="display: flex; gap: 8px;"><input type="text" id="youtube-url-input" data-i18n-placeholder="placeholder_yt" placeholder="קישור YouTube..." style="margin:0;"><button onclick="shareYouTubeVideo()" style="width: auto; margin:0; background: var(--danger);" data-i18n="btn_show">הצג</button></div>
                         <div id="youtube-player-container" style="margin-top: 10px;" class="hidden"><iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe></div>
                     </div>
 
                     <!-- לוח לבן -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h4 style="margin: 0;">🎨 לוח לבן שיתופי</h4>
+                            <h4 style="margin: 0;" data-i18n="whiteboard_title">🎨 לוח לבן שיתופי</h4>
                             <div>
                                 <input type="color" id="brush-color" value="#4f46e5" style="display: inline-block; width: 35px; height: 30px; padding: 0; vertical-align: middle;">
-                                <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger);">נקה</button>
+                                <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger);" data-i18n="btn_clear">נקה</button>
                             </div>
                         </div>
                         <canvas id="whiteboard-canvas" height="200"></canvas>
@@ -139,48 +158,48 @@
 
                     <!-- PDF -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">📄 הצגת PDF</h4>
+                        <h4 style="margin-bottom: 8px;" data-i18n="pdf_title">📄 הצגת PDF</h4>
                         <input type="file" id="pdf-upload" accept="application/pdf" style="margin-bottom: 8px; padding: 6px;">
                         <canvas id="pdf-canvas" style="max-height: 220px; object-fit: contain;"></canvas>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;" id="pdf-controls" class="hidden">
-                            <button onclick="prevPage()" style="width: auto; padding: 6px 12px; margin: 0;">◀ קודם</button>
+                            <button onclick="prevPage()" style="width: auto; padding: 6px 12px; margin: 0;" data-i18n="btn_pdf_prev">◀ קודם</button>
                             <span id="pdf-page-info" style="font-weight: bold; font-size: 14px;">עמוד 0 מתוך 0</span>
-                            <button onclick="nextPage()" style="width: auto; padding: 6px 12px; margin: 0;">הבא ▶</button>
+                            <button onclick="nextPage()" style="width: auto; padding: 6px 12px; margin: 0;" data-i18n="btn_pdf_next">הבא ▶</button>
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <div class="tool-box hidden" id="teacher-waiting-box">
-                        <h4 style="margin-bottom: 8px; color: var(--warning);">⏳ תלמידים ממתינים</h4>
-                        <div id="waiting-students-list">אין תלמידים ממתינים.</div>
+                        <h4 style="margin-bottom: 8px; color: var(--warning);" data-i18n="waiting_students_title">⏳ תלמידים ממתינים</h4>
+                        <div id="waiting-students-list" data-i18n="no_waiting_students">אין תלמידים ממתינים.</div>
                     </div>
 
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <h4 style="margin: 0;">👥 משתתפים וחיוויי שליטה</h4>
-                            <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;">הפק דוח 📊</button>
+                            <h4 style="margin: 0;" data-i18n="participants_title">👥 משתתפים וחיוויי שליטה</h4>
+                            <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;" data-i18n="btn_report">הפק דוח 📊</button>
                         </div>
                         <div id="participants-list" style="max-height: 180px; overflow-y: auto;"></div>
                     </div>
 
                     <!-- סקרים -->
                     <div class="tool-box" id="poll-container">
-                        <h4 style="margin-bottom: 6px;">📊 סקר כיתתי חי</h4>
+                        <h4 style="margin-bottom: 6px;" data-i18n="poll_title">📊 סקר כיתתי חי</h4>
                         <div id="teacher-poll-creator" class="hidden">
-                            <input type="text" id="poll-question" placeholder="שאלה">
-                            <input type="text" id="poll-opt1" placeholder="תשובה א'">
-                            <input type="text" id="poll-opt2" placeholder="תשובה ב'">
-                            <button onclick="publishPoll()" style="background: var(--success); padding: 6px;">הפעל סקר</button>
+                            <input type="text" id="poll-question" data-i18n-placeholder="placeholder_poll_q" placeholder="שאלה">
+                            <input type="text" id="poll-opt1" data-i18n-placeholder="placeholder_poll_opt1" placeholder="תשובה א'">
+                            <input type="text" id="poll-opt2" data-i18n-placeholder="placeholder_poll_opt2" placeholder="תשובה ב'">
+                            <button onclick="publishPoll()" style="background: var(--success); padding: 6px;" data-i18n="btn_publish_poll">הפעל סקר</button>
                         </div>
-                        <div id="student-poll-taker"><p style="color: var(--muted); font-size: 13px; margin: 0;">אין סקר פעיל.</p></div>
+                        <div id="student-poll-taker"><p style="color: var(--muted); font-size: 13px; margin: 0;" data-i18n="no_active_poll">אין סקר פעיל.</p></div>
                         <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
                     </div>
 
                     <!-- תמלול -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <h4 style="margin: 0;">🗣️ תמלול</h4>
+                            <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול</h4>
                             <div style="display: flex; gap: 4px; align-items: center;">
                                 <select id="transcript-lang" style="margin: 0; padding: 2px 4px; font-size: 11px; width: auto;" onchange="changeTranscriptLang(this.value)">
                                     <option value="he-IL">עברית 🇮🇱</option>
@@ -195,26 +214,26 @@
                                     <option value="pt-BR">פורטוגזית 🇧🇷</option>
                                     <option value="zh-CN">סינית 🇨🇳</option>
                                 </select>
-                                <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;">הפעל</button>
-                                <button onclick="downloadTranscript()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--muted); margin: 0;">שמור</button>
+                                <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;" data-i18n="btn_transcript_start">הפעל</button>
+                                <button onclick="downloadTranscript()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--muted); margin: 0;" data-i18n="btn_save">שמור</button>
                             </div>
                         </div>
-                        <div id="transcript-messages" class="transcript-box">תמלול מופסק...</div>
+                        <div id="transcript-messages" class="transcript-box" data-i18n="transcript_stopped">תמלול מופסק...</div>
                     </div>
 
                     <!-- צ'אט -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">💬 צ'אט</h4>
+                        <h4 style="margin-bottom: 8px;" data-i18n="chat_title">💬 צ'אט</h4>
                         <div id="chat-messages" class="chat-box"></div>
-                        <input type="text" id="chat-input" placeholder="הקלד הודעה...">
-                        <button onclick="sendChatMessage()" style="padding: 6px;">שלח</button>
+                        <input type="text" id="chat-input" data-i18n-placeholder="placeholder_chat" placeholder="הקלד הודעה...">
+                        <button onclick="sendChatMessage()" style="padding: 6px;" data-i18n="btn_send">שלח</button>
                     </div>
 
                     <!-- מחשבון -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;">🧮 מחשבון מדעי</h4>
-                        <input type="text" id="calc-input" placeholder="למשל: Math.sqrt(144)">
-                        <button onclick="calculateMath()" style="background: #8b5cf6; padding: 6px;">חשב</button>
+                        <h4 style="margin-bottom: 8px;" data-i18n="calc_title">🧮 מחשבון מדעי</h4>
+                        <input type="text" id="calc-input" data-i18n-placeholder="placeholder_calc" placeholder="למשל: Math.sqrt(144)">
+                        <button onclick="calculateMath()" style="background: #8b5cf6; padding: 6px;" data-i18n="btn_calc">חשב</button>
                         <p id="calc-result" style="font-weight: bold; font-size: 14px; color: var(--primary); margin: 2px 0 0 0;"></p>
                     </div>
                 </div>
@@ -225,6 +244,781 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         const supabase = createClient('https://ufivtmlumzhdsljjckqv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaXZ0bWx1bXpoZHNsampja3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIxMjEsImV4cCI6MjEwMzUwODEyMX0.qW-A_JdOZifQtkAmPku6XJWDV-_AVfI8M8GGMdSNLIw');
+
+        // מילון תרגומים מלא לכלל השפות במערכת
+        const translations = {
+            he: {
+                app_title: "🎓 כיתה וירטואלית חכמה",
+                toggle_theme: "🌓 מצב כהה / בהיר",
+                auth_login_title: "התחברות למערכת",
+                auth_register_title: "הרשמה למערכת",
+                placeholder_email: "אימייל",
+                placeholder_password: "סיסמה",
+                placeholder_fullname: "שם מלא",
+                role_student: "תלמיד 👨‍🎓",
+                role_teacher: "מורה 👨‍🏫",
+                btn_login: "התחבר",
+                btn_register: "הירשם",
+                link_forgot: "שכחת סיסמה?",
+                btn_toggle_auth: "עבור להרשמה / התחברות",
+                reset_title: "הגדרת סיסמה חדשה",
+                placeholder_new_password: "סיסמה חדשה (לפחות 6 תווים)",
+                btn_save_password: "שמור סיסמה",
+                welcome_prefix: "שלום",
+                btn_logout: "התנתק",
+                currency_title: "💱 שערי מטבעות חיים",
+                loading_rates: "טוען שערים...",
+                teacher_open_room: "👨‍🏫 פתיחת חדר חדש",
+                placeholder_room_title: "שם השיעור",
+                btn_open_room: "פתח חדר",
+                active_rooms: "🏫 חדרים פעילים",
+                loading_rooms: "טוען חדרים...",
+                waiting_teacher_approval: "⏳ ממתין לאישור המורה...",
+                btn_cancel_leave: "בטל ועזוב",
+                btn_raise_hand: "🙋‍♂️ הרם יד",
+                btn_lower_hand: "🙋‍♂️ הורד יד",
+                btn_leave_room: "צא מהחדר 🚪",
+                btn_cam_off: "📷 כבה מצלמה",
+                btn_cam_on: "📷 הפעל מצלמה",
+                btn_mic_mute: "🎤 השתק מיקרופון",
+                btn_mic_unmute: "🎤 הפעל מיקרופון",
+                btn_share_screen: "🖥️ שתף מסך",
+                btn_record: "🔴 הקלטה",
+                btn_stop_record: "⏹️ עצור הקלטה",
+                youtube_title: "📺 שיתוף סרטון YouTube",
+                placeholder_yt: "קישור YouTube...",
+                btn_show: "הצג",
+                whiteboard_title: "🎨 לוח לבן שיתופי",
+                btn_clear: "נקה",
+                pdf_title: "📄 הצגת PDF",
+                btn_pdf_prev: "◀ קודם",
+                btn_pdf_next: "הבא ▶",
+                waiting_students_title: "⏳ תלמידים ממתינים",
+                no_waiting_students: "אין תלמידים ממתינים.",
+                participants_title: "👥 משתתפים וחיוויי שליטה",
+                btn_report: "הפק דוח 📊",
+                poll_title: "📊 סקר כיתתי חי",
+                placeholder_poll_q: "שאלה",
+                placeholder_poll_opt1: "תשובה א'",
+                placeholder_poll_opt2: "תשובה ב'",
+                btn_publish_poll: "הפעל סקר",
+                no_active_poll: "אין סקר פעיל.",
+                transcript_title: "🗣️ תמלול",
+                btn_transcript_start: "הפעל",
+                btn_transcript_stop: "עצור",
+                btn_save: "שמור",
+                transcript_stopped: "תמלול מופסק...",
+                chat_title: "💬 צ'אט",
+                placeholder_chat: "הקלד הודעה...",
+                btn_send: "שלח",
+                calc_title: "🧮 מחשבון מדעי",
+                placeholder_calc: "למשל: Math.sqrt(144)",
+                btn_calc: "חשב"
+            },
+            en: {
+                app_title: "🎓 Smart Virtual Classroom",
+                toggle_theme: "🌓 Dark / Light Mode",
+                auth_login_title: "System Login",
+                auth_register_title: "System Registration",
+                placeholder_email: "Email",
+                placeholder_password: "Password",
+                placeholder_fullname: "Full Name",
+                role_student: "Student 👨‍🎓",
+                role_teacher: "Teacher 👨‍🏫",
+                btn_login: "Login",
+                btn_register: "Register",
+                link_forgot: "Forgot Password?",
+                btn_toggle_auth: "Switch to Register / Login",
+                reset_title: "Set New Password",
+                placeholder_new_password: "New Password (min 6 chars)",
+                btn_save_password: "Save Password",
+                welcome_prefix: "Hello",
+                btn_logout: "Logout",
+                currency_title: "💱 Live Currency Rates",
+                loading_rates: "Loading rates...",
+                teacher_open_room: "👨‍🏫 Open New Room",
+                placeholder_room_title: "Lesson Name",
+                btn_open_room: "Open Room",
+                active_rooms: "🏫 Active Rooms",
+                loading_rooms: "Loading rooms...",
+                waiting_teacher_approval: "⏳ Waiting for teacher approval...",
+                btn_cancel_leave: "Cancel & Leave",
+                btn_raise_hand: "🙋‍♂️ Raise Hand",
+                btn_lower_hand: "🙋‍♂️ Lower Hand",
+                btn_leave_room: "Leave Room 🚪",
+                btn_cam_off: "📷 Turn Off Camera",
+                btn_cam_on: "📷 Turn On Camera",
+                btn_mic_mute: "🎤 Mute Mic",
+                btn_mic_unmute: "🎤 Unmute Mic",
+                btn_share_screen: "🖥️ Share Screen",
+                btn_record: "🔴 Record",
+                btn_stop_record: "⏹️ Stop Recording",
+                youtube_title: "📺 Share YouTube Video",
+                placeholder_yt: "YouTube link...",
+                btn_show: "Show",
+                whiteboard_title: "🎨 Collaborative Whiteboard",
+                btn_clear: "Clear",
+                pdf_title: "📄 PDF Viewer",
+                btn_pdf_prev: "◀ Prev",
+                btn_pdf_next: "Next ▶",
+                waiting_students_title: "⏳ Waiting Students",
+                no_waiting_students: "No waiting students.",
+                participants_title: "👥 Participants & Controls",
+                btn_report: "Get Report 📊",
+                poll_title: "📊 Live Class Poll",
+                placeholder_poll_q: "Question",
+                placeholder_poll_opt1: "Option A",
+                placeholder_poll_opt2: "Option B",
+                btn_publish_poll: "Launch Poll",
+                no_active_poll: "No active poll.",
+                transcript_title: "🗣️ Transcript",
+                btn_transcript_start: "Start",
+                btn_transcript_stop: "Stop",
+                btn_save: "Save",
+                transcript_stopped: "Transcription stopped...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Type a message...",
+                btn_send: "Send",
+                calc_title: "🧮 Scientific Calculator",
+                placeholder_calc: "e.g., Math.sqrt(144)",
+                btn_calc: "Calculate"
+            },
+            ar: {
+                app_title: "🎓 الفصل الافتراضي الذكي",
+                toggle_theme: "🌓 الوضع الداكن / الفاتح",
+                auth_login_title: "تسجيل الدخول للنظام",
+                auth_register_title: "تسجيل في النظام",
+                placeholder_email: "البريد الإلكتروني",
+                placeholder_password: "كلمة المرور",
+                placeholder_fullname: "الاسم الكامل",
+                role_student: "طالب 👨‍🎓",
+                role_teacher: "معلم 👨‍🏫",
+                btn_login: "تسجيل الدخول",
+                btn_register: "تسجيل",
+                link_forgot: "هل نسيت كلمة المرور؟",
+                btn_toggle_auth: "التبديل إلى تسجيل / دخول",
+                reset_title: "تعيين كلمة مرور جديدة",
+                placeholder_new_password: "كلمة مرور جديدة (6 أحرف على الأقل)",
+                btn_save_password: "حفظ كلمة المرور",
+                welcome_prefix: "أهلاً",
+                btn_logout: "تسجيل الخروج",
+                currency_title: "💱 أسعار العملات المباشرة",
+                loading_rates: "جاري تحميل الأسعار...",
+                teacher_open_room: "👨‍🏫 فتح غرفة جديدة",
+                placeholder_room_title: "اسم الدرس",
+                btn_open_room: "فتح الغرفة",
+                active_rooms: "🏫 الغرف النشطة",
+                loading_rooms: "جاري تحميل الغرف...",
+                waiting_teacher_approval: "⏳ في انتظار موافقة المعلم...",
+                btn_cancel_leave: "إلغاء ومغادرة",
+                btn_raise_hand: "🙋‍♂️ رفع اليد",
+                btn_lower_hand: "🙋‍♂️ خفض اليد",
+                btn_leave_room: "مغادرة الغرفة 🚪",
+                btn_cam_off: "📷 إيقاف الكاميرا",
+                btn_cam_on: "📷 تشغيل الكاميرا",
+                btn_mic_mute: "🎤 كتم الميكروفون",
+                btn_mic_unmute: "🎤 إلغاء كتم الميكروفون",
+                btn_share_screen: "🖥️ مشاركة الشاشة",
+                btn_record: "🔴 تسجيل",
+                btn_stop_record: "⏹️ إيقاف التسجيل",
+                youtube_title: "📺 مشاركة فيديو يوتيوب",
+                placeholder_yt: "رابط يوتيوب...",
+                btn_show: "عرض",
+                whiteboard_title: "🎨 لوحة بيضاء تعاونية",
+                btn_clear: "مسح",
+                pdf_title: "📄 عرض ملف PDF",
+                btn_pdf_prev: "◀ السابق",
+                btn_pdf_next: "التالي ▶",
+                waiting_students_title: "⏳ الطلاب المنتظرون",
+                no_waiting_students: "لا يوجد طلاب في الانتظار.",
+                participants_title: "👥 المشاركون وأدوات التحكم",
+                btn_report: "إصدار التقرير 📊",
+                poll_title: "📊 استطلاع رأي مباشر",
+                placeholder_poll_q: "السؤال",
+                placeholder_poll_opt1: "الخيار أ",
+                placeholder_poll_opt2: "الخيار ب",
+                btn_publish_poll: "إطلاق الاستطلاع",
+                no_active_poll: "لا يوجد استطلاع نشط.",
+                transcript_title: "🗣️ النص التلقائي",
+                btn_transcript_start: "تشغيل",
+                btn_transcript_stop: "إيقاف",
+                btn_save: "حفظ",
+                transcript_stopped: "تم إيقاف النسخ...",
+                chat_title: "💬 الدردشة",
+                placeholder_chat: "اكتب رسالة...",
+                btn_send: "إرسال",
+                calc_title: "🧮 الحاسبة العلمية",
+                placeholder_calc: "مثال: Math.sqrt(144)",
+                btn_calc: "احسب"
+            },
+            ru: {
+                app_title: "🎓 Умный виртуальный класс",
+                toggle_theme: "🌓 Темная / Светлая тема",
+                auth_login_title: "Вход в систему",
+                auth_register_title: "Регистрация в системе",
+                placeholder_email: "Эл. почта",
+                placeholder_password: "Пароль",
+                placeholder_fullname: "Полное имя",
+                role_student: "Студент 👨‍🎓",
+                role_teacher: "Учитель 👨‍🏫",
+                btn_login: "Войти",
+                btn_register: "Зарегистрироваться",
+                link_forgot: "Забыли пароль?",
+                btn_toggle_auth: "Переключить вход / регистрацию",
+                reset_title: "Установить новый пароль",
+                placeholder_new_password: "Новый пароль (мин. 6 символов)",
+                btn_save_password: "Сохранить пароль",
+                welcome_prefix: "Привет",
+                btn_logout: "Выйти",
+                currency_title: "💱 Курсы валют в реальном времени",
+                loading_rates: "Загрузка курсов...",
+                teacher_open_room: "👨‍🏫 Создать новую комнату",
+                placeholder_room_title: "Название урока",
+                btn_open_room: "Создать комнату",
+                active_rooms: "🏫 Активные комнаты",
+                loading_rooms: "Загрузка комнат...",
+                waiting_teacher_approval: "⏳ Ожидание одобрения учителя...",
+                btn_cancel_leave: "Отмена и выход",
+                btn_raise_hand: "🙋‍♂️ Поднять руку",
+                btn_lower_hand: "🙋‍♂️ Опустить руку",
+                btn_leave_room: "Покинуть комнату 🚪",
+                btn_cam_off: "📷 Выключить камеру",
+                btn_cam_on: "📷 Включить камеру",
+                btn_mic_mute: "🎤 Выключить микрофон",
+                btn_mic_unmute: "🎤 Включить микрофон",
+                btn_share_screen: "🖥️ Демонстрация экрана",
+                btn_record: "🔴 Запись",
+                btn_stop_record: "⏹️ Стоп запись",
+                youtube_title: "📺 Поделиться видео YouTube",
+                placeholder_yt: "Ссылка YouTube...",
+                btn_show: "Показать",
+                whiteboard_title: "🎨 Совместная доска",
+                btn_clear: "Очистить",
+                pdf_title: "📄 Просмотр PDF",
+                btn_pdf_prev: "◀ Назад",
+                btn_pdf_next: "Вперед ▶",
+                waiting_students_title: "⏳ Ожидающие студенты",
+                no_waiting_students: "Нет ожидающих студентов.",
+                participants_title: "👥 Участники и управление",
+                btn_report: "Отчет 📊",
+                poll_title: "📊 Живой опрос",
+                placeholder_poll_q: "Вопрос",
+                placeholder_poll_opt1: "Вариант А",
+                placeholder_poll_opt2: "Вариант Б",
+                btn_publish_poll: "Запустить опрос",
+                no_active_poll: "Нет активного опроса.",
+                transcript_title: "🗣️ Расшифровка",
+                btn_transcript_start: "Старт",
+                btn_transcript_stop: "Стоп",
+                btn_save: "Сохранить",
+                transcript_stopped: "Расшифровка остановлена...",
+                chat_title: "💬 Чат",
+                placeholder_chat: "Введите сообщение...",
+                btn_send: "Отправить",
+                calc_title: "🧮 Научный калькулятор",
+                placeholder_calc: "напр.: Math.sqrt(144)",
+                btn_calc: "Посчитать"
+            },
+            es: {
+                app_title: "🎓 Aula Virtual Inteligente",
+                toggle_theme: "🌓 Modo Oscuro / Claro",
+                auth_login_title: "Iniciar Sesión",
+                auth_register_title: "Registro del Sistema",
+                placeholder_email: "Correo electrónico",
+                placeholder_password: "Contraseña",
+                placeholder_fullname: "Nombre completo",
+                role_student: "Estudiante 👨‍🎓",
+                role_teacher: "Profesor 👨‍🏫",
+                btn_login: "Entrar",
+                btn_register: "Registrarse",
+                link_forgot: "¿Olvidaste tu contraseña?",
+                btn_toggle_auth: "Cambiar a Registro / Login",
+                reset_title: "Establecer Nueva Contraseña",
+                placeholder_new_password: "Nueva contraseña (mín. 6 carac.)",
+                btn_save_password: "Guardar Contraseña",
+                welcome_prefix: "Hola",
+                btn_logout: "Cerrar Sesión",
+                currency_title: "💱 Tipos de Cambio en Vivo",
+                loading_rates: "Cargando tasas...",
+                teacher_open_room: "👨‍🏫 Abrir Nueva Sala",
+                placeholder_room_title: "Nombre de la lección",
+                btn_open_room: "Abrir Sala",
+                active_rooms: "🏫 Salas Activas",
+                loading_rooms: "Cargando salas...",
+                waiting_teacher_approval: "⏳ Esperando aprobación del profesor...",
+                btn_cancel_leave: "Cancelar y Salir",
+                btn_raise_hand: "🙋‍♂️ Levantar Mano",
+                btn_lower_hand: "🙋‍♂️ Bajarr Mano",
+                btn_leave_room: "Salir de la Sala 🚪",
+                btn_cam_off: "📷 Apagar Cámara",
+                btn_cam_on: "📷 Encender Cámara",
+                btn_mic_mute: "🎤 Silenciar Mic",
+                btn_mic_unmute: "🎤 Activar Mic",
+                btn_share_screen: "🖥️ Compartir Pantalla",
+                btn_record: "🔴 Grabar",
+                btn_stop_record: "⏹️ Detener Grabación",
+                youtube_title: "📺 Compartir Video de YouTube",
+                placeholder_yt: "Enlace de YouTube...",
+                btn_show: "Mostrar",
+                whiteboard_title: "🎨 Pizarra Colaborativa",
+                btn_clear: "Limpiar",
+                pdf_title: "📄 Lector de PDF",
+                btn_pdf_prev: "◀ Ant",
+                btn_pdf_next: "Sig ▶",
+                waiting_students_title: "⏳ Estudiantes en Espera",
+                no_waiting_students: "No hay estudiantes esperando.",
+                participants_title: "👥 Participantes y Controles",
+                btn_report: "Obtener Reporte 📊",
+                poll_title: "📊 Encuesta en Vivo",
+                placeholder_poll_q: "Pregunta",
+                placeholder_poll_opt1: "Opción A",
+                placeholder_poll_opt2: "Opción B",
+                btn_publish_poll: "Lanzar Encuesta",
+                no_active_poll: "No hay encuesta activa.",
+                transcript_title: "🗣️ Transcripción",
+                btn_transcript_start: "Iniciar",
+                btn_transcript_stop: "Detener",
+                btn_save: "Guardar",
+                transcript_stopped: "Transcripción detenida...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Escribe un mensaje...",
+                btn_send: "Enviar",
+                calc_title: "🧮 Calculadora Científica",
+                placeholder_calc: "ej., Math.sqrt(144)",
+                btn_calc: "Calcular"
+            },
+            fr: {
+                app_title: "🎓 Classe Virtuelle Intelligente",
+                toggle_theme: "🌓 Mode Sombre / Clair",
+                auth_login_title: "Connexion au Système",
+                auth_register_title: "Inscription au Système",
+                placeholder_email: "E-mail",
+                placeholder_password: "Mot de passe",
+                placeholder_fullname: "Nom complet",
+                role_student: "Étudiant 👨‍🎓",
+                role_teacher: "Enseignant 👨‍🏫",
+                btn_login: "Connexion",
+                btn_register: "S'inscrire",
+                link_forgot: "Mot de passe oublié ?",
+                btn_toggle_auth: "Basculer Inscription / Connexion",
+                reset_title: "Définir un Nouveau Mot de Passe",
+                placeholder_new_password: "Nouveau mot de passe (min 6 carac.)",
+                btn_save_password: "Enregistrer le mot de passe",
+                welcome_prefix: "Bonjour",
+                btn_logout: "Déconnexion",
+                currency_title: "💱 Taux de Change en Direct",
+                loading_rates: "Chargement des taux...",
+                teacher_open_room: "👨‍🏫 Ouvrir une Nouvelle Salle",
+                placeholder_room_title: "Nom du cours",
+                btn_open_room: "Ouvrir la Salle",
+                active_rooms: "🏫 Salles Actives",
+                loading_rooms: "Chargement des salles...",
+                waiting_teacher_approval: "⏳ En attente de l'approbation du professeur...",
+                btn_cancel_leave: "Annuler et Quitter",
+                btn_raise_hand: "🙋‍♂️ Lever la Main",
+                btn_lower_hand: "🙋‍♂️ Baisser la Main",
+                btn_leave_room: "Quitter la Salle 🚪",
+                btn_cam_off: "📷 Éteindre la Caméra",
+                btn_cam_on: "📷 Allumer la Caméra",
+                btn_mic_mute: "🎤 Couper le Micro",
+                btn_mic_unmute: "🎤 Activer le Micro",
+                btn_share_screen: "🖥️ Partager l'Écran",
+                btn_record: "🔴 Enregistrer",
+                btn_stop_record: "⏹️ Arrêter l'Enregistrement",
+                youtube_title: "📺 Partager une Vidéo YouTube",
+                placeholder_yt: "Lien YouTube...",
+                btn_show: "Afficher",
+                whiteboard_title: "🎨 Tableau Blanc Collaboratif",
+                btn_clear: "Effacer",
+                pdf_title: "📄 Lecteur PDF",
+                btn_pdf_prev: "◀ Préc",
+                btn_pdf_next: "Suiv ▶",
+                waiting_students_title: "⏳ Étudiants en Attente",
+                no_waiting_students: "Aucun étudiant en attente.",
+                participants_title: "👥 Participants et Contrôles",
+                btn_report: "Obtenir le Rapport 📊",
+                poll_title: "📊 Sondage en Direct",
+                placeholder_poll_q: "Question",
+                placeholder_poll_opt1: "Option A",
+                placeholder_poll_opt2: "Option B",
+                btn_publish_poll: "Lancer le Sondage",
+                no_active_poll: "Aucun sondage actif.",
+                transcript_title: "🗣️ Transcription",
+                btn_transcript_start: "Démarrer",
+                btn_transcript_stop: "Arrêter",
+                btn_save: "Enregistrer",
+                transcript_stopped: "Transcription arrêtée...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Tapez un message...",
+                btn_send: "Envoyer",
+                calc_title: "🧮 Calculatrice Scientifique",
+                placeholder_calc: "ex., Math.sqrt(144)",
+                btn_calc: "Calculer"
+            },
+            de: {
+                app_title: "🎓 Intelligentes Virtuelles Klassenzimmer",
+                toggle_theme: "🌓 Dunkel- / Hell-Modus",
+                auth_login_title: "System-Anmeldung",
+                auth_register_title: "System-Registrierung",
+                placeholder_email: "E-Mail",
+                placeholder_password: "Passwort",
+                placeholder_fullname: "Vollständiger Name",
+                role_student: "Schüler 👨‍🎓",
+                role_teacher: "Lehrer 👨‍🏫",
+                btn_login: "Anmelden",
+                btn_register: "Registrieren",
+                link_forgot: "Passwort vergessen?",
+                btn_toggle_auth: "Zu Registrierung / Anmeldung wechseln",
+                reset_title: "Neues Passwort festlegen",
+                placeholder_new_password: "Neues Passwort (min. 6 Zeichen)",
+                btn_save_password: "Passwort speichern",
+                welcome_prefix: "Hallo",
+                btn_logout: "Abmelden",
+                currency_title: "💱 Live-Wechselkurse",
+                loading_rates: "Kurse werden geladen...",
+                teacher_open_room: "👨‍🏫 Neuen Raum öffnen",
+                placeholder_room_title: "Lektionsname",
+                btn_open_room: "Raum öffnen",
+                active_rooms: "🏫 Aktive Räume",
+                loading_rooms: "Räume werden geladen...",
+                waiting_teacher_approval: "⏳ Warten auf Genehmigung des Lehrers...",
+                btn_cancel_leave: "Abbrechen & Verlassen",
+                btn_raise_hand: "🙋‍♂️ Hand heben",
+                btn_lower_hand: "🙋‍♂️ Hand senken",
+                btn_leave_room: "Raum verlassen 🚪",
+                btn_cam_off: "📷 Kamera aus",
+                btn_cam_on: "📷 Kamera an",
+                btn_mic_mute: "🎤 Stummschalten",
+                btn_mic_unmute: "🎤 Stummschaltung aufheben",
+                btn_share_screen: "🖥️ Bildschirm teilen",
+                btn_record: "🔴 Aufnehmen",
+                btn_stop_record: "⏹️ Aufnahme stoppen",
+                youtube_title: "📺 YouTube-Video teilen",
+                placeholder_yt: "YouTube-Link...",
+                btn_show: "Anzeigen",
+                whiteboard_title: "🎨 Kollaboratives Whiteboard",
+                btn_clear: "Löschen",
+                pdf_title: "📄 PDF-Betrachter",
+                btn_pdf_prev: "◀ Zurück",
+                btn_pdf_next: "Weiter ▶",
+                waiting_students_title: "⏳ Wartende Schüler",
+                no_waiting_students: "Keine wartenden Schüler.",
+                participants_title: "👥 Teilnehmer & Steuerung",
+                btn_report: "Bericht abrufen 📊",
+                poll_title: "📊 Live-Umfrage",
+                placeholder_poll_q: "Frage",
+                placeholder_poll_opt1: "Option A",
+                placeholder_poll_opt2: "Option B",
+                btn_publish_poll: "Umfrage starten",
+                no_active_poll: "Keine aktive Umfrage.",
+                transcript_title: "🗣️ Transkript",
+                btn_transcript_start: "Start",
+                btn_transcript_stop: "Stopp",
+                btn_save: "Speichern",
+                transcript_stopped: "Transkription gestoppt...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Nachricht eingeben...",
+                btn_send: "Senden",
+                calc_title: "🧮 Wissenschaftlicher Rechner",
+                placeholder_calc: "z.B. Math.sqrt(144)",
+                btn_calc: "Berechnen"
+            },
+            it: {
+                app_title: "🎓 Aula Virtuale Intelligente",
+                toggle_theme: "🌓 Modalità Scura / Chiara",
+                auth_login_title: "Accesso al Sistema",
+                auth_register_title: "Registrazione al Sistema",
+                placeholder_email: "Email",
+                placeholder_password: "Password",
+                placeholder_fullname: "Nome Completo",
+                role_student: "Studente 👨‍🎓",
+                role_teacher: "Insegnante 👨‍🏫",
+                btn_login: "Accedi",
+                btn_register: "Registrati",
+                link_forgot: "Password dimenticata?",
+                btn_toggle_auth: "Passa a Registrazione / Accesso",
+                reset_title: "Imposta Nuova Password",
+                placeholder_new_password: "Nuova password (min 6 caratteri)",
+                btn_save_password: "Salva Password",
+                welcome_prefix: "Ciao",
+                btn_logout: "Esci",
+                currency_title: "💱 Tassi di Cambio in Tempo Reale",
+                loading_rates: "Caricamento tassi...",
+                teacher_open_room: "👨‍🏫 Apri Nuova Stanza",
+                placeholder_room_title: "Nome della lezione",
+                btn_open_room: "Apri Stanza",
+                active_rooms: "🏫 Stanze Attive",
+                loading_rooms: "Caricamento stanze...",
+                waiting_teacher_approval: "⏳ In attesa dell'approvazione del docente...",
+                btn_cancel_leave: "Annulla e Lascia",
+                btn_raise_hand: "🙋‍♂️ Alza la Mano",
+                btn_lower_hand: "🙋‍♂️ Abbassa la Mano",
+                btn_leave_room: "Lascia la Stanza 🚪",
+                btn_cam_off: "📷 Spegni Telecamera",
+                btn_cam_on: "📷 Accendi Telecamera",
+                btn_mic_mute: "🎤 Disattiva Microfono",
+                btn_mic_unmute: "🎤 Attiva Microfono",
+                btn_share_screen: "🖥️ Condividi Schermo",
+                btn_record: "🔴 Registra",
+                btn_stop_record: "⏹️ Stop Registrazione",
+                youtube_title: "📺 Condividi Video YouTube",
+                placeholder_yt: "Link YouTube...",
+                btn_show: "Mostra",
+                whiteboard_title: "🎨 Lavagna Condivisa",
+                btn_clear: "Pulisci",
+                pdf_title: "📄 Visualizzatore PDF",
+                btn_pdf_prev: "◀ Prec",
+                btn_pdf_next: "Succ ▶",
+                waiting_students_title: "⏳ Studenti in Attesa",
+                no_waiting_students: "Nessuno studente in attesa.",
+                participants_title: "👥 Partecipanti e Controlli",
+                btn_report: "Genera Report 📊",
+                poll_title: "📊 Sondaggio in Tempo Reale",
+                placeholder_poll_q: "Domanda",
+                placeholder_poll_opt1: "Opzione A",
+                placeholder_poll_opt2: "Opzione B",
+                btn_publish_poll: "Avvia Sondaggio",
+                no_active_poll: "Nessun sondaggio attivo.",
+                transcript_title: "🗣️ Trascrizione",
+                btn_transcript_start: "Avvia",
+                btn_transcript_stop: "Ferma",
+                btn_save: "Salva",
+                transcript_stopped: "Trascrizione interrotta...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Scrivi un messaggio...",
+                btn_send: "Invia",
+                calc_title: "🧮 Calcolatrice Scientifica",
+                placeholder_calc: "es., Math.sqrt(144)",
+                btn_calc: "Calcola"
+            },
+            pt: {
+                app_title: "🎓 Sala de Aula Virtual Inteligente",
+                toggle_theme: "🌓 Modo Escuro / Claro",
+                auth_login_title: "Login no Sistema",
+                auth_register_title: "Cadastro no Sistema",
+                placeholder_email: "E-mail",
+                placeholder_password: "Senha",
+                placeholder_fullname: "Nome Completo",
+                role_student: "Estudante 👨‍🎓",
+                role_teacher: "Professor 👨‍🏫",
+                btn_login: "Entrar",
+                btn_register: "Cadastrar",
+                link_forgot: "Esqueceu a senha?",
+                btn_toggle_auth: "Alternar para Cadastro / Login",
+                reset_title: "Definir Nova Senha",
+                placeholder_new_password: "Nova senha (mín. 6 caracteres)",
+                btn_save_password: "Salvar Senha",
+                welcome_prefix: "Olá",
+                btn_logout: "Sair",
+                currency_title: "💱 Taxas de Câmbio ao Vivo",
+                loading_rates: "Carregando taxas...",
+                teacher_open_room: "👨‍🏫 Abrir Nova Sala",
+                placeholder_room_title: "Nome da aula",
+                btn_open_room: "Abrir Sala",
+                active_rooms: "🏫 Salas Ativas",
+                loading_rooms: "Carregando salas...",
+                waiting_teacher_approval: "⏳ Aguardando aprovação do professor...",
+                btn_cancel_leave: "Cancelar e Sair",
+                btn_raise_hand: "🙋‍♂️ Levantar a Mão",
+                btn_lower_hand: "🙋‍♂️ Abaixar a Mão",
+                btn_leave_room: "Sair da Sala 🚪",
+                btn_cam_off: "📷 Desligar Câmera",
+                btn_cam_on: "📷 Ligar Câmera",
+                btn_mic_mute: "🎤 Mutar Microfone",
+                btn_mic_unmute: "🎤 Desmutar Microfone",
+                btn_share_screen: "🖥️ Compartilhar Tela",
+                btn_record: "🔴 Gravar",
+                btn_stop_record: "⏹️ Parar Gravação",
+                youtube_title: "📺 Compartilhar Vídeo do YouTube",
+                placeholder_yt: "Link do YouTube...",
+                btn_show: "Mostrar",
+                whiteboard_title: "🎨 Lousa Colaborativa",
+                btn_clear: "Limpar",
+                pdf_title: "📄 Visualizador de PDF",
+                btn_pdf_prev: "◀ Ant",
+                btn_pdf_next: "Próx ▶",
+                waiting_students_title: "⏳ Alunos Aguardando",
+                no_waiting_students: "Nenhum aluno aguardando.",
+                participants_title: "👥 Participantes e Controles",
+                btn_report: "Gerar Relatório 📊",
+                poll_title: "📊 Enquete ao Vivo",
+                placeholder_poll_q: "Pergunta",
+                placeholder_poll_opt1: "Opção A",
+                placeholder_poll_opt2: "Opção B",
+                btn_publish_poll: "Lançar Enquete",
+                no_active_poll: "Nenhuma enquete ativa.",
+                transcript_title: "🗣️ Transcrição",
+                btn_transcript_start: "Iniciar",
+                btn_transcript_stop: "Parar",
+                btn_save: "Salvar",
+                transcript_stopped: "Transcrição parada...",
+                chat_title: "💬 Chat",
+                placeholder_chat: "Digite uma mensagem...",
+                btn_send: "Enviar",
+                calc_title: "🧮 Calculadora Científica",
+                placeholder_calc: "ex., Math.sqrt(144)",
+                btn_calc: "Calcular"
+            },
+            am: {
+                app_title: "🎓 ብելህ ምናባዊ ክፍል",
+                toggle_theme: "🌓 የጨለማ / ብርሃን ሁኔታ",
+                auth_login_title: "ስርዓት መግቢያ",
+                auth_register_title: "ስርዓት ምዝገባ",
+                placeholder_email: "ኢሜይል",
+                placeholder_password: "የይለፍ ቃል",
+                placeholder_fullname: "ሙሉ ስም",
+                role_student: "ተማሪ 👨‍🎓",
+                role_teacher: "መምህር 👨‍🏫",
+                btn_login: "ግባ",
+                btn_register: "መዝግብ",
+                link_forgot: "የይለፍ ቃል ረስተዋል?",
+                btn_toggle_auth: "ወደ ምዝገባ / መግቢያ ቀይር",
+                reset_title: "አዲስ የይለፍ ቃል ማዘጋጀት",
+                placeholder_new_password: "አዲስ የይለፍ ቃል (ቢያንስ 6 ፊደላት)",
+                btn_save_password: "የይለፍ ቃል አስቀምጥ",
+                welcome_prefix: "ሰላም",
+                btn_logout: "ውጣ",
+                currency_title: "💱 የቀጥታ ምንዛሬ ዋጋዎች",
+                loading_rates: "ዋጋዎችን በመጫን ላይ...",
+                teacher_open_room: "👨‍🏫 አዲስ ክፍል ክፈት",
+                placeholder_room_title: "የክፍል ስም",
+                btn_open_room: "ክፍል ክፈት",
+                active_rooms: "🏫 ንቁ ክፍሎች",
+                loading_rooms: "ክፍሎችን በመጫን ላይ...",
+                waiting_teacher_approval: "⏳ የመምህር ፈቃድ በመጠባበቅ ላይ...",
+                btn_cancel_leave: "ሰርዝ እና ውጣ",
+                btn_raise_hand: "🙋‍♂️ እጅ አኑር",
+                btn_lower_hand: "🙋‍♂️ እጅ ዝቅ አድርግ",
+                btn_leave_room: "ከክፍል ውጣ 🚪",
+                btn_cam_off: "📷 ካሜራ አጥፉ",
+                btn_cam_on: "📷 ካሜራ አብራ",
+                btn_mic_mute: "🎤 ማይክ አጥፉ",
+                btn_mic_unmute: "🎤 ማይክ አብራ",
+                btn_share_screen: "🖥️ ማያ ገጽ አጋራ",
+                btn_record: "🔴 መዝግብ",
+                btn_stop_record: "⏹️ መቅዳት አቁም",
+                youtube_title: "📺 የዩቲዩብ ቪዲዮ አጋራ",
+                placeholder_yt: "የዩቲዩብ ሊንክ...",
+                btn_show: "አሳይ",
+                whiteboard_title: "🎨 የትብብር ሰሌዳ",
+                btn_clear: "አጽዳ",
+                pdf_title: "📄 ፒዲኤፍ ማየት",
+                btn_pdf_prev: "◀ ኋላ",
+                btn_pdf_next: "ቀጣይ ▶",
+                waiting_students_title: "⏳ የሚጠብቁ ተማሪዎች",
+                no_waiting_students: "የሚጠብቁ ተማሪዎች የሉም።",
+                participants_title: "👥 ተሳታፊዎች እና መቆጣጠሪያዎች",
+                btn_report: "ዘገባ አግኝ 📊",
+                poll_title: "📊 የቀጥታ ክፍል ድምጽ መስጫ",
+                placeholder_poll_q: "ጥያቄ",
+                placeholder_poll_opt1: "አማራጭ 1",
+                placeholder_poll_opt2: "አማራጭ 2",
+                btn_publish_poll: "ድምጽ መስጫ ጀምር",
+                no_active_poll: "ምንም ንቁ ድምጽ መስጫ የለም።",
+                transcript_title: "🗣️ ትርጉም",
+                btn_transcript_start: "ጀምር",
+                btn_transcript_stop: "አቁም",
+                btn_save: "አስቀምጥ",
+                transcript_stopped: "ጽሑፍ መቅዳት ቆሟል...",
+                chat_title: "💬 ቻት",
+                placeholder_chat: "መልእክት ይጻፉ...",
+                btn_send: "ላክ",
+                calc_title: "🧮 ሳይንሳዊ ካልኩሌተር",
+                placeholder_calc: "ለምሳሌ: Math.sqrt(144)",
+                btn_calc: "አስላ"
+            },
+            zh: {
+                app_title: "🎓 智能虚拟课堂",
+                toggle_theme: "🌓 深色 / 浅色模式",
+                auth_login_title: "系统登录",
+                auth_register_title: "系统注册",
+                placeholder_email: "电子邮箱",
+                placeholder_password: "密码",
+                placeholder_fullname: "全名",
+                role_student: "学生 👨‍🎓",
+                role_teacher: "教师 👨‍🏫",
+                btn_login: "登录",
+                btn_register: "注册",
+                link_forgot: "忘记密码？",
+                btn_toggle_auth: "切换注册 / 登录",
+                reset_title: "设置新密码",
+                placeholder_new_password: "新密码（至少6位）",
+                btn_save_password: "保存密码",
+                welcome_prefix: "你好",
+                btn_logout: "退出登录",
+                currency_title: "💱 实时汇率",
+                loading_rates: "正在加载汇率...",
+                teacher_open_room: "👨‍🏫 打开新房间",
+                placeholder_room_title: "课程名称",
+                btn_open_room: "打开房间",
+                active_rooms: "🏫 活跃房间",
+                loading_rooms: "正在加载房间...",
+                waiting_teacher_approval: "⏳ 等待老师批准...",
+                btn_cancel_leave: "取消并离开",
+                btn_raise_hand: "🙋‍♂️ 举手",
+                btn_lower_hand: "🙋‍♂️ 放下手",
+                btn_leave_room: "离开房间 🚪",
+                btn_cam_off: "📷 关闭摄像头",
+                btn_cam_on: "📷 开启摄像头",
+                btn_mic_mute: "🎤 静音麦克风",
+                btn_mic_unmute: "🎤 取消静音",
+                btn_share_screen: "🖥️ 共享屏幕",
+                btn_record: "🔴 录制",
+                btn_stop_record: "⏹️ 停止录制",
+                youtube_title: "📺 分享YouTube视频",
+                placeholder_yt: "YouTube链接...",
+                btn_show: "显示",
+                whiteboard_title: "🎨 协作白板",
+                btn_clear: "清空",
+                pdf_title: "📄 PDF阅读器",
+                btn_pdf_prev: "◀ 上一页",
+                btn_pdf_next: "下一页 ▶",
+                waiting_students_title: "⏳ 等待中的学生",
+                no_waiting_students: "没有等待的学生。",
+                participants_title: "👥 参与者与控制",
+                btn_report: "生成报告 📊",
+                poll_title: "📊 课堂实时投票",
+                placeholder_poll_q: "问题",
+                placeholder_poll_opt1: "选项 A",
+                placeholder_poll_opt2: "选项 B",
+                btn_publish_poll: "发起投票",
+                no_active_poll: "当前没有投票。",
+                transcript_title: "🗣️ 语音转写",
+                btn_transcript_start: "开始",
+                btn_transcript_stop: "停止",
+                btn_save: "保存",
+                transcript_stopped: "转写已停止...",
+                chat_title: "💬 聊天",
+                placeholder_chat: "输入消息...",
+                btn_send: "发送",
+                calc_title: "🧮 科学计算器",
+                placeholder_calc: "例如：Math.sqrt(144)",
+                btn_calc: "计算"
+            }
+        };
+
+        let currentLang = 'he';
+        window.changeAppLanguage = (lang) => {
+            currentLang = lang;
+            const t = translations[lang] || translations['en'];
+            
+            // הגדרת כיוון עמוד (RTL או LTR)
+            const isRtl = ['he', 'ar', 'am'].includes(lang);
+            document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', lang);
+
+            // עדכון כל האלמנטים המכילים מאפיין תרגום
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.innerText = t[key];
+            });
+
+            // עדכון placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
+        };
 
         let isReg = false, userId = null, roomId = null, activeChannel = null, role = 'student', userName = 'משתמש';
         let mediaStream = null, mediaRecorder, chunks = [], recognition = null, isTranscribing = false, transcriptText = "";
@@ -347,24 +1141,19 @@
         window.changeTranscriptLang = (newLang) => {
             if (recognition) {
                 const wasRunning = isTranscribing;
-                if (wasRunning) {
-                    recognition.stop();
-                    isTranscribing = false;
-                }
+                if (wasRunning) { recognition.stop(); isTranscribing = false; }
                 recognition.lang = newLang;
-                if (wasRunning) {
-                    recognition.start();
-                    isTranscribing = true;
-                }
+                if (wasRunning) { recognition.start(); isTranscribing = true; }
             }
         };
 
         window.toggleSpeechRecognition = () => {
             if (!recognition) return;
+            const t = translations[currentLang] || translations['en'];
             const btn = document.getElementById('toggle-transcript-btn');
             isTranscribing = !isTranscribing;
             isTranscribing ? recognition.start() : recognition.stop();
-            btn.innerText = isTranscribing ? 'עצור' : 'הפעל';
+            btn.innerText = isTranscribing ? t.btn_transcript_stop : t.btn_transcript_start;
             btn.style.background = isTranscribing ? 'var(--danger)' : 'var(--success)';
         };
 
@@ -396,7 +1185,7 @@
                 pdfCanvas.height = vp.height; pdfCanvas.width = vp.width;
                 page.render({ canvasContext: pdfCtx, viewport: vp });
             });
-            document.getElementById('pdf-page-info').innerText = `עמוד ${num} מתוך ${pdfDoc.numPages}`;
+            document.getElementById('pdf-page-info').innerText = `${currentLang === 'he' ? 'עמוד' : 'Page'} ${num} / ${pdfDoc.numPages}`;
         }
         window.prevPage = () => { if (pageNum > 1) renderPage(--pageNum); };
         window.nextPage = () => { if (pageNum < pdfDoc.numPages) renderPage(++pageNum); };
@@ -404,9 +1193,10 @@
         // אוטנטיקציה ופעולות משתמש
         window.toggleAuthMode = () => {
             isReg = !isReg;
-            document.getElementById('form-title').innerText = isReg ? 'הרשמה למערכת' : 'התחברות למערכת';
+            const t = translations[currentLang] || translations['en'];
+            document.getElementById('form-title').innerText = isReg ? t.auth_register_title : t.auth_login_title;
             document.getElementById('register-fields').classList.toggle('hidden', !isReg);
-            document.getElementById('auth-action-btn').innerText = isReg ? 'הירשם' : 'התחבר';
+            document.getElementById('auth-action-btn').innerText = isReg ? t.btn_register : t.btn_login;
             document.getElementById('forgot-password-link').style.display = isReg ? 'none' : 'inline';
         };
         window.handleAuthSubmit = async () => {
@@ -441,7 +1231,8 @@
             const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
             if (!profile) return;
             role = profile.role; userName = profile.full_name;
-            document.getElementById('welcome-user').innerText = `שלום, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            const t = translations[currentLang] || translations['en'];
+            document.getElementById('welcome-user').innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? (t.role_teacher.split(' ')[0]) : (t.role_student.split(' ')[0])})`;
             document.getElementById('teacher-panel').classList.toggle('hidden', role !== 'teacher');
             showSec('dashboard-section'); loadRooms();
         }
@@ -465,8 +1256,9 @@
         async function loadRooms() {
             const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
             const list = document.getElementById('rooms-list');
-            if (!rooms || !rooms.length) { list.innerHTML = '<p style="color:var(--muted)">אין חדרים.</p>'; return; }
-            list.innerHTML = rooms.map(r => `<div class="room-item"><span><b>${r.title}</b> (מורה: ${r.profiles?.full_name || ''})</span><button onclick="enterRoom('${r.id}', '${r.title}')" style="width:auto; padding:5px 12px; margin:0;">הכנס</button></div>`).join('');
+            const t = translations[currentLang] || translations['en'];
+            if (!rooms || !rooms.length) { list.innerHTML = `<p style="color:var(--muted)">${currentLang === 'he' ? 'אין חדרים.' : 'No rooms.'}</p>`; return; }
+            list.innerHTML = rooms.map(r => `<div class="room-item"><span><b>${r.title}</b> (${currentLang === 'he' ? 'מורה' : 'Teacher'}: ${r.profiles?.full_name || ''})</span><button onclick="enterRoom('${r.id}', '${r.title}')" style="width:auto; padding:5px 12px; margin:0;">${currentLang === 'he' ? 'הכנס' : 'Enter'}</button></div>`).join('');
         }
 
         window.enterRoom = async (id, title) => {
@@ -486,22 +1278,22 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, p => {
                     fetchParticipants(id);
                     if (role === 'student' && p.new && p.new.user_id === userId) {
-                        if (p.new.status === 'approved') {
-                            showSec('room-section'); initStream();
-                        }
+                        if (p.new.status === 'approved') { showSec('room-section'); initStream(); }
                         if (mediaStream) {
                             if (p.new.mic_active !== undefined) {
                                 const audioTrack = mediaStream.getAudioTracks()[0];
                                 if (audioTrack && audioTrack.enabled !== p.new.mic_active) {
                                     audioTrack.enabled = p.new.mic_active;
-                                    document.getElementById('toggle-mic-btn').innerText = p.new.mic_active ? '🎤 השתק מיקרופון' : '🎤 הפעל מיקרופון';
+                                    const t = translations[currentLang] || translations['en'];
+                                    document.getElementById('toggle-mic-btn').innerText = p.new.mic_active ? t.btn_mic_mute : t.btn_mic_unmute;
                                 }
                             }
                             if (p.new.cam_active !== undefined) {
                                 const videoTrack = mediaStream.getVideoTracks()[0];
                                 if (videoTrack && videoTrack.enabled !== p.new.cam_active) {
                                     videoTrack.enabled = p.new.cam_active;
-                                    document.getElementById('toggle-cam-btn').innerText = p.new.cam_active ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
+                                    const t = translations[currentLang] || translations['en'];
+                                    document.getElementById('toggle-cam-btn').innerText = p.new.cam_active ? t.btn_cam_off : t.btn_cam_on;
                                 }
                             }
                         }
@@ -532,15 +1324,7 @@
         }
 
         window.approveStudent = async sId => {
-            const { error } = await supabase.from('room_participants')
-                .update({ status: 'approved' })
-                .eq('room_id', roomId)
-                .eq('user_id', sId);
-                
-            if (error) {
-                console.error("שגיאה באישור התלמיד:", error.message);
-                alert("שגיאה באישור התלמיד: " + error.message);
-            }
+            await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', sId);
         };
 
         window.teacherToggleMic = async (targetUserId, newMicState) => {
@@ -555,23 +1339,26 @@
 
         window.toggleRaiseHand = async () => {
             handRaised = !handRaised;
+            const t = translations[currentLang] || translations['en'];
             const btn = document.getElementById('raise-hand-btn');
             btn.style.background = handRaised ? 'var(--danger)' : 'var(--warning)';
-            btn.innerText = handRaised ? '🙋‍♂️ הורד יד' : '🙋‍♂️ הרם יד';
+            btn.innerText = handRaised ? t.btn_lower_hand : t.btn_raise_hand;
             await supabase.from('room_participants').update({ hand_raised: handRaised }).eq('room_id', roomId).eq('user_id', userId);
         };
 
         window.toggleMyCamera = async () => {
             if (!mediaStream) return;
             const t = mediaStream.getVideoTracks()[0]; t.enabled = !t.enabled;
-            document.getElementById('toggle-cam-btn').innerText = t.enabled ? '📷 כבה מצלמה' : '📷 הפעל מצלמה';
+            const tr = translations[currentLang] || translations['en'];
+            document.getElementById('toggle-cam-btn').innerText = t.enabled ? tr.btn_cam_off : tr.btn_cam_on;
             await supabase.from('room_participants').update({ cam_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
         };
 
         window.toggleMyMicrophone = async () => {
             if (!mediaStream) return;
             const t = mediaStream.getAudioTracks()[0]; t.enabled = !t.enabled;
-            document.getElementById('toggle-mic-btn').innerText = t.enabled ? '🎤 השתק מיקרופון' : '🎤 הפעל מיקרופון';
+            const tr = translations[currentLang] || translations['en'];
+            document.getElementById('toggle-mic-btn').innerText = t.enabled ? tr.btn_mic_mute : tr.btn_mic_unmute;
             await supabase.from('room_participants').update({ mic_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
         };
 
@@ -588,16 +1375,16 @@
                             <b>👤 ${p.profiles?.full_name || 'משתמש'}</b> ${p.hand_raised ? '🙋‍♂️' : ''}
                         </div>
                         <span style="font-size: 11px; color: var(--muted);">
-                            ${p.cam_active ? '📷 פעילה' : '📷 כבויה'} | ${p.mic_active ? '🎤 פתוח' : '🎤 מושתק'}
+                            ${p.cam_active ? '📷' : '📷❌'} | ${p.mic_active ? '🎤' : '🎤❌'}
                         </span>
                     </div>
                     ${role === 'teacher' && p.user_id !== userId ? `
                         <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
                             <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">
-                                ${p.mic_active ? 'השתק שמע' : 'הפעל שמע'}
+                                ${p.mic_active ? 'Mute' : 'Unmute'}
                             </button>
                             <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">
-                                ${p.cam_active ? 'כבה מצלמה' : 'הפעל מצלמה'}
+                                ${p.cam_active ? 'Cam Off' : 'Cam On'}
                             </button>
                         </div>
                     ` : ''}
@@ -606,8 +1393,8 @@
 
             if (role === 'teacher') {
                 const wCont = document.getElementById('waiting-students-list');
-                wCont.innerHTML = waiting.length === 0 ? '<span style="color:var(--muted); font-size: 12px;">אין ממתינים.</span>' :
-                    waiting.map(w => `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; background:var(--card); padding:6px; border-radius:4px;"><span style="font-size:13px;"><b>${w.profiles?.full_name || ''}</b></span><button onclick="approveStudent('${w.user_id}')" style="width:auto; padding:4px 10px; margin:0; background:var(--success); font-size:12px;">אשר ✓</button></div>`).join('');
+                wCont.innerHTML = waiting.length === 0 ? `<span style="color:var(--muted); font-size: 12px;">${currentLang === 'he' ? 'אין ממתינים.' : 'No waiting.'}</span>` :
+                    waiting.map(w => `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; background:var(--card); padding:6px; border-radius:4px;"><span style="font-size:13px;"><b>${w.profiles?.full_name || ''}</b></span><button onclick="approveStudent('${w.user_id}')" style="width:auto; padding:4px 10px; margin:0; background:var(--success); font-size:12px;">Approve ✓</button></div>`).join('');
             }
         }
 
@@ -622,21 +1409,21 @@
         window.stopAndSaveRecording = () => { if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); } };
 
         window.downloadAttendanceReport = () => {
-            let r = `===== דוח נוכחות =====\nכותרת: ${document.getElementById('current-room-title').innerText}\n\n`;
-            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - מצלמה: ${p.cam_active ? 'פעילה' : 'כבויה'} | שמע: ${p.mic_active ? 'פעיל' : 'מושתק'}\n`);
-            r += `\n--- תמלול ---\n${transcriptText}`;
+            let r = `===== Report =====\nRoom: ${document.getElementById('current-room-title').innerText}\n\n`;
+            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - Cam: ${p.cam_active ? 'On' : 'Off'} | Mic: ${p.mic_active ? 'On' : 'Off'}\n`);
+            r += `\n--- Transcript ---\n${transcriptText}`;
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/plain;charset=utf-8' }));
             a.download = `report_${Date.now()}.txt`; a.click();
         };
 
         window.calculateMath = () => {
             try { document.getElementById('calc-result').innerText = `= ${eval(document.getElementById('calc-input').value)}`; }
-            catch(e) { document.getElementById('calc-result').innerText = 'שגיאה'; }
+            catch(e) { document.getElementById('calc-result').innerText = 'Error'; }
         };
 
         window.sendChatMessage = () => {
             const inp = document.getElementById('chat-input'); if (!inp.value) return;
-            document.getElementById('chat-messages').innerHTML += `<div><b>אני:</b> ${inp.value}</div>`; inp.value = '';
+            document.getElementById('chat-messages').innerHTML += `<div><b>Me:</b> ${inp.value}</div>`; inp.value = '';
         };
 
         window.leaveRoom = async () => {
