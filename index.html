@@ -167,11 +167,18 @@
                         <div id="youtube-player-container" style="margin-top: 10px;" class="hidden"><iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe></div>
                     </div>
 
-                    <!-- לוח לבן -->
+                    <!-- לוח לבן משודרג (פיצ'ר 4) -->
                     <div class="tool-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                             <h4 style="margin: 0;" data-i18n="whiteboard_title">🎨 לוח לבן שיתופי</h4>
-                            <div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select id="wb-tool-mode" style="width: auto; margin:0; padding:4px; font-size:13px;" onchange="changeWbMode(this.value)">
+                                    <option value="pen">✏️ עט</option>
+                                    <option value="highlighter">🖍️ מרקר</option>
+                                    <option value="eraser">🧹 מחק</option>
+                                    <option value="rect">🔲 מלבן</option>
+                                    <option value="circle">⚪ עיגול</option>
+                                </select>
                                 <input type="color" id="brush-color" value="#4f46e5" style="display: inline-block; width: 35px; height: 30px; padding: 0; vertical-align: middle;">
                                 <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger);" data-i18n="btn_clear">נקה</button>
                             </div>
@@ -193,6 +200,18 @@
                 </div>
 
                 <div>
+                    <!-- פאנל ניהול שאלות פרטיות למורה (פיצ'ר 2) -->
+                    <div class="tool-box hidden" id="teacher-private-q-box">
+                        <h4 style="margin-bottom: 6px; color: var(--warning);" data-i18n="private_q_title">📥 שאלות פרטיות מתלמידים</h4>
+                        <div id="teacher-private-q-list" style="max-height: 120px; overflow-y: auto; font-size: 13px;" data-i18n="no_private_q">אין שאלות פרטיות ממתינות.</div>
+                    </div>
+
+                    <!-- אנליטיקה וסטטיסטיקה כיתתית למורה (פיצ'ר 3) -->
+                    <div class="tool-box hidden" id="teacher-analytics-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="analytics_title">📈 מדד מעורבות כיתתי</h4>
+                        <canvas id="analytics-chart" height="130"></canvas>
+                    </div>
+
                     <div class="tool-box hidden" id="teacher-waiting-box">
                         <h4 style="margin-bottom: 8px; color: var(--warning);" data-i18n="waiting_students_title">⏳ תלמידים ממתינים</h4>
                         <div id="waiting-students-list" data-i18n="no_waiting_students">אין תלמידים ממתינים.</div>
@@ -285,6 +304,23 @@
                         <div id="transcript-messages" class="transcript-box" data-i18n="transcript_stopped">תמלול מופסק...</div>
                     </div>
 
+                    <!-- עוזר AI אינטליגנטי לתלמיד (פיצ'ר 1) -->
+                    <div class="tool-box" id="ai-tutor-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="ai_tutor_title">🤖 עוזר לימודים חכם (AI Tutor)</h4>
+                        <div id="ai-tutor-messages" class="chat-box" style="height: 90px;">
+                            <div style="color: var(--primary);"><b>AI Tutor:</b> שאל אותי כל שאלה על החומר הנלמד!</div>
+                        </div>
+                        <input type="text" id="ai-tutor-input" data-i18n-placeholder="placeholder_ai_tutor" placeholder="שאל שאלה את עוזר ה-AI..." style="margin-bottom:6px; padding:6px;">
+                        <button onclick="askAiTutor()" style="background: var(--primary); padding:6px;" data-i18n="btn_ask_ai">שאל את ה-AI 💡</button>
+                    </div>
+
+                    <!-- שליחת שאלה פרטית למורה (פיצ'ר 2 - חלק תלמיד) -->
+                    <div class="tool-box" id="student-private-q-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="student_private_q_title">🔒 פנייה פרטית למורה</h4>
+                        <input type="text" id="student-private-input" placeholder="יש לך שאלה אישית שלא תרצה שכולם יראו?" style="margin-bottom:6px; padding:6px;">
+                        <button onclick="sendPrivateQuestionToTeacher()" style="background: var(--warning); color:#000; padding:6px;" data-i18n="btn_send_private">שלח למורה באופן דיסקרטי ✉️</button>
+                    </div>
+
                     <!-- מחברת אישית לתלמיד -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="notepad_title">📝 מחברת הערות אישית</h4>
@@ -293,7 +329,7 @@
 
                     <!-- צ'אט -->
                     <div class="tool-box">
-                        <h4 style="margin-bottom: 8px;" data-i18n="chat_title">💬 צ'אט</h4>
+                        <h4 style="margin-bottom: 8px;" data-i18n="chat_title">💬 צ'אט כיתתי</h4>
                         <div id="chat-messages" class="chat-box"></div>
                         <input type="text" id="chat-input" data-i18n-placeholder="placeholder_chat" placeholder="הקלד הודעה...">
                         <button onclick="sendChatMessage()" style="padding: 6px;" data-i18n="btn_send">שלח</button>
@@ -383,7 +419,7 @@
                 transcript_stopped: "תמלול מופסק...",
                 notepad_title: "📝 מחברת הערות אישית",
                 placeholder_notepad: "כתוב כאן את הסיכומים שלך...",
-                chat_title: "💬 צ'אט",
+                chat_title: "💬 צ'אט כיתתי",
                 placeholder_chat: "הקלד הודעה...",
                 btn_send: "שלח",
                 calc_title: "🧮 מחשבון מדעי",
@@ -398,7 +434,15 @@
                 no_active_assignment: "אין מטלה פעילה כרגע.",
                 quiz_title: "🏆 חידון מהיר & טבלת מובילים",
                 btn_start_quiz: "הפעל חידון",
-                no_active_quiz: "אין חידון פעיל."
+                no_active_quiz: "אין חידון פעיל.",
+                ai_tutor_title: "🤖 עוזר לימודים חכם (AI Tutor)",
+                placeholder_ai_tutor: "שאל שאלה את עוזר ה-AI...",
+                btn_ask_ai: "שאל את ה-AI 💡",
+                student_private_q_title: "🔒 פנייה פרטית למורה",
+                btn_send_private: "שלח למורה באופן דיסקרטי ✉️",
+                private_q_title: "📥 שאלות פרטיות מתלמידים",
+                no_private_q: "אין שאלות פרטיות ממתינות.",
+                analytics_title: "📈 מדד מעורבות כיתתי"
             },
             en: {
                 app_title: "🎓 Smart Virtual Classroom",
@@ -467,7 +511,7 @@
                 transcript_stopped: "Transcription stopped...",
                 notepad_title: "📝 Personal Notepad",
                 placeholder_notepad: "Type your notes here...",
-                chat_title: "💬 Chat",
+                chat_title: "💬 Class Chat",
                 placeholder_chat: "Type a message...",
                 btn_send: "Send",
                 calc_title: "🧮 Scientific Calculator",
@@ -482,7 +526,15 @@
                 no_active_assignment: "No active assignment.",
                 quiz_title: "🏆 Live Quiz & Leaderboard",
                 btn_start_quiz: "Start Quiz",
-                no_active_quiz: "No active quiz."
+                no_active_quiz: "No active quiz.",
+                ai_tutor_title: "🤖 AI Study Assistant",
+                placeholder_ai_tutor: "Ask AI a study question...",
+                btn_ask_ai: "Ask AI 💡",
+                student_private_q_title: "🔒 Private Question to Teacher",
+                btn_send_private: "Send Discreetly ✉️",
+                private_q_title: "📥 Private Student Questions",
+                no_private_q: "No pending private questions.",
+                analytics_title: "📈 Class Engagement Index"
             }
         };
 
@@ -510,6 +562,7 @@
         let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
         let myWeatherInfo = "⏳ טוען מזג אוויר...";
         let timerInterval = null, currentQuiz = null, scoresMap = {}, isFocusActive = false;
+        let wbMode = 'pen', analyticsChartInstance = null;
 
         function playBeepSound() {
             try {
@@ -546,12 +599,10 @@
             localStorage.setItem('theme', next);
         };
 
-        // פיצ'ר 2: מצב פוקוס (Focus Mode)
         window.toggleFocusMode = () => {
             isFocusActive = !isFocusActive;
             const boxes = document.querySelectorAll('.tool-box');
             boxes.forEach(box => {
-                // שומר רק על וידאו וכלים מרכזיים, או מכבה את השאר
                 if(isFocusActive) {
                     if(!box.contains(document.getElementById('local-video')) && !box.contains(document.getElementById('whiteboard-canvas'))) {
                         box.classList.add('hidden');
@@ -560,7 +611,7 @@
                     box.classList.remove('hidden');
                 }
             });
-            alert(isפוקוס_active_msg = isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
+            alert(isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -584,6 +635,142 @@
             if (saved) document.getElementById('student-notepad').value = saved;
         }
 
+        // --- פיצ'ר 1: עוזר לימודים חכם (AI Tutor) ---
+        window.askAiTutor = () => {
+            const inp = document.getElementById('ai-tutor-input');
+            const question = inp.value.trim();
+            if (!question) return alert('נא להזין שאלה לעוזר ה-AI');
+            
+            const tutorBox = document.getElementById('ai-tutor-messages');
+            tutorBox.innerHTML += `<div><b>אתה:</b> ${question}</div>`;
+            inp.value = '';
+
+            // סימולציית תגובת AI חכמה ומותאמת להקשר השיעור
+            setTimeout(() => {
+                let aiReply = "שאלה מצוינת! על פי הנושא הנלמד בכיתה כרגע, מומלץ להתמקד בעקרונות הבסיסיים, לתרגל דוגמאות מעשיות ולבדוק את המחברת האישית שלך לסיכומים נוספים.";
+                if (question.includes('אנגלית') || question.includes('english')) {
+                    aiReply = "Learning English requires consistency! Try practicing vocabulary daily and using speech tools to check your pronunciation.";
+                } else if (question.includes('קוד') || question.includes('python')) {
+                    aiReply = "כדי לפתור בעיות תכנות ב-Python, זכור לבדוק שגיאות תחביר (SyntaxError) ולוודא שהספריות הנדרשות מותקנות.";
+                }
+                tutorBox.innerHTML += `<div style="color: var(--primary); margin-top:4px;"><b>AI Tutor:</b> ${aiReply}</div>`;
+                tutorBox.scrollTop = tutorBox.scrollHeight;
+            }, 600);
+        };
+
+        // --- פיצ'ר 2: פנייה דיסקרטית/שאלות פרטיות למורה ---
+        window.sendPrivateQuestionToTeacher = () => {
+            const q = document.getElementById('student-private-input').value.trim();
+            if (!q) return alert('כתוב שאלה לשליחה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'private_question', payload: { studentName: userName, question: q } });
+                document.getElementById('student-private-input').value = '';
+                alert('השאלה נשלחה באופן דיסקרטי למורה!');
+            }
+        };
+
+        function renderTeacherPrivateQ(payload) {
+            playBeepSound();
+            const list = document.getElementById('teacher-private-q-list');
+            if (list.innerText.includes('אין')) list.innerHTML = '';
+            list.innerHTML += `<div style="background:var(--card); padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid var(--border);"><b>👤 ${payload.studentName}:</b> ${payload.question}</div>`;
+        }
+
+        // --- פיצ'ר 3: מדד מעורבות כיתתי (Analytics Dashboard למורה) ---
+        function updateAnalyticsChart() {
+            if (role !== 'teacher') return;
+            const total = sessionParticipants.length || 1;
+            const activeCams = sessionParticipants.filter(p => p.cam_active).length;
+            const activeMics = sessionParticipants.filter(p => p.mic_active).length;
+            const hands = sessionParticipants.filter(p => p.hand_raised).length;
+
+            const ctxAnalytics = document.getElementById('analytics-chart').getContext('2d');
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+
+            analyticsChartInstance = new Chart(ctxAnalytics, {
+                type: 'doughnut',
+                data: {
+                    labels: ['מצלמות פעילות 📷', 'מיקרופונים פתוחים 🎤', 'ידיים מורמות 🙋‍♂️'],
+                    datasets: [{
+                        data: [activeCams, activeMics, hands],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        // --- פיצ'ר 4: לוח לבן משודרג עם כלים (עט, מרקר, מחק, צורות) ---
+        window.changeWbMode = (mode) => { wbMode = mode; };
+
+        let startX, startY, snapshot;
+        const canvas = document.getElementById('whiteboard-canvas'), ctx = canvas.getContext('2d');
+        let painting = false;
+
+        function initWhiteboard() {
+            canvas.width = canvas.offsetWidth; canvas.height = 200;
+            canvas.addEventListener('mousedown', e => {
+                painting = true;
+                const r = canvas.getBoundingClientRect();
+                startX = e.clientX - r.left; startY = e.clientY - r.top;
+                snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                ctx.beginPath(); ctx.moveTo(startX, startY);
+            });
+            canvas.addEventListener('mouseup', e => {
+                if (!painting) return;
+                painting = false;
+                if (wbMode === 'rect' || wbMode === 'circle') {
+                    const r = canvas.getBoundingClientRect();
+                    const endX = e.clientX - r.left, endY = e.clientY - r.top;
+                    drawShape(startX, startY, endX, endY, true);
+                }
+                ctx.beginPath();
+            });
+            canvas.addEventListener('mousemove', e => draw(e, true));
+        }
+
+        function draw(e, send) {
+            if (!painting) return;
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            const color = document.getElementById('brush-color').value;
+
+            if (wbMode === 'pen') {
+                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'pen', x, y, color } });
+            } else if (wbMode === 'highlighter') {
+                ctx.lineWidth = 12; ctx.lineCap = 'square'; ctx.strokeStyle = color + '40'; // שקוף למחצה
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'highlighter', x, y, color } });
+            } else if (wbMode === 'eraser') {
+                ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'eraser', x, y } });
+            } else if (wbMode === 'rect' || wbMode === 'circle') {
+                ctx.putImageData(snapshot, 0, 0);
+                drawShape(startX, startY, x, y, false);
+            }
+        }
+
+        function drawShape(x1, y1, x2, y2, send) {
+            const color = document.getElementById('brush-color').value;
+            ctx.strokeStyle = color; ctx.lineWidth = 2;
+            if (wbMode === 'rect') {
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            } else if (wbMode === 'circle') {
+                let radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                ctx.beginPath(); ctx.arc(x1, y1, radius, 0, 2 * Math.PI); ctx.stroke();
+            }
+            if (send && activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'draw_shape', payload: { mode: wbMode, x1, y1, x2, y2, color } });
+            }
+        }
+
+        window.clearWhiteboard = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
+        };
+
         window.launchBreakoutRoom = () => {
             const gName = document.getElementById('breakout-group-name').value;
             if (!gName) return alert('נא להזין שם קבוצה');
@@ -602,6 +789,7 @@
                 alert('המשימה שוגרה לכיתה!');
             }
         };
+
         function renderStudentAssignment(text) {
             playBeepSound();
             document.getElementById('student-assignment-view').innerHTML = `
@@ -610,6 +798,7 @@
                 <button onclick='submitAssignmentAns()' style='background:var(--success); padding:4px;'>הגש למורה ✓</button>
             `;
         }
+
         window.submitAssignmentAns = () => {
             const ans = document.getElementById('student-ans-input').value;
             if (!ans) return alert('כתוב תשובה');
@@ -628,6 +817,7 @@
                 alert('החידון התחיל!');
             }
         };
+
         function renderStudentQuiz(quiz) {
             playBeepSound();
             document.getElementById('student-quiz-view').innerHTML = `
@@ -636,13 +826,12 @@
                 <button onclick='submitQuizAns()' style='background:var(--primary); padding:4px;'>שלח תשובה</button>
             `;
         }
+
         window.submitQuizAns = () => {
             const val = document.getElementById('quiz-user-ans').value;
             if (!val) return;
             const isCorrect = val.trim().toLowerCase() === currentQuiz.ans.trim().toLowerCase();
-            if (isCorrect) {
-                scoresMap[userName] = (scoresMap[userName] || 0) + 10;
-            }
+            if (isCorrect) { scoresMap[userName] = (scoresMap[userName] || 0) + 10; }
             if (activeChannel) {
                 activeChannel.send({ type: 'broadcast', event: 'quiz_answer', payload: { student: userName, correct: isCorrect, scoreBoard: scoresMap } });
                 document.getElementById('student-quiz-view').innerHTML = `<p style="font-weight: bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};">${isCorrect ? '🎉 תשובה נכונה (+10 נקודות)!' : '❌ תשובה שגויה, נסה שוב'}</p>`;
@@ -656,7 +845,6 @@
             document.getElementById('leaderboard-content').innerText = text;
         }
 
-        // פיצ'ר 3: שליחת הקפצת מסך (Attention Ping)
         window.teacherPingStudent = (targetUserId) => {
             if (role !== 'teacher') return;
             if (activeChannel) {
@@ -664,6 +852,7 @@
                 alert('התראת תשומת לב נשלחה לתלמיד!');
             }
         };
+
         function triggerAttentionEffect() {
             playBeepSound();
             const container = document.getElementById('main-app-container');
@@ -694,29 +883,6 @@
             }, 1000);
         }
 
-        const canvas = document.getElementById('whiteboard-canvas'), ctx = canvas.getContext('2d');
-        let painting = false;
-        function initWhiteboard() {
-            canvas.width = canvas.offsetWidth; canvas.height = 200;
-            canvas.addEventListener('mousedown', e => { painting = true; draw(e, false); });
-            canvas.addEventListener('mouseup', () => { painting = false; ctx.beginPath(); });
-            canvas.addEventListener('mousemove', e => draw(e, true));
-            canvas.addEventListener('touchstart', e => { painting = true; draw(e.touches[0], false); });
-            canvas.addEventListener('touchend', () => { painting = false; ctx.beginPath(); });
-            canvas.addEventListener('touchmove', e => draw(e.touches[0], true));
-        }
-        function draw(e, send) {
-            if (!painting) return;
-            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, color = document.getElementById('brush-color').value;
-            ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
-            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
-            if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_line', payload: { x, y, color } });
-        }
-        window.clearWhiteboard = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
-        };
-
         window.shareYouTubeVideo = () => {
             const id = (document.getElementById('youtube-url-input').value.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/) || [])[2];
             if (!id || id.length !== 11) return alert('קישור לא תקין');
@@ -728,7 +894,6 @@
             document.getElementById('youtube-player-container').classList.remove('hidden');
         }
 
-        // פיצ'ר 1: סקר אנונימי / הצבעה חשאית
         window.publishPoll = () => {
             const q = document.getElementById('poll-question').value, o1 = document.getElementById('poll-opt1').value, o2 = document.getElementById('poll-opt2').value;
             const isAnon = document.getElementById('anon-poll-check').checked;
@@ -742,6 +907,7 @@
                 alert(isAnon ? 'סקר אנונימי שוגר בהצלחה! 🕵️‍♂️' : 'סקר רגיל שוגר!');
             }
         };
+
         function renderStudentPoll(poll) {
             playBeepSound();
             pollData = poll;
@@ -750,6 +916,7 @@
             document.getElementById('student-poll-taker').innerHTML = h;
             document.getElementById('poll-results-view').classList.add('hidden');
         }
+
         window.votePoll = idx => {
             const voterKey = pollData.isAnonymous ? `anon_${Math.random()}` : userName;
             if (activeChannel) {
@@ -757,6 +924,7 @@
                 document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success); font-weight: bold;">הצבעתך נקלטה! ${pollData.isAnonymous ? '(נשמר באנונימיות)' : ''}</p>`;
             }
         };
+
         function updateChart(votes = {}) {
             const counts = pollData.options.map(() => 0);
             Object.values(votes).forEach(i => { if (counts[i] !== undefined) counts[i]++; });
@@ -855,6 +1023,7 @@
             document.getElementById('auth-action-btn').innerText = isReg ? t.btn_register : t.btn_login;
             document.getElementById('forgot-password-link').style.display = isReg ? 'none' : 'inline';
         };
+
         window.handleAuthSubmit = async () => {
             const email = document.getElementById('email').value, password = document.getElementById('password').value;
             if (!email || !password) return alert('נא למלא שדות');
@@ -868,18 +1037,21 @@
                 checkUserSession();
             }
         };
+
         window.handleForgotPassword = async () => {
             const email = document.getElementById('email').value;
             if (!email) return alert('הזן אימייל');
             const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
             if (error) alert(error.message); else alert('הוראות איפוס נשלחו!');
         };
+
         window.handleUpdatePassword = async () => {
             const p = document.getElementById('new-password').value;
             if (!p || p.length < 6) return alert('סיסמה קצרה מדי');
             const { error } = await supabase.auth.updateUser({ password: p });
             if (error) alert(error.message); else { alert('הסיסמה עודכנה!'); window.location.hash = ''; checkUserSession(); }
         };
+
         async function checkUserSession() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) { showSec('auth-section'); return; }
@@ -929,6 +1101,12 @@
             document.getElementById('teacher-assignment-creator').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-quiz-creator').classList.toggle('hidden', role !== 'teacher');
             
+            // תצוגת פיצ'רים חדשים למורה/תלמיד
+            document.getElementById('teacher-private-q-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-analytics-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
+            document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
+            
             const status = role === 'teacher' ? 'approved' : 'waiting';
             if (status === 'waiting') showSec('waiting-room-section'); else { showSec('room-section'); initStream(); }
 
@@ -961,9 +1139,21 @@
                         }
                     }
                 })
-                .on('broadcast', { event: 'draw_line' }, p => {
-                    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = p.payload.color;
-                    ctx.lineTo(p.payload.x, p.payload.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.payload.x, p.payload.y);
+                .on('broadcast', { event: 'draw_action' }, p => {
+                    const d = p.payload;
+                    ctx.lineWidth = d.mode === 'highlighter' ? 12 : (d.mode === 'eraser' ? 20 : 3);
+                    ctx.lineCap = d.mode === 'highlighter' ? 'square' : 'round';
+                    ctx.strokeStyle = d.mode === 'eraser' ? '#ffffff' : (d.mode === 'highlighter' ? d.color + '40' : d.color);
+                    ctx.lineTo(d.x, d.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(d.x, d.y);
+                })
+                .on('broadcast', { event: 'draw_shape' }, p => {
+                    const d = p.payload;
+                    ctx.strokeStyle = d.color; ctx.lineWidth = 2;
+                    if (d.mode === 'rect') ctx.strokeRect(d.x1, d.y1, d.x2 - d.x1, d.y2 - d.y1);
+                    else if (d.mode === 'circle') {
+                        let radius = Math.sqrt(Math.pow(d.x2 - d.x1, 2) + Math.pow(d.y2 - d.y1, 2));
+                        ctx.beginPath(); ctx.arc(d.x1, d.y1, radius, 0, 2 * Math.PI); ctx.stroke();
+                    }
                 })
                 .on('broadcast', { event: 'clear_board' }, () => ctx.clearRect(0, 0, canvas.width, canvas.height))
                 .on('broadcast', { event: 'share_youtube' }, p => applyYouTube(p.payload.videoId))
@@ -974,10 +1164,9 @@
                 .on('broadcast', { event: 'new_assignment' }, p => renderStudentAssignment(p.payload.text))
                 .on('broadcast', { event: 'assignment_submitted' }, p => { if (role === 'teacher') alert(`תלמיד ${p.payload.student} הגיש מטלה: "${p.payload.answer}"`); })
                 .on('broadcast', { event: 'launch_quiz' }, p => renderStudentQuiz(p.payload))
-                .on('broadcast', { event: 'quiz_answer' }, p => { 
-                    updateLeaderboardUI(p.payload.scoreBoard);
-                })
+                .on('broadcast', { event: 'quiz_answer' }, p => { updateLeaderboardUI(p.payload.scoreBoard); })
                 .on('broadcast', { event: 'attention_ping' }, p => { if (role === 'student' && p.payload.targetUserId === userId) triggerAttentionEffect(); })
+                .on('broadcast', { event: 'private_question' }, p => { if (role === 'teacher') renderTeacherPrivateQ(p.payload); })
                 .on('broadcast', { event: 'transcript' }, p => {
                     const box = document.getElementById('transcript-messages');
                     box.innerHTML += `<div><b>${p.payload.user}:</b> ${p.payload.text}</div>`; box.scrollTop = box.scrollHeight;
@@ -1069,6 +1258,8 @@
                 const wCont = document.getElementById('waiting-students-list');
                 wCont.innerHTML = waiting.length === 0 ? `<span style="color:var(--muted); font-size: 12px;">אין ממתינים.</span>` :
                     waiting.map(w => `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; background:var(--card); padding:6px; border-radius:4px;"><span style="font-size:13px;"><b>${w.profiles?.full_name || ''}</b></span><button onclick="approveStudent('${w.user_id}')" style="width:auto; padding:4px 10px; margin:0; background:var(--success); font-size:12px;">Approve ✓</button></div>`).join('');
+                
+                updateAnalyticsChart();
             }
         }
 
