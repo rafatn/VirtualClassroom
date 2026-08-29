@@ -113,12 +113,6 @@
             </div>
         </div>
 
-        <!-- חדר המתנה -->
-        <div id="waiting-room-section" class="hidden" style="text-align: center; padding: 40px;">
-            <h3 style="color: var(--warning);" data-i18n="waiting_teacher_approval">⏳ ממתין לאישור המורה...</h3>
-            <button onclick="leaveRoom()" style="max-width: 200px; margin: 20px auto; background: var(--danger);" data-i18n="btn_cancel_leave">בטל ועזוב</button>
-        </div>
-
         <!-- חלון השיעור -->
         <div id="room-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -199,7 +193,7 @@
                 </div>
 
                 <div>
-                    <!-- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
+                    <!-- נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="ambient_title">🎵 מוזיקת רקע וצלילי ריכוז</h4>
                         <div style="display: flex; gap: 6px;">
@@ -209,7 +203,7 @@
                         </div>
                     </div>
 
-                    <!-- פיצ'ר חדש 4: לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
+                    <!-- לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="sticky_title">💡 פתקיות רעיונות שיתופיות</h4>
@@ -228,11 +222,6 @@
                     <div class="tool-box hidden" id="teacher-analytics-box">
                         <h4 style="margin-bottom: 6px;" data-i18n="analytics_title">📈 מדד מעורבות כיתתי</h4>
                         <canvas id="analytics-chart" height="130"></canvas>
-                    </div>
-
-                    <div class="tool-box hidden" id="teacher-waiting-box">
-                        <h4 style="margin-bottom: 8px; color: var(--warning);" data-i18n="waiting_students_title">⏳ תלמידים ממתינים</h4>
-                        <div id="waiting-students-list" data-i18n="no_waiting_students">אין תלמידים ממתינים.</div>
                     </div>
 
                     <!-- חדרי דיונים (Breakout Rooms) -->
@@ -296,7 +285,7 @@
                         <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
                     </div>
 
-                    <!-- פיצ'ר חדש 2: כרטיס יציאה / משוב סוף שיעור -->
+                    <!-- משוב סוף שיעור -->
                     <div class="tool-box" id="feedback-container">
                         <h4 style="margin-bottom: 6px;" data-i18n="feedback_title">📝 משוב והערכה עצמית (Exit Ticket)</h4>
                         <div id="teacher-feedback-creator" class="hidden">
@@ -306,7 +295,7 @@
                         <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">המידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
                     </div>
 
-                    <!-- תמלול וסיכום AI (משודרג עם פיצ'ר 1) -->
+                    <!-- תמלול וסיכום AI -->
                     <div class="tool-box">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI מתקדם</h4>
@@ -406,8 +395,6 @@
                 btn_open_room: "פתח חדר",
                 active_rooms: "🏫 חדרים פעילים",
                 loading_rooms: "טוען חדרים...",
-                waiting_teacher_approval: "⏳ ממתין לאישור המורה...",
-                btn_cancel_leave: "בטל ועזוב",
                 btn_raise_hand: "🙋‍♂️ הרם יד",
                 btn_lower_hand: "🙋‍♂️ הורד יד",
                 btn_focus_mode: "🎯 מצב פוקוס",
@@ -427,8 +414,6 @@
                 pdf_title: "📄 הצגת PDF",
                 btn_pdf_prev: "◀ קודם",
                 btn_pdf_next: "הבא ▶",
-                waiting_students_title: "⏳ תלמידים ממתינים",
-                no_waiting_students: "אין תלמידים ממתינים.",
                 participants_title: "👥 משתתפים וחיוויי שליטה",
                 btn_mute_all: "השתק הכל 🔇",
                 btn_ping_student: "הקפץ מסך ⚡",
@@ -507,8 +492,6 @@
                 btn_open_room: "Open Room",
                 active_rooms: "🏫 Active Rooms",
                 loading_rooms: "Loading rooms...",
-                waiting_teacher_approval: "⏳ Waiting for teacher approval...",
-                btn_cancel_leave: "Cancel & Leave",
                 btn_raise_hand: "🙋‍♂️ Raise Hand",
                 btn_lower_hand: "🙋‍♂️ Lower Hand",
                 btn_focus_mode: "🎯 Focus Mode",
@@ -528,8 +511,6 @@
                 pdf_title: "📄 PDF Viewer",
                 btn_pdf_prev: "◀ Prev",
                 btn_pdf_next: "Next ▶",
-                waiting_students_title: "⏳ Waiting Students",
-                no_waiting_students: "No waiting students.",
                 participants_title: "👥 Participants & Controls",
                 btn_mute_all: "Mute All 🔇",
                 btn_ping_student: "Ping Screen ⚡",
@@ -682,13 +663,11 @@
             if (saved) document.getElementById('student-notepad').value = saved;
         }
 
-        // --- פיצ'ר חדש 3: נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) ---
         window.playAmbientSound = (type) => {
             stopAmbientSound();
             try {
                 const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
                 if (type === 'rain') {
-                    // סימולציית רעש לבן (גשם) באמצעות בידוד תדרים
                     const bufferSize = ctxAudio.sampleRate * 2;
                     const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
                     const output = buffer.getChannelData(0);
@@ -696,14 +675,13 @@
                     const whiteNoise = ctxAudio.createBufferSource();
                     whiteNoise.buffer = buffer; whiteNoise.loop = true;
                     const filter = ctxAudio.createBiquadFilter();
-                    filter.type = 'lowpass'; filter.frequency.value = 800; // מעדן את הרעש לצליל גשם
+                    filter.type = 'lowpass'; filter.frequency.value = 800;
                     whiteNoise.connect(filter); filter.connect(ctxAudio.destination);
                     whiteNoise.start(); ambientAudioNode = whiteNoise;
                 } else if (type === 'lofi') {
-                    // אקורד מרגיע לריכוז (סימולציית צליל Lo-Fi נעים)
                     const osc = ctxAudio.createOscillator();
                     const gain = ctxAudio.createGain();
-                    osc.type = 'triangle'; osc.frequency.value = 220; // A3
+                    osc.type = 'triangle'; osc.frequency.value = 220;
                     gain.gain.setValueAtTime(0.05, ctxAudio.currentTime);
                     osc.connect(gain); gain.connect(ctxAudio.destination);
                     osc.start(); ambientAudioNode = osc;
@@ -719,7 +697,6 @@
             }
         };
 
-        // --- פיצ'ר חדש 4: פתקיות רעיונות שיתופיות (Sticky Notes) ---
         window.openNewStickyModal = () => {
             const text = prompt('כתוב רעיון או שאלה לפתקית השיתופית:');
             if (!text) return;
@@ -746,7 +723,6 @@
             `).join('');
         }
 
-        // --- פיצ'ר חדש 2: משוב סוף שיעור (Exit Ticket) ---
         window.triggerExitTicket = () => {
             if (role !== 'teacher') return;
             if (activeChannel) {
@@ -781,7 +757,6 @@
             }
         };
 
-        // --- פיצ'ר חדש 1: סיכום שיעור מתקדם מבוסס AI (עם עיצוב והורדה) ---
         window.generateAdvancedAiSummary = () => {
             if (!transcriptText.trim()) return alert('אין מספיק נתוני תמלול לסיכום מתקדם');
             const summaryBox = document.getElementById('transcript-messages');
@@ -1255,7 +1230,6 @@
             document.getElementById('teacher-poll-creator').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('download-report-btn').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('mute-all-btn').classList.toggle('hidden', role !== 'teacher');
-            document.getElementById('teacher-waiting-box').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-timer-controls').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-breakout-box').classList.toggle('hidden', role !== 'teacher');
             document.getElementById('teacher-assignment-creator').classList.toggle('hidden', role !== 'teacher');
@@ -1267,11 +1241,12 @@
             document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
             document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
             
-            const status = role === 'teacher' ? 'approved' : 'waiting';
-            if (status === 'waiting') showSec('waiting-room-section'); else { showSec('room-section'); initStream(); }
+            // כניסה ישירה ללא המתנה (כל תלמיד יכול להיכנס באופן חופשי)
+            showSec('room-section'); 
+            initStream();
 
             await supabase.from('room_participants').upsert([{ 
-                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status, weather_info: myWeatherInfo 
+                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: 'approved', weather_info: myWeatherInfo 
             }], { onConflict: 'room_id, user_id' });
             
             fetchParticipants(id);
@@ -1280,7 +1255,6 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, p => {
                     fetchParticipants(id);
                     if (role === 'student' && p.new && p.new.user_id === userId) {
-                        if (p.new.status === 'approved') { showSec('room-section'); initStream(); }
                         if (mediaStream) {
                             if (p.new.mic_active !== undefined) {
                                 const audioTrack = mediaStream.getAudioTracks()[0];
@@ -1351,10 +1325,6 @@
             } catch(e){}
         }
 
-        window.approveStudent = async sId => {
-            await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', sId);
-        };
-
         window.teacherToggleMic = async (targetUserId, newMicState) => {
             if (role !== 'teacher') return;
             await supabase.from('room_participants').update({ mic_active: newMicState }).eq('room_id', roomId).eq('user_id', targetUserId);
@@ -1401,7 +1371,7 @@
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
             if (!data) return;
             sessionParticipants = data;
-            const approved = data.filter(p => p.status === 'approved'), waiting = data.filter(p => p.status === 'waiting');
+            const approved = data.filter(p => p.status === 'approved');
 
             document.getElementById('participants-list').innerHTML = approved.map(p => `
                 <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px;">
@@ -1423,10 +1393,6 @@
             `).join('');
 
             if (role === 'teacher') {
-                const wCont = document.getElementById('waiting-students-list');
-                wCont.innerHTML = waiting.length === 0 ? `<span style="color:var(--muted); font-size: 12px;">אין ממתינים.</span>` :
-                    waiting.map(w => `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; background:var(--card); padding:6px; border-radius:4px;"><span style="font-size:13px;"><b>${w.profiles?.full_name || ''}</b></span><button onclick="approveStudent('${w.user_id}')" style="width:auto; padding:4px 10px; margin:0; background:var(--success); font-size:12px;">Approve ✓</button></div>`).join('');
-                
                 updateAnalyticsChart();
             }
         }
@@ -1468,7 +1434,7 @@
         };
 
         function showSec(id) {
-            ['auth-section', 'reset-password-section', 'dashboard-section', 'waiting-room-section', 'room-section'].forEach(s => {
+            ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(s => {
                 const el = document.getElementById(s); if (el) el.classList.add('hidden');
             });
             const t = document.getElementById(id); if (t) t.classList.remove('hidden');
