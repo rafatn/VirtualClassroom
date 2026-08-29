@@ -864,7 +864,6 @@
             canvas.height = 200;
             
             canvas.addEventListener('mousedown', e => {
-                // ודא שלקנבס יש רוחב תקין לפני פעולת ציור
                 if (canvas.width === 0 || canvas.height === 0) return;
                 painting = true;
                 const r = canvas.getBoundingClientRect();
@@ -872,7 +871,6 @@
                 try {
                     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 } catch(err) {
-                    // הגנה מפני שגיאת רוחב 0
                     snapshot = null;
                 }
                 ctx.beginPath(); ctx.moveTo(startX, startY);
@@ -1263,7 +1261,6 @@
             
             showSec('room-section'); 
             
-            // עדכון גודל הקנבס לאחר שהחלון גלוי לגמרי
             setTimeout(() => {
                 canvas.width = canvas.offsetWidth || 600;
                 canvas.height = 200;
