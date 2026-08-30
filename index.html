@@ -1432,8 +1432,53 @@
                 video.id = 'local-video';
                 video.muted = true;
                 if (mediaStream && video.srcObject !== mediaStream) video.srcObject = mediaStream;
+
+                // IMPORTANT: there must be exactly ONE local tile.
+                // Older versions could leave the original placeholder plus
+                // a second tile for the same user, especially on students.
+                const localTiles = Array.from(grid.querySelectorAll('.video-tile')).filter(t => {
+                    const v = t.querySelector('video');
+                    return t.dataset.userid === uid || v?.id === 'local-video' || (mediaStream && v?.srcObject === mediaStream);
+                });
+                // Keep the tile we just resolved and remove every duplicate.
+                localTiles.forEach(t => {
+                    if (t !== tile) t.remove();
+                });
+                tile.dataset.userid = uid;
+                tile.classList.remove('remote-video');
             }
             return video;
+        }
+
+        function removeDuplicateLocalTiles() {
+            const grid = document.getElementById('video-grid-container');
+            if (!grid) return;
+            const all = Array.from(grid.querySelectorAll('.video-tile'));
+            const candidates = all.filter(tile => {
+                const v = tile.querySelector('video');
+                return tile.dataset.userid === userId ||
+                       v?.id === 'local-video' ||
+                       (mediaStream && v?.srcObject === mediaStream);
+            });
+            if (candidates.length <= 1) return;
+
+            // Prefer the tile with our real local video stream.
+            const keep = candidates.find(t => t.querySelector('video')?.srcObject === mediaStream)
+                      || candidates.find(t => t.dataset.userid === userId)
+                      || candidates[0];
+
+            candidates.forEach(t => {
+                if (t !== keep) t.remove();
+            });
+            keep.dataset.userid = userId;
+            const v = keep.querySelector('video');
+            if (v) {
+                v.id = 'local-video';
+                v.srcObject = mediaStream;
+                v.muted = true;
+                v.autoplay = true;
+                v.playsInline = true;
+            }
         }
 
         async function sendRtcSignal(targetUserId, type, data) {
@@ -1671,6 +1716,7 @@
             const me = visible.find(p => p.user_id === userId);
             if (me) {
                 ensureVideoTile(me.user_id, me.profiles?.full_name || userName || 'משתמש', true, me.profiles?.role === 'teacher');
+                removeDuplicateLocalTiles();
             }
 
             Array.from(gridContainer.querySelectorAll('.video-tile[data-userid]')).forEach(tile => {
