@@ -1522,7 +1522,13 @@
         }
 
         async function handleWebRTCSignal(payload) {
-            if (!payload || payload.targetUserId !== userId || payload.fromUserId === userId) return;
+            if (!payload || payload.fromUserId === userId) return;
+            // READY is broadcast to the whole room; only the teacher handles it.
+            if (payload.type === 'ready') {
+                await handleRtcReady(payload);
+                return;
+            }
+            if (payload.targetUserId !== userId) return;
             const remote = sessionParticipants.find(p => p.user_id === payload.fromUserId);
             const remoteName = remote?.profiles?.full_name || 'משתתף';
             const remoteRole = remote?.profiles?.role || payload.fromRole || 'student';
@@ -1577,7 +1583,7 @@
                 await activeChannel.send({
                     type: 'broadcast',
                     event: 'webrtc_signal',
-                    payload: { fromUserId: userId, fromRole: role, targetUserId: role === 'teacher' ? null : '__teacher__', type: 'ready', data: { userId, userName, role } }
+                    payload: { fromUserId: userId, fromRole: role, targetUserId: null, type: 'ready', data: { userId, userName, role } }
                 });
 
                 if (role === 'teacher') {
@@ -1594,8 +1600,14 @@
         async function handleRtcReady(payload) {
             if (role !== 'teacher' || !payload?.data?.userId || payload.data.userId === userId) return;
             const student = sessionParticipants.find(p => p.user_id === payload.data.userId);
-            if (student?.status === 'approved') {
-                await createRtcOffer(payload.data.userId, payload.data.userName || student.profiles?.full_name || 'תלמיד', 'student');
+            // The participant row may arrive a moment after the READY broadcast.
+            // In that case, still create the peer; the database status is only a UI gate.
+            if (!student || student.status === 'approved') {
+                await createRtcOffer(
+                    payload.data.userId,
+                    payload.data.userName || student?.profiles?.full_name || 'תלמיד',
+                    'student'
+                );
             }
         }
 
@@ -1653,10 +1665,13 @@
             const gridContainer = document.getElementById('video-grid-container');
             const wantedIds = new Set(visible.map(p => p.user_id));
 
-            visible.forEach(p => {
-                const isMe = p.user_id === userId;
-                ensureVideoTile(p.user_id, p.profiles?.full_name || 'משתמש', isMe, p.profiles?.role === 'teacher');
-            });
+            // Create/update ONLY our local tile here. Remote tiles are created only
+            // when an actual WebRTC MediaStream arrives (ontrack). This prevents
+            // black duplicate tiles for participants who have not connected yet.
+            const me = visible.find(p => p.user_id === userId);
+            if (me) {
+                ensureVideoTile(me.user_id, me.profiles?.full_name || userName || 'משתמש', true, me.profiles?.role === 'teacher');
+            }
 
             Array.from(gridContainer.querySelectorAll('.video-tile[data-userid]')).forEach(tile => {
                 if (!wantedIds.has(tile.dataset.userid)) {
