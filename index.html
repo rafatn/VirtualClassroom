@@ -1267,7 +1267,7 @@
                 canvas.height = 200;
             }, 100);
 
-            initStream();
+            await initStream();
 
             await supabase.from('room_participants').upsert([{ 
                 room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: 'approved', weather_info: myWeatherInfo 
@@ -1347,9 +1347,15 @@
             try { 
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); 
                 const localVideoEl = document.getElementById('local-video');
-                if (localVideoEl) localVideoEl.srcObject = mediaStream; 
-                document.getElementById('video-user-label').innerText = userName + " (את/ה)";
-            } catch(e){}
+                if (localVideoEl) {
+                    localVideoEl.srcObject = mediaStream;
+                    localVideoEl.muted = true;
+                }
+                const labelEl = document.getElementById('video-user-label');
+                if (labelEl) labelEl.innerText = userName + " (את/ה)";
+            } catch(e){
+                console.error("Camera access error:", e);
+            }
         }
 
         window.teacherToggleMic = async (targetUserId, newMicState) => {
@@ -1401,19 +1407,54 @@
             const approved = data.filter(p => p.status === 'approved');
 
             const gridContainer = document.getElementById('video-grid-container');
-            gridContainer.innerHTML = approved.map(p => {
-                const isMe = p.user_id === userId;
-                return `
-                    <div class="video-tile">
-                        ${isMe ? `<video id="local-video" autoplay muted playsinline></video>` : `<video autoplay playsinline></video>`}
-                        <div class="video-user-label">${p.profiles?.full_name || 'משתמש'} ${isMe ? '(את/ה)' : ''}</div>
-                    </div>
-                `;
-            }).join('');
+            
+            // יצירת מפה או בדיקה כדי לוודא שאיננו דורסים ומאבדים את הזרם המקומי (local-video)
+            let localTile = document.getElementById('local-video')?.closest('.video-tile');
+            if (!localTile) {
+                gridContainer.innerHTML = approved.map(p => {
+                    const isMe = p.user_id === userId;
+                    return `
+                        <div class="video-tile" data-userid="${p.user_id}">
+                            <video ${isMe ? 'id="local-video" muted' : ''} autoplay playsinline></video>
+                            <div class="video-user-label">${p.profiles?.full_name || 'משתמש'} ${isMe ? '(את/ה)' : ''}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                // עדכון דינמי של רשימת האריחים מבלי לאבד את אלמנט הוידאו המקומי הקיים
+                const existingTiles = Array.from(gridContainer.children);
+                const existingUserIds = existingTiles.map(tile => tile.getAttribute('data-userid'));
+                
+                // הוספת משתמשים חדשים שלא קיימים ב-DOM
+                approved.forEach(p => {
+                    if (!existingUserIds.includes(p.user_id)) {
+                        const isMe = p.user_id === userId;
+                        const tile = document.createElement('div');
+                        tile.className = 'video-tile';
+                        tile.setAttribute('data-userid', p.user_id);
+                        tile.innerHTML = `
+                            <video ${isMe ? 'id="local-video" muted' : ''} autoplay playsinline></video>
+                            <div class="video-user-label">${p.profiles?.full_name || 'משתמש'} ${isMe ? '(את/ה)' : ''}</div>
+                        `;
+                        gridContainer.appendChild(tile);
+                    }
+                });
 
+                // הסרת משתמשים שיצאו
+                existingTiles.forEach(tile => {
+                    const uid = tile.getAttribute('data-userid');
+                    if (!approved.some(p => p.user_id === uid)) {
+                        tile.remove();
+                    }
+                });
+            }
+
+            // חיבור מחדש של הזרם המקומי לאלמנט הוידאו במידת הצורך
             if (mediaStream) {
                 const localVidEl = document.getElementById('local-video');
-                if (localVidEl) localVidEl.srcObject = mediaStream;
+                if (localVidEl && localVidEl.srcObject !== mediaStream) {
+                    localVidEl.srcObject = mediaStream;
+                }
             }
 
             document.getElementById('participants-list').innerHTML = approved.map(p => `
