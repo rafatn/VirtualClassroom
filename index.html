@@ -32,7 +32,7 @@
         
 		.video-grid {
                       display: grid;
-                      grid-template-columns: 3fr 1fr; 
+                      grid-template-columns: 3fr 1fr; /* תצוגה ראשית גדולה למורה וטור צדדי לתלמידים */
                       gap: 10px;
                       margin-bottom: 15px;
                       height: 400px;
@@ -48,7 +48,7 @@
                       overflow: hidden;
                       position: relative;
                       border: 2px solid var(--border);
-                      height: 140px; 
+                      height: 140px; /* גובה ברירת מחדל לאריחים הקטנים */
                     }
 		.video-tile.spotlight {
                       grid-column: 1 / -1;
@@ -59,13 +59,14 @@
                     }					
         .video-tile.remote-video { border-color: var(--primary); }
         .video-tile.remote-video::after { content: 'LIVE'; position:absolute; top:5px; left:5px; background:rgba(16,185,129,.9); color:#fff; font-size:9px; padding:2px 5px; border-radius:4px; }
-        .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; color: #fff; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
         hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
         .top-bar-btn { background: var(--muted); color: #fff; padding: 6px 12px; border-radius: 6px; width: auto; display: inline-block; font-size: 14px; }
         .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; width: auto; display: inline; padding: 0; }
+        .weather-badge { font-size: 11px; background: var(--tool); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 3px; }
         
         @keyframes flashAlert {
             0% { background-color: rgba(239, 68, 68, 0.2); }
@@ -628,17 +629,7 @@
         let wbMode = 'pen', analyticsChartInstance = null, ambientAudioNode = null;
         let stickyNotesList = [];
 
-        // פונקציית צבעים ייחודית לכל משתתף לפי מזהה
-        function getUserColor(uid) {
-            if (!uid) return '#4f46e5';
-            let hash = 0;
-            for (let i = 0; i < uid.length; i++) {
-                hash = uid.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-            return '#' + '00000'.substring(0, 6 - c.length) + c;
-        }
-
+        // WebRTC: המורה יוזם חיבור לכל תלמיד; תלמידים מקבלים את המורה בלבד.
         const rtcPeers = new Map();
         const rtcIceQueues = new Map();
         const rtcRemoteStreams = new Map();
@@ -648,6 +639,8 @@
                 { urls: 'stun:stun1.l.google.com:19302' }
             ]
         };
+        let rtcReady = false;
+        let rtcStarting = false;
 
         function playBeepSound() {
             try {
@@ -880,6 +873,7 @@
 
         function updateAnalyticsChart() {
             if (role !== 'teacher') return;
+            const total = sessionParticipants.length || 1;
             const activeCams = sessionParticipants.filter(p => p.cam_active).length;
             const activeMics = sessionParticipants.filter(p => p.mic_active).length;
             const hands = sessionParticipants.filter(p => p.hand_raised).length;
@@ -1408,10 +1402,7 @@
                     localVideoEl.playsInline = true;
                 }
                 const labelEl = document.getElementById('video-user-label');
-                if (labelEl) {
-                    labelEl.innerText = userName + " (את/ה)";
-                    labelEl.style.backgroundColor = getUserColor(userId);
-                }
+                if (labelEl) labelEl.innerText = userName + " (את/ה)";
                 return mediaStream;
             } catch(e){
                 console.error('Camera access error:', e);
@@ -1420,11 +1411,17 @@
             }
         }
 
+        function getVideoElementForUser(uid) {
+            const tile = document.querySelector(`.video-tile[data-userid="${CSS.escape(uid)}"]`);
+            return tile ? tile.querySelector('video') : null;
+        }
+
         function ensureVideoTile(uid, name, isMe = false, isTeacher = false) {
             const grid = document.getElementById('video-grid-container');
             let tile = grid.querySelector(`.video-tile[data-userid="${CSS.escape(uid)}"]`);
-            const userColor = getUserColor(uid);
 
+            // הקובץ המקורי מכיל אריח local-video ללא data-userid.
+            // במקום ליצור אריח שני, נהפוך את האריח הקיים לאריח של המשתמש הנוכחי.
             if (!tile && isMe) {
                 const oldLocal = grid.querySelector('.video-tile:not([data-userid]) #local-video');
                 if (oldLocal) {
@@ -1432,10 +1429,7 @@
                     tile.dataset.userid = uid;
                     tile.classList.remove('remote-video');
                     const label = tile.querySelector('.video-user-label');
-                    if (label) {
-                        label.textContent = name + ' (את/ה)';
-                        label.style.backgroundColor = userColor;
-                    }
+                    if (label) label.textContent = name + ' (את/ה)';
                 }
             }
 
@@ -1455,7 +1449,6 @@
                 const label = document.createElement('div');
                 label.className = 'video-user-label';
                 label.textContent = name + (isMe ? ' (את/ה)' : (isTeacher ? ' (מורה)' : ''));
-                label.style.backgroundColor = userColor;
                 tile.append(video, label);
                 grid.appendChild(tile);
             }
@@ -1465,10 +1458,14 @@
                 video.muted = true;
                 if (mediaStream && video.srcObject !== mediaStream) video.srcObject = mediaStream;
 
+                // IMPORTANT: there must be exactly ONE local tile.
+                // Older versions could leave the original placeholder plus
+                // a second tile for the same user, especially on students.
                 const localTiles = Array.from(grid.querySelectorAll('.video-tile')).filter(t => {
                     const v = t.querySelector('video');
                     return t.dataset.userid === uid || v?.id === 'local-video' || (mediaStream && v?.srcObject === mediaStream);
                 });
+                // Keep the tile we just resolved and remove every duplicate.
                 localTiles.forEach(t => {
                     if (t !== tile) t.remove();
                 });
@@ -1478,42 +1475,404 @@
             return video;
         }
 
-        // עדכון תצוגת רשימת המשתתפים עם הצבע התואם לשם שלהם
-        async function fetchParticipants(rid) {
-            const { data } = await supabase.from('room_participants')
-                .select(`user_id, cam_active, mic_active, hand_raised, profiles(full_name, role), weather_info`)
-                .eq('room_id', rid);
-            
-            sessionParticipants = data || [];
-            const list = document.getElementById('participants-list');
-            if (!sessionParticipants.length) { list.innerHTML = `<span style="color:var(--muted); font-size:12px;">אין משתתפים.</span>`; return; }
+        function removeDuplicateLocalTiles() {
+            const grid = document.getElementById('video-grid-container');
+            if (!grid) return;
+            const all = Array.from(grid.querySelectorAll('.video-tile'));
+            const candidates = all.filter(tile => {
+                const v = tile.querySelector('video');
+                return tile.dataset.userid === userId ||
+                       v?.id === 'local-video' ||
+                       (mediaStream && v?.srcObject === mediaStream);
+            });
+            if (candidates.length <= 1) return;
 
-            list.innerHTML = sessionParticipants.map(p => {
-                const name = p.profiles?.full_name || 'משתמש';
-                const color = getUserColor(p.user_id);
-                return `
-                    <div class="participant-card">
-                        <span style="color: ${color}; font-weight: bold;">
-                            ${name} ${p.user_id === userId ? '(את/ה)' : ''} ${p.hand_raised ? '🙋‍♂️' : ''}
-                        </span>
-                        <div style="font-size: 12px; display: flex; gap: 6px; align-items: center;">
-                            <span>${p.cam_active ? '📷' : '📷❌'}</span>
-                            <span>${p.mic_active ? '🎤' : '🎤❌'}</span>
-                            <span class="weather-badge">${p.weather_info || ''}</span>
-                            ${role === 'teacher' && p.user_id !== userId ? `<button onclick="teacherPingStudent('${p.user_id}')" style="width:auto; padding:2px 6px; font-size:10px; background:var(--warning); color:#000; margin:0;" data-i18n="btn_ping_student">הקפץ ⚡</button>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            // Prefer the tile with our real local video stream.
+            const keep = candidates.find(t => t.querySelector('video')?.srcObject === mediaStream)
+                      || candidates.find(t => t.dataset.userid === userId)
+                      || candidates[0];
 
-            updateAnalyticsChart();
+            candidates.forEach(t => {
+                if (t !== keep) t.remove();
+            });
+            keep.dataset.userid = userId;
+            const v = keep.querySelector('video');
+            if (v) {
+                v.id = 'local-video';
+                v.srcObject = mediaStream;
+                v.muted = true;
+                v.autoplay = true;
+                v.playsInline = true;
+            }
         }
+
+        async function sendRtcSignal(targetUserId, type, data) {
+            if (!activeChannel || !targetUserId) return;
+            await activeChannel.send({
+                type: 'broadcast',
+                event: 'webrtc_signal',
+                payload: { fromUserId: userId, fromRole: role, targetUserId, type, data }
+            });
+        }
+
+        function closeRtcPeer(remoteUserId) {
+            const pc = rtcPeers.get(remoteUserId);
+            if (pc) {
+                try { pc.onicecandidate = null; pc.ontrack = null; pc.close(); } catch(e) {}
+                rtcPeers.delete(remoteUserId);
+            }
+            const video = getVideoElementForUser(remoteUserId);
+            if (video) video.srcObject = null;
+            rtcIceQueues.delete(remoteUserId);
+            rtcRemoteStreams.delete(remoteUserId);
+        }
+
+        async function createRtcPeer(remoteUserId, remoteName, remoteRole, createOffer = false) {
+            if (!remoteUserId || remoteUserId === userId || !mediaStream) return null;
+
+            let pc = rtcPeers.get(remoteUserId);
+            if (pc) return pc;
+
+            pc = new RTCPeerConnection(rtcConfig);
+            rtcPeers.set(remoteUserId, pc);
+
+            mediaStream.getTracks().forEach(track => {
+                try { pc.addTrack(track, mediaStream); } catch(e) { console.warn('addTrack:', e); }
+            });
+
+            pc.onicecandidate = event => {
+                if (event.candidate) sendRtcSignal(remoteUserId, 'ice', event.candidate);
+            };
+
+            pc.ontrack = event => {
+                // יש דפדפנים שבהם ontrack מגיע ללא streams[0].
+                // לכן אנו מרכיבים MediaStream מרצועות האודיו/וידאו שהתקבלו.
+                let remoteStream = rtcRemoteStreams.get(remoteUserId);
+                if (!remoteStream) {
+                    remoteStream = new MediaStream();
+                    rtcRemoteStreams.set(remoteUserId, remoteStream);
+                }
+                if (event.track && !remoteStream.getTracks().some(t => t.id === event.track.id)) {
+                    remoteStream.addTrack(event.track);
+                }
+                const video = ensureVideoTile(remoteUserId, remoteName || 'משתתף', false, remoteRole === 'teacher');
+                if (video && video.srcObject !== remoteStream) {
+                    video.srcObject = remoteStream;
+                    video.muted = false;
+                    video.autoplay = true;
+                    video.playsInline = true;
+                    video.play().catch(() => {});
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+                    if (pc.connectionState === 'failed' && role === 'teacher') {
+                        closeRtcPeer(remoteUserId);
+                        setTimeout(() => createRtcOffer(remoteUserId, remoteName, remoteRole), 1000);
+                    }
+                }
+            };
+
+            if (createOffer) await createRtcOfferOnPeer(pc, remoteUserId);
+            return pc;
+        }
+
+        async function createRtcOfferOnPeer(pc, remoteUserId) {
+            const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+            await pc.setLocalDescription(offer);
+            await sendRtcSignal(remoteUserId, 'offer', pc.localDescription);
+        }
+
+        async function createRtcOffer(remoteUserId, remoteName, remoteRole) {
+            if (role !== 'teacher') return;
+            closeRtcPeer(remoteUserId);
+            const pc = await createRtcPeer(remoteUserId, remoteName, remoteRole, false);
+            if (pc) await createRtcOfferOnPeer(pc, remoteUserId);
+        }
+
+        async function handleWebRTCSignal(payload) {
+            if (!payload || payload.fromUserId === userId) return;
+            // READY is broadcast to the whole room; only the teacher handles it.
+            if (payload.type === 'ready') {
+                await handleRtcReady(payload);
+                return;
+            }
+            if (payload.targetUserId !== userId) return;
+            const remote = sessionParticipants.find(p => p.user_id === payload.fromUserId);
+            const remoteName = remote?.profiles?.full_name || 'משתתף';
+            const remoteRole = remote?.profiles?.role || payload.fromRole || 'student';
+
+            try {
+                if (payload.type === 'offer') {
+                    // תלמיד מקבל Offer מהמורה. המורה בלבד יוצר Offers.
+                    if (role !== 'student' || remoteRole !== 'teacher') return;
+                    closeRtcPeer(payload.fromUserId);
+                    const pc = await createRtcPeer(payload.fromUserId, remoteName, remoteRole, false);
+                    await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
+                    const queuedIce = rtcIceQueues.get(payload.fromUserId) || [];
+                    for (const candidate of queuedIce) {
+                        try { await pc.addIceCandidate(candidate); } catch(e) { console.warn('Queued ICE:', e); }
+                    }
+                    rtcIceQueues.delete(payload.fromUserId);
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    await sendRtcSignal(payload.fromUserId, 'answer', pc.localDescription);
+                } else if (payload.type === 'answer') {
+                    // המורה מקבל Answer מהתלמיד.
+                    if (role !== 'teacher') return;
+                    const pc = rtcPeers.get(payload.fromUserId);
+                    if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
+                } else if (payload.type === 'ice') {
+                    const pc = rtcPeers.get(payload.fromUserId);
+                    if (pc && payload.data) {
+                        const candidate = new RTCIceCandidate(payload.data);
+                        // ICE יכול להגיע לפני setRemoteDescription. שומרים אותו לתור.
+                        if (pc.remoteDescription && pc.remoteDescription.type) {
+                            try { await pc.addIceCandidate(candidate); } catch(e) { console.warn('ICE:', e); }
+                        } else {
+                            if (!rtcIceQueues.has(payload.fromUserId)) rtcIceQueues.set(payload.fromUserId, []);
+                            rtcIceQueues.get(payload.fromUserId).push(candidate);
+                        }
+                    }
+                } else if (payload.type === 'bye') {
+                    closeRtcPeer(payload.fromUserId);
+                }
+            } catch (e) {
+                console.error('WebRTC signaling error:', e);
+            }
+        }
+
+        async function startWebRTC() {
+            if (!activeChannel || !mediaStream || rtcReady || rtcStarting) return;
+            rtcStarting = true;
+            try {
+                rtcReady = true;
+                // התלמיד מודיע למורה שהוא מוכן לקבל Offer.
+                // המורה יכול גם לשלוח Offers מחדש כאשר תלמיד מופיע ברשימת המשתתפים.
+                await activeChannel.send({
+                    type: 'broadcast',
+                    event: 'webrtc_signal',
+                    payload: { fromUserId: userId, fromRole: role, targetUserId: null, type: 'ready', data: { userId, userName, role } }
+                });
+
+                if (role === 'teacher') {
+                    const approved = sessionParticipants.filter(p => p.status === 'approved' && p.user_id !== userId && p.profiles?.role === 'student');
+                    for (const p of approved) {
+                        await createRtcOffer(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                    }
+                }
+            } finally {
+                rtcStarting = false;
+            }
+        }
+
+        async function handleRtcReady(payload) {
+            if (role !== 'teacher' || !payload?.data?.userId || payload.data.userId === userId) return;
+            const student = sessionParticipants.find(p => p.user_id === payload.data.userId);
+            // The participant row may arrive a moment after the READY broadcast.
+            // In that case, still create the peer; the database status is only a UI gate.
+            if (!student || student.status === 'approved') {
+                await createRtcOffer(
+                    payload.data.userId,
+                    payload.data.userName || student?.profiles?.full_name || 'תלמיד',
+                    'student'
+                );
+            }
+        }
+
+        window.teacherToggleMic = async (targetUserId, newMicState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: newMicState }).eq('room_id', roomId).eq('user_id', targetUserId);
+        };
+
+        window.teacherToggleCam = async (targetUserId, newCamState) => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ cam_active: newCamState }).eq('room_id', roomId).eq('user_id', targetUserId);
+        };
+
+        window.teacherMuteAll = async () => {
+            if (role !== 'teacher') return;
+            await supabase.from('room_participants').update({ mic_active: false }).eq('room_id', roomId).neq('user_id', userId);
+            alert('כל התלמידים הושתקו בהצלחה 🔇');
+        };
+
+        window.toggleRaiseHand = async () => {
+            handRaised = !handRaised;
+            if (handRaised && role === 'teacher') playBeepSound();
+            const t = translations[currentLang];
+            const btn = document.getElementById('raise-hand-btn');
+            btn.style.background = handRaised ? 'var(--danger)' : 'var(--warning)';
+            btn.innerText = handRaised ? t.btn_lower_hand : t.btn_raise_hand;
+            await supabase.from('room_participants').update({ hand_raised: handRaised }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyCamera = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getVideoTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-cam-btn').innerText = t.enabled ? tr.btn_cam_off : tr.btn_cam_on;
+            await supabase.from('room_participants').update({ cam_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyMicrophone = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getAudioTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-mic-btn').innerText = t.enabled ? tr.btn_mic_mute : tr.btn_mic_unmute;
+            await supabase.from('room_participants').update({ mic_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        async function fetchParticipants(id) {
+            const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
+            if (!data) return;
+            sessionParticipants = data;
+            const approved = data.filter(p => p.status === 'approved');
+            const visible = role === 'teacher'
+                ? approved
+                : approved.filter(p => p.user_id === userId || p.profiles?.role === 'teacher');
+
+            const gridContainer = document.getElementById('video-grid-container');
+            const wantedIds = new Set(visible.map(p => p.user_id));
+
+            // Create/update ONLY our local tile here. Remote tiles are created only
+            // when an actual WebRTC MediaStream arrives (ontrack). This prevents
+            // black duplicate tiles for participants who have not connected yet.
+            const me = visible.find(p => p.user_id === userId);
+            if (me) {
+                ensureVideoTile(me.user_id, me.profiles?.full_name || userName || 'משתמש', true, me.profiles?.role === 'teacher');
+                removeDuplicateLocalTiles();
+            }
+
+            Array.from(gridContainer.querySelectorAll('.video-tile[data-userid]')).forEach(tile => {
+                if (!wantedIds.has(tile.dataset.userid)) {
+                    const uid = tile.dataset.userid;
+                    if (uid !== userId) closeRtcPeer(uid);
+                    tile.remove();
+                }
+            });
+
+            const localVidEl = document.getElementById('local-video');
+            if (localVidEl && mediaStream && localVidEl.srcObject !== mediaStream) {
+                localVidEl.srcObject = mediaStream;
+                localVidEl.muted = true;
+            }
+
+            document.getElementById('participants-list').innerHTML = approved.map(p => `
+                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <b>👤 ${p.profiles?.full_name || 'משתמש'}</b> ${p.hand_raised ? '🙋‍♂️' : ''}
+                            <span class="weather-badge">${p.weather_info || '🌤️ ---'}</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--muted);">${p.cam_active ? '📷' : '📷❌'} | ${p.mic_active ? '🎤' : '🎤❌'}</span>
+                    </div>
+                    ${role === 'teacher' && p.user_id !== userId ? `
+                        <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
+                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? 'Mute' : 'Unmute'}</button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
+                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;">הקפץ ⚡</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            if (role === 'teacher') {
+                updateAnalyticsChart();
+                // אם תלמיד נכנס אחרי המורה, ננסה לפתוח אליו חיבור.
+                if (rtcReady) {
+                    for (const p of approved.filter(x => x.profiles?.role === 'student' && x.user_id !== userId)) {
+                        if (!rtcPeers.has(p.user_id)) createRtcOffer(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                    }
+                }
+            }
+        }
+
+        window.startScreenShare = async () => {
+            try {
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                const screenTrack = displayStream.getVideoTracks()[0];
+                const localVideo = document.getElementById('local-video');
+                if (localVideo) localVideo.srcObject = displayStream;
+                for (const pc of rtcPeers.values()) {
+                    const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+                    if (sender) await sender.replaceTrack(screenTrack);
+                }
+                screenTrack.onended = async () => {
+                    const cameraTrack = mediaStream?.getVideoTracks()[0];
+                    if (cameraTrack) {
+                        if (localVideo) localVideo.srcObject = mediaStream;
+                        for (const pc of rtcPeers.values()) {
+                            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+                            if (sender) await sender.replaceTrack(cameraTrack);
+                        }
+                    }
+                };
+            } catch(e) { console.warn('Screen share cancelled:', e); }
+        };
+        window.startRecording = () => {
+            const s = document.getElementById('local-video').srcObject; if (!s) return; chunks = [];
+            mediaRecorder = new MediaRecorder(s);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.onstop = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' })); a.download = 'lesson.webm'; a.click(); };
+            mediaRecorder.start(); document.getElementById('stop-rec-btn').classList.remove('hidden');
+        };
+        window.stopAndSaveRecording = () => { if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); } };
+
+        window.downloadAttendanceReport = () => {
+            let r = `===== Report =====\nRoom: ${document.getElementById('current-room-title').innerText}\n\n`;
+            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - Weather: ${p.weather_info || 'N/A'} - Cam: ${p.cam_active ? 'On' : 'Off'} | Mic: ${p.mic_active ? 'On' : 'Off'}\n`);
+            r += `\n--- Transcript ---\n${transcriptText}`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/plain;charset=utf-8' }));
+            a.download = `report_${Date.now()}.txt`; a.click();
+        };
+
+        window.calculateMath = () => {
+            try { document.getElementById('calc-result').innerText = `= ${eval(document.getElementById('calc-input').value)}`; }
+            catch(e) { document.getElementById('calc-result').innerText = 'Error'; }
+        };
+
+        window.sendChatMessage = () => {
+            const inp = document.getElementById('chat-input'); if (!inp.value) return;
+            document.getElementById('chat-messages').innerHTML += `<div><b>Me:</b> ${inp.value}</div>`; inp.value = '';
+        };
+
+        window.leaveRoom = async () => {
+            if (isTranscribing) toggleSpeechRecognition();
+            stopAmbientSound();
+            if (activeChannel) {
+                for (const remoteUserId of rtcPeers.keys()) {
+                    try { await sendRtcSignal(remoteUserId, 'bye', {}); } catch(e) {}
+                    closeRtcPeer(remoteUserId);
+                }
+                rtcPeers.clear();
+                rtcReady = false;
+                rtcStarting = false;
+                supabase.removeChannel(activeChannel);
+                activeChannel = null;
+            }
+            if (roomId && userId) await supabase.from('room_participants').delete().eq('room_id', roomId).eq('user_id', userId);
+            showSec('dashboard-section'); loadRooms();
+        };
 
         function showSec(id) {
             ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(s => {
-                document.getElementById(s).classList.toggle('hidden', s !== id);
+                const el = document.getElementById(s); if (el) el.classList.add('hidden');
             });
+            const t = document.getElementById(id); if (t) t.classList.remove('hidden');
         }
+		// הוספת האזנה ללחיצה על אריחי וידאו לצורך הגדלה
+        document.addEventListener('click', function(e) {
+            const tile = e.target.closest('.video-tile');
+        if (tile && !e.target.closest('button')) {
+        // הסרת פוקוס מקודמים והחלפה
+        document.querySelectorAll('.video-tile').forEach(t => {
+            if (t !== tile) t.classList.remove('spotlight');
+        });
+        tile.classList.toggle('spotlight');
+    }
+});	
+		
     </script>
 </body>
 </html>
