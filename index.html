@@ -32,12 +32,43 @@
         
         .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .video-tile { background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 2px solid var(--border); }
-        /* לתלמיד: חלון המורה מוצג גדול ובולט */
-        body.student-view .video-tile.teacher-video { grid-column: 1 / -1; }
-        body.student-view .video-tile.teacher-video video { height: 360px; }
-        body.student-view .video-tile:not(.teacher-video) video { height: 150px; }
+        /* ===== תצוגת תלמיד: המורה הוא הווידאו הראשי ===== */
+        body.student-view #video-grid-container {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            align-items: start;
+        }
+        body.student-view #video-grid-container .video-tile.teacher-video {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            border-width: 3px;
+        }
+        body.student-view #video-grid-container .video-tile.teacher-video video {
+            width: 100% !important;
+            height: 500px !important;
+            min-height: 500px !important;
+            max-height: 70vh !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+        body.student-view #video-grid-container .video-tile:not(.teacher-video) {
+            max-width: 260px;
+        }
+        body.student-view #video-grid-container .video-tile:not(.teacher-video) video {
+            height: 150px !important;
+            min-height: 150px !important;
+        }
         @media (max-width: 700px) {
-            body.student-view .video-tile.teacher-video video { height: 260px; }
+            body.student-view #video-grid-container {
+                grid-template-columns: 1fr;
+            }
+            body.student-view #video-grid-container .video-tile.teacher-video video {
+                height: 360px !important;
+                min-height: 360px !important;
+                max-height: 65vh !important;
+            }
         }
         .video-tile.remote-video { border-color: var(--primary); }
         .video-tile.remote-video::after { content: 'LIVE'; position:absolute; top:5px; left:5px; background:rgba(16,185,129,.9); color:#fff; font-size:9px; padding:2px 5px; border-radius:4px; }
@@ -1562,6 +1593,15 @@
                 tile.classList.toggle('teacher-video', !!isTeacher);
             } else {
                 tile.classList.toggle('teacher-video', !!isTeacher);
+            }
+
+            // תלמיד: כל אריח שמזוהה כמורה מקבל תמיד את מחלקת הווידאו הראשי.
+            if (isTeacher && role === 'student') {
+                tile.classList.add('teacher-video');
+                video.style.width = '100%';
+                video.style.height = window.innerWidth <= 700 ? '360px' : '500px';
+                video.style.minHeight = window.innerWidth <= 700 ? '360px' : '500px';
+                video.style.objectFit = 'cover';
             }
             return video;
         }
