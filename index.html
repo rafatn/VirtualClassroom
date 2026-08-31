@@ -53,6 +53,61 @@
             100% { background-color: rgba(239, 68, 68, 0.2); }
         }
         .attention-active { animation: flashAlert 1s infinite; border: 2px solid var(--danger) !important; }
+
+        /* סרגל פיצ'רים צף */
+        #floating-features-bar {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px;
+            max-width: calc(100vw - 36px);
+            overflow-x: auto;
+            background: rgba(15,23,42,.92);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0,0,0,.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        #floating-features-bar.hidden { display:none !important; }
+        .floating-feature-btn {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            min-width: 48px;
+            height: 42px;
+            margin: 0 !important;
+            padding: 7px 11px !important;
+            border: 1px solid rgba(255,255,255,.14) !important;
+            border-radius: 12px !important;
+            background: rgba(255,255,255,.10) !important;
+            color: #fff !important;
+            font-size: 12px !important;
+            line-height: 1.1;
+            white-space: nowrap;
+            box-shadow: none !important;
+        }
+        .floating-feature-btn:hover { background: rgba(255,255,255,.22) !important; transform: translateY(-2px); }
+        .floating-feature-btn.active { background: var(--primary) !important; }
+        .floating-feature-btn.danger { background: rgba(239,68,68,.78) !important; }
+        .floating-feature-btn.success { background: rgba(16,185,129,.78) !important; }
+        .floating-feature-label { display:block; font-size:9px; opacity:.85; margin-top:2px; }
+        #floating-features-toggle {
+            position: fixed; right: 18px; bottom: 18px; z-index:10000;
+            width:48px !important; height:48px; margin:0 !important; padding:0 !important;
+            border-radius:50% !important; background:var(--primary) !important; color:#fff !important;
+            box-shadow:0 8px 25px rgba(0,0,0,.3); font-size:21px; display:none;
+        }
+        #floating-features-bar.collapsed { display:none; }
+        @media(max-width:700px) {
+            #floating-features-bar { left:8px; right:8px; bottom:8px; max-width:none; border-radius:15px; }
+            #floating-features-toggle { right:12px; bottom:12px; }
+            .floating-feature-btn { min-width:44px; height:40px; padding:6px 8px !important; font-size:11px !important; }
+        }
+
     </style>
 </head>
 <body>
@@ -1899,6 +1954,64 @@
             });
             const t = document.getElementById(id); if (t) t.classList.remove('hidden');
         }
-    </script>
+    
+        window.toggleFloatingFeatures = () => {
+            const bar = document.getElementById('floating-features-bar');
+            const toggle = document.getElementById('floating-features-toggle');
+            if (!bar || !toggle) return;
+            const hidden = bar.classList.toggle('hidden');
+            toggle.style.display = hidden ? 'block' : 'none';
+        };
+        window.floatingGo = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+        };
+        window.floatingFindTool = (term) => {
+            const boxes = [...document.querySelectorAll('#room-section .tool-box')];
+            const box = boxes.find(b => (b.innerText || '').toLowerCase().includes(term.toLowerCase()));
+            if (box) box.scrollIntoView({behavior:'smooth', block:'center'});
+        };
+        function updateFloatingBarVisibility() {
+            const room = document.getElementById('room-section');
+            const bar = document.getElementById('floating-features-bar');
+            const toggle = document.getElementById('floating-features-toggle');
+            if (!room || !bar || !toggle) return;
+            const inRoom = !room.classList.contains('hidden');
+            if (inRoom) {
+                bar.classList.remove('hidden');
+                toggle.style.display = 'none';
+            } else {
+                bar.classList.add('hidden');
+                toggle.style.display = 'none';
+            }
+        }
+        const _floatingObserver = new MutationObserver(updateFloatingBarVisibility);
+        document.addEventListener('DOMContentLoaded', () => {
+            const room = document.getElementById('room-section');
+            if (room) _floatingObserver.observe(room, {attributes:true, attributeFilter:['class']});
+            updateFloatingBarVisibility();
+        });
+
+</script>
+
+    <!-- סרגל פיצ'רים צף: נשאר נגיש גם בזמן גלילה -->
+    <button id="floating-features-toggle" onclick="toggleFloatingFeatures()" title="כלי כיתה">🧰</button>
+    <div id="floating-features-bar" class="hidden" aria-label="כלי כיתה צפים">
+        <button class="floating-feature-btn" onclick="floatingGo('video-grid-container')">🎥<span class="floating-feature-label">וידאו</span></button>
+        <button class="floating-feature-btn" onclick="toggleMyCamera()">📷<span class="floating-feature-label">מצלמה</span></button>
+        <button class="floating-feature-btn" onclick="toggleMyMicrophone()">🎤<span class="floating-feature-label">מיקרופון</span></button>
+        <button class="floating-feature-btn" onclick="startScreenShare()">🖥️<span class="floating-feature-label">מסך</span></button>
+        <button class="floating-feature-btn success" onclick="startRecording()">🔴<span class="floating-feature-label">הקלטה</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('YouTube')">📺<span class="floating-feature-label">YouTube</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('לוח לבן')">✏️<span class="floating-feature-label">לוח</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('PDF')">📄<span class="floating-feature-label">PDF</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('משתתפים')">👥<span class="floating-feature-label">משתתפים</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('צ׳אט')">💬<span class="floating-feature-label">צ׳אט</span></button>
+        <button class="floating-feature-btn" onclick="toggleFocusMode()">🎯<span class="floating-feature-label">פוקוס</span></button>
+        <button class="floating-feature-btn" onclick="toggleRaiseHand()">🙋<span class="floating-feature-label">הרמת יד</span></button>
+        <button class="floating-feature-btn danger" onclick="leaveRoom()">🚪<span class="floating-feature-label">יציאה</span></button>
+        <button class="floating-feature-btn" onclick="toggleFloatingFeatures()">✕<span class="floating-feature-label">סגור</span></button>
+    </div>
+
 </body>
 </html>
