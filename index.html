@@ -30,36 +30,15 @@
         .room-item, .participant-card { background: var(--card); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         video { width: 100%; height: 140px; background: #000; border-radius: 6px; object-fit: cover; }
         
-		.video-grid {
-                      display: grid;
-                      grid-template-columns: 3fr 1fr; /* תצוגה ראשית גדולה למורה וטור צדדי לתלמידים */
-                      gap: 10px;
-                      margin-bottom: 15px;
-                      height: 400px;
-                    }
-					
-		.video-tile.teacher-tile {
-                      grid-row: span 3;
-                      height: 100%;
-                    }
-	    .video-tile {
-                      background: #000;
-                      border-radius: 8px;
-                      overflow: hidden;
-                      position: relative;
-                      border: 2px solid var(--border);
-                      height: 140px; /* גובה ברירת מחדל לאריחים הקטנים */
-                    }
-		.video-tile.spotlight {
-                      grid-column: 1 / -1;
-                      height: 350px !important;
-                    }
-       .video-tile.spotlight video {
-                   height: 350px !important;
-                    }					
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .video-tile { background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 2px solid var(--border); }
         .video-tile.remote-video { border-color: var(--primary); }
         .video-tile.remote-video::after { content: 'LIVE'; position:absolute; top:5px; left:5px; background:rgba(16,185,129,.9); color:#fff; font-size:9px; padding:2px 5px; border-radius:4px; }
-        .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 4px solid var(--primary); }
+        .participant-name-color { display:inline-flex; align-items:center; gap:6px; font-weight:700; }
+        .participant-color-dot { width:10px; height:10px; border-radius:50%; display:inline-block; flex:0 0 10px; box-shadow:0 0 0 2px rgba(255,255,255,.25); }
+        .participant-device { font-size:10px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+        .participant-device span { background:var(--tool); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
 
         .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
         #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
@@ -622,6 +601,38 @@
         };
 
         let isReg = false, userId = null, roomId = null, activeChannel = null, role = 'student', userName = 'משתמש';
+        const participantMeta = new Map();
+
+        function hashString(str) { let h = 0; for (let i = 0; i < String(str).length; i++) h = ((h << 5) - h + String(str).charCodeAt(i)) | 0; return Math.abs(h); }
+        function participantColor(uid) {
+            const palette = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#d946ef','#ec4899','#64748b'];
+            return palette[hashString(uid || 'user') % palette.length];
+        }
+        function detectOS() {
+            const ua = navigator.userAgent || '';
+            if (/Windows NT/i.test(ua)) return 'Windows';
+            if (/Android/i.test(ua)) return 'Android';
+            if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+            if (/Mac OS X/i.test(ua)) return 'macOS';
+            if (/Linux/i.test(ua)) return 'Linux';
+            return 'Unknown';
+        }
+        function detectBrowser() {
+            const ua = navigator.userAgent || '';
+            if (/Edg\//i.test(ua)) return 'Edge';
+            if (/OPR\//i.test(ua)) return 'Opera';
+            if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
+            if (/Firefox\//i.test(ua)) return 'Firefox';
+            if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) return 'Chrome';
+            if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) return 'Safari';
+            return 'Browser';
+        }
+        function myParticipantMeta() { return { userId, userName, role, color: participantColor(userId), os: detectOS(), browser: detectBrowser() }; }
+        function getParticipantMeta(uid, fallbackName, fallbackRole) {
+            return participantMeta.get(uid) || { userId: uid, userName: fallbackName || 'משתמש', role: fallbackRole || 'student', color: participantColor(uid), os: 'לא ידוע', browser: 'לא ידוע' };
+        }
+        function escapeHtml(v) { const d=document.createElement('div'); d.textContent=String(v ?? ''); return d.innerHTML; }
+
         let mediaStream = null, mediaRecorder, chunks = [], recognition = null, isTranscribing = false, transcriptText = "";
         let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
         let myWeatherInfo = "⏳ טוען מזג אוויר...";
@@ -1337,6 +1348,14 @@
                         }
                     }
                 })
+                .on('broadcast', { event: 'participant_info' }, async p => {
+                    const m = p.payload;
+                    if (!m?.userId || m.userId === userId) return;
+                    participantMeta.set(m.userId, m);
+                    fetchParticipants(id);
+                    // Send our metadata back so a newly joined participant also learns about us.
+                    if (m.replyTo === userId) await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
+                })
                 .on('broadcast', { event: 'webrtc_signal' }, async p => {
                     if (p.payload?.type === 'ready') await handleRtcReady(p.payload);
                     else await handleWebRTCSignal(p.payload);
@@ -1385,6 +1404,8 @@
                 })
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
+                        participantMeta.set(userId, myParticipantMeta());
+                        await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
                         await startWebRTC();
                     }
                 });
@@ -1429,7 +1450,7 @@
                     tile.dataset.userid = uid;
                     tile.classList.remove('remote-video');
                     const label = tile.querySelector('.video-user-label');
-                    if (label) label.textContent = name + ' (את/ה)';
+                    if (label) { label.textContent = name + ' (את/ה)'; label.style.borderRightColor = getParticipantMeta(uid, name, 'student').color; }
                 }
             }
 
@@ -1448,7 +1469,10 @@
                 }
                 const label = document.createElement('div');
                 label.className = 'video-user-label';
+                const meta = getParticipantMeta(uid, name, isTeacher ? 'teacher' : 'student');
                 label.textContent = name + (isMe ? ' (את/ה)' : (isTeacher ? ' (מורה)' : ''));
+                label.style.borderRightColor = meta.color;
+                label.style.boxShadow = `inset 0 0 0 1px ${meta.color}55`;
                 tile.append(video, label);
                 grid.appendChild(tile);
             }
@@ -1653,7 +1677,7 @@
                 await activeChannel.send({
                     type: 'broadcast',
                     event: 'webrtc_signal',
-                    payload: { fromUserId: userId, fromRole: role, targetUserId: null, type: 'ready', data: { userId, userName, role } }
+                    payload: { fromUserId: userId, fromRole: role, targetUserId: null, type: 'ready', data: { ...myParticipantMeta() } }
                 });
 
                 if (role === 'teacher') {
@@ -1669,6 +1693,7 @@
 
         async function handleRtcReady(payload) {
             if (role !== 'teacher' || !payload?.data?.userId || payload.data.userId === userId) return;
+            participantMeta.set(payload.data.userId, payload.data);
             const student = sessionParticipants.find(p => p.user_id === payload.data.userId);
             // The participant row may arrive a moment after the READY broadcast.
             // In that case, still create the peer; the database status is only a UI gate.
@@ -1727,6 +1752,8 @@
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
             if (!data) return;
             sessionParticipants = data;
+            data.forEach(p => { if (!participantMeta.has(p.user_id)) participantMeta.set(p.user_id, { userId:p.user_id, userName:p.profiles?.full_name || 'משתמש', role:p.profiles?.role || 'student', color:participantColor(p.user_id), os:'לא ידוע', browser:'לא ידוע' }); });
+            participantMeta.set(userId, myParticipantMeta());
             const approved = data.filter(p => p.status === 'approved');
             const visible = role === 'teacher'
                 ? approved
@@ -1758,11 +1785,15 @@
                 localVidEl.muted = true;
             }
 
-            document.getElementById('participants-list').innerHTML = approved.map(p => `
-                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px;">
+            document.getElementById('participants-list').innerHTML = approved.map(p => {
+                const meta = getParticipantMeta(p.user_id, p.profiles?.full_name || 'משתמש', p.profiles?.role || 'student');
+                const displayName = escapeHtml(p.profiles?.full_name || meta.userName || 'משתמש');
+                return `
+                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px; border-right: 4px solid ${meta.color};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <b>👤 ${p.profiles?.full_name || 'משתמש'}</b> ${p.hand_raised ? '🙋‍♂️' : ''}
+                        <div style="display: flex; flex-direction:column; align-items:flex-start; gap: 2px; min-width:0;">
+                            <div class="participant-name-color"><span class="participant-color-dot" style="background:${meta.color}"></span><b>👤 ${displayName}</b> ${p.hand_raised ? '🙋‍♂️' : ''}</div>
+                            <div class="participant-device"><span>💻 ${escapeHtml(meta.os)}</span><span>🌐 ${escapeHtml(meta.browser)}</span></div>
                             <span class="weather-badge">${p.weather_info || '🌤️ ---'}</span>
                         </div>
                         <span style="font-size: 11px; color: var(--muted);">${p.cam_active ? '📷' : '📷❌'} | ${p.mic_active ? '🎤' : '🎤❌'}</span>
@@ -1775,7 +1806,14 @@
                         </div>
                     ` : ''}
                 </div>
-            `).join('');
+            `; }).join('');
+
+            // Apply the participant color to existing remote/local video labels.
+            approved.forEach(p => {
+                const tile = document.querySelector(`.video-tile[data-userid="${CSS.escape(p.user_id)}"]`);
+                const label = tile?.querySelector('.video-user-label');
+                if (label) label.style.borderRightColor = getParticipantMeta(p.user_id, p.profiles?.full_name, p.profiles?.role).color;
+            });
 
             if (role === 'teacher') {
                 updateAnalyticsChart();
@@ -1861,18 +1899,6 @@
             });
             const t = document.getElementById(id); if (t) t.classList.remove('hidden');
         }
-		// הוספת האזנה ללחיצה על אריחי וידאו לצורך הגדלה
-        document.addEventListener('click', function(e) {
-            const tile = e.target.closest('.video-tile');
-        if (tile && !e.target.closest('button')) {
-        // הסרת פוקוס מקודמים והחלפה
-        document.querySelectorAll('.video-tile').forEach(t => {
-            if (t !== tile) t.classList.remove('spotlight');
-        });
-        tile.classList.toggle('spotlight');
-    }
-});	
-		
     </script>
 </body>
 </html>
