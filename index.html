@@ -32,6 +32,13 @@
         
         .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .video-tile { background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 2px solid var(--border); }
+        /* לתלמיד: חלון המורה מוצג גדול ובולט */
+        body.student-view .video-tile.teacher-video { grid-column: 1 / -1; }
+        body.student-view .video-tile.teacher-video video { height: 360px; }
+        body.student-view .video-tile:not(.teacher-video) video { height: 150px; }
+        @media (max-width: 700px) {
+            body.student-view .video-tile.teacher-video video { height: 260px; }
+        }
         .video-tile.remote-video { border-color: var(--primary); }
         .video-tile.remote-video::after { content: 'LIVE'; position:absolute; top:5px; left:5px; background:rgba(16,185,129,.9); color:#fff; font-size:9px; padding:2px 5px; border-radius:4px; }
         .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 4px solid var(--primary); }
@@ -1366,6 +1373,8 @@
             document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
             document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
             
+            document.body.classList.toggle('student-view', role === 'student');
+            document.body.classList.toggle('teacher-view', role === 'teacher');
             showSec('room-section'); 
             
             setTimeout(() => {
@@ -1511,7 +1520,7 @@
 
             if (!tile) {
                 tile = document.createElement('div');
-                tile.className = 'video-tile' + (isMe ? '' : ' remote-video');
+                tile.className = 'video-tile' + (isMe ? '' : ' remote-video') + (isTeacher ? ' teacher-video' : '');
                 tile.dataset.userid = uid;
                 const video = document.createElement('video');
                 video.autoplay = true;
@@ -1550,6 +1559,9 @@
                 });
                 tile.dataset.userid = uid;
                 tile.classList.remove('remote-video');
+                tile.classList.toggle('teacher-video', !!isTeacher);
+            } else {
+                tile.classList.toggle('teacher-video', !!isTeacher);
             }
             return video;
         }
