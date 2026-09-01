@@ -159,8 +159,54 @@
         .vcx-hand{animation:flashAlert 1s infinite}.vcx-hidden{display:none!important}
         @media(max-width:800px){.vcx-grid{grid-template-columns:1fr}.vcx-stat-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
-<style id="v5-modern-design">:root{--v5-bg:#f3f6fb;--v5-surface:rgba(255,255,255,.96);--v5-border:#e4e9f2;--v5-text:#172033;--v5-muted:#6b778c;--v5-accent:#4f46e5;--v5-shadow:0 14px 40px rgba(15,23,42,.09)}:root[data-theme="dark"]{--v5-bg:#07111f;--v5-surface:rgba(15,23,42,.96);--v5-border:#26344a;--v5-text:#f8fafc;--v5-muted:#94a3b8;--v5-shadow:0 14px 40px rgba(0,0,0,.28)}body{background:radial-gradient(circle at 5% 0%,rgba(99,102,241,.10),transparent 28%),radial-gradient(circle at 100% 15%,rgba(14,165,233,.08),transparent 25%),var(--v5-bg)!important;color:var(--v5-text)}.container{max-width:1500px!important;padding:24px!important;border-radius:24px!important;background:var(--v5-surface)!important;box-shadow:var(--v5-shadow)!important}.grid-container{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)!important;gap:18px!important}.tool-box,.vcx-panel,.vcx-stat,.room-item,.participant-card{border-radius:16px!important;border:1px solid var(--v5-border)!important;box-shadow:0 6px 22px rgba(15,23,42,.06)!important}.tool-box{padding:16px!important;background:var(--tool)!important}.video-tile{border-radius:16px!important;overflow:hidden!important;box-shadow:0 8px 26px rgba(15,23,42,.16)!important}.video-tile video{border-radius:16px!important}.room-header,.lesson-header{border-radius:20px!important;box-shadow:var(--v5-shadow)!important}input,select,textarea{border-radius:12px!important;border-color:var(--v5-border)!important}.floating-feature-btn{border-radius:12px!important}.vcx-stat-grid{gap:10px}.vcx-grid{gap:14px}@media(max-width:900px){.grid-container{grid-template-columns:1fr!important}.container{padding:14px!important;border-radius:16px!important}}@media(max-width:600px){body{padding:8px!important}.container{padding:10px!important}.grid-container{gap:10px!important}.video-tile{min-height:120px!important}.video-tile video{min-height:120px!important}#floating-features-bar{left:8px!important;right:8px!important;bottom:8px!important;max-width:none!important;border-radius:16px!important}.floating-feature-btn{min-width:48px!important;height:42px!important}}#v5-live-pill{position:fixed;top:14px;left:14px;z-index:10001;display:none;padding:7px 11px;border-radius:999px;background:#dc2626;color:white;font-weight:800;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.2)}.v5-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.v5-section-title h3,.v5-section-title h4{margin:0}</style></head>
-<body><div id="v5-live-pill">● LIVE</div><script>document.addEventListener('DOMContentLoaded',()=>{const r=document.getElementById('room-section'),p=document.getElementById('v5-live-pill');if(!r||!p)return;const f=()=>p.style.display=r.classList.contains('hidden')?'none':'block';new MutationObserver(f).observe(r,{attributes:true,attributeFilter:['class']});f()});</script>
+<style id="v5-modern-design">:root{--v5-bg:#f3f6fb;--v5-surface:rgba(255,255,255,.96);--v5-border:#e4e9f2;--v5-text:#172033;--v5-muted:#6b778c;--v5-accent:#4f46e5;--v5-shadow:0 14px 40px rgba(15,23,42,.09)}:root[data-theme="dark"]{--v5-bg:#07111f;--v5-surface:rgba(15,23,42,.96);--v5-border:#26344a;--v5-text:#f8fafc;--v5-muted:#94a3b8;--v5-shadow:0 14px 40px rgba(0,0,0,.28)}body{background:radial-gradient(circle at 5% 0%,rgba(99,102,241,.10),transparent 28%),radial-gradient(circle at 100% 15%,rgba(14,165,233,.08),transparent 25%),var(--v5-bg)!important;color:var(--v5-text)}.container{max-width:1500px!important;padding:24px!important;border-radius:24px!important;background:var(--v5-surface)!important;box-shadow:var(--v5-shadow)!important}.grid-container{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)!important;gap:18px!important}.tool-box,.vcx-panel,.vcx-stat,.room-item,.participant-card{border-radius:16px!important;border:1px solid var(--v5-border)!important;box-shadow:0 6px 22px rgba(15,23,42,.06)!important}.tool-box{padding:16px!important;background:var(--tool)!important}.video-tile{border-radius:16px!important;overflow:hidden!important;box-shadow:0 8px 26px rgba(15,23,42,.16)!important}.video-tile video{border-radius:16px!important}.room-header,.lesson-header{border-radius:20px!important;box-shadow:var(--v5-shadow)!important}input,select,textarea{border-radius:12px!important;border-color:var(--v5-border)!important}.floating-feature-btn{border-radius:12px!important}.vcx-stat-grid{gap:10px}.vcx-grid{gap:14px}@media(max-width:900px){.grid-container{grid-template-columns:1fr!important}.container{padding:14px!important;border-radius:16px!important}}@media(max-width:600px){body{padding:8px!important}.container{padding:10px!important}.grid-container{gap:10px!important}.video-tile{min-height:120px!important}.video-tile video{min-height:120px!important}#floating-features-bar{left:8px!important;right:8px!important;bottom:8px!important;max-width:none!important;border-radius:16px!important}.floating-feature-btn{min-width:48px!important;height:42px!important}}#v5-live-pill{position:fixed;top:14px;left:14px;z-index:10001;display:none;padding:7px 11px;border-radius:999px;background:#dc2626;color:white;font-weight:800;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.2)}.v5-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.v5-section-title h3,.v5-section-title h4{margin:0}</style><style id="ceramic-v6-design">
+:root{--cer-bg:#eee9df;--cer-surface:#f8f5ee;--cer-surface2:#e9e2d5;--cer-ink:#263238;--cer-muted:#71808a;--cer-glaze:#6d9ca3;--cer-glaze2:#9db9b0;--cer-clay:#b9785b;--cer-line:rgba(70,65,55,.14);--cer-shadow:0 18px 45px rgba(70,58,42,.13)}
+:root[data-theme="dark"]{--cer-bg:#1d2425;--cer-surface:#293132;--cer-surface2:#222a2b;--cer-ink:#edf2ef;--cer-muted:#aebbb7;--cer-glaze:#86b8bc;--cer-glaze2:#739d91;--cer-clay:#c98a6a;--cer-line:rgba(240,235,220,.13);--cer-shadow:0 20px 50px rgba(0,0,0,.28)}
+*{box-sizing:border-box}body{background:radial-gradient(circle at 12% 8%,rgba(255,255,255,.7),transparent 24%),radial-gradient(circle at 88% 18%,rgba(109,156,163,.12),transparent 25%),var(--cer-bg)!important;color:var(--cer-ink)!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:radial-gradient(rgba(70,60,45,.16) .7px,transparent .7px);background-size:9px 9px;mix-blend-mode:multiply;z-index:-1}
+.container{max-width:1540px!important;background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(246,241,232,.96))!important;border:1px solid var(--cer-line)!important;border-radius:30px!important;box-shadow:var(--cer-shadow)!important;padding:24px!important}
+:root[data-theme="dark"] .container{background:linear-gradient(145deg,rgba(47,56,57,.98),rgba(35,43,44,.98))!important}
+.tool-box,.vcx-panel,.vcx-stat,.room-item,.participant-card{background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(235,229,218,.7))!important;border:1px solid var(--cer-line)!important;border-radius:21px!important;box-shadow:0 9px 25px rgba(72,59,43,.09),inset 0 1px rgba(255,255,255,.7)!important}
+:root[data-theme="dark"] .tool-box,:root[data-theme="dark"] .vcx-panel,:root[data-theme="dark"] .vcx-stat,:root[data-theme="dark"] .room-item,:root[data-theme="dark"] .participant-card{background:linear-gradient(145deg,#303a3b,#263031)!important}
+button,.top-bar-btn{border-radius:13px!important;border:1px solid var(--cer-line)!important;transition:.2s ease!important;box-shadow:0 4px 10px rgba(70,58,42,.08)!important}button:hover,.top-bar-btn:hover{transform:translateY(-1px);filter:saturate(1.06)}
+input,select,textarea{background:rgba(255,255,255,.62)!important;border:1px solid var(--cer-line)!important;border-radius:14px!important;color:var(--cer-ink)!important} :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{background:#202829!important}
+.video-tile{border:2px solid rgba(255,255,255,.75)!important;border-radius:23px!important;box-shadow:0 16px 34px rgba(54,47,38,.17)!important;background:#d9d4ca!important;overflow:hidden!important}.video-tile video{border-radius:21px!important}
+#whiteboard-canvas{background:#fbfaf5!important;border:8px solid #e3ddd0!important;border-radius:24px!important;box-shadow:inset 0 0 0 1px var(--cer-line),0 12px 28px rgba(70,58,42,.12)!important}
+.chat-box{height:240px!important;background:linear-gradient(160deg,#f8f5ee,#e9e2d7)!important;border:1px solid var(--cer-line)!important;border-radius:22px!important;padding:14px!important;box-shadow:inset 0 2px 12px rgba(70,58,42,.06)!important}
+.chat-box>*{animation:cerFade .25s ease}.chat-box div{background:rgba(255,255,255,.55);border:1px solid rgba(80,70,55,.08);border-radius:15px!important;padding:8px 11px;margin:6px 0!important;box-shadow:0 4px 10px rgba(70,58,42,.05)}
+#vcx-live-center{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(231,226,216,.65))!important;border-radius:24px!important;border:1px solid var(--cer-line)!important;padding:14px!important}
+.vcx-stat{position:relative;overflow:hidden}.vcx-stat:after{content:"";position:absolute;inset:auto -20% -45% -20%;height:70%;background:radial-gradient(circle,var(--cer-glaze),transparent 65%);opacity:.09}
+.room-header,.lesson-header{border-radius:24px!important;background:linear-gradient(135deg,rgba(248,245,238,.95),rgba(221,231,226,.8))!important;border:1px solid var(--cer-line)!important;box-shadow:var(--cer-shadow)!important}
+#floating-features-bar{background:rgba(248,245,238,.9)!important;border:1px solid var(--cer-line)!important;backdrop-filter:blur(16px);border-radius:22px!important;box-shadow:0 15px 35px rgba(60,52,43,.15)!important}.floating-feature-btn{border-radius:15px!important;background:linear-gradient(145deg,#faf8f2,#e4ddd0)!important}
+.ceramic-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(109,156,163,.13);border:1px solid rgba(109,156,163,.25);font-size:12px;font-weight:700;color:var(--cer-glaze)}
+@keyframes cerFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}@media(max-width:900px){.container{padding:14px!important;border-radius:20px!important}.grid-container{grid-template-columns:1fr!important}}@media(max-width:600px){body{padding:6px!important}.container{padding:9px!important;border-radius:16px!important}.video-tile{border-radius:17px!important}#whiteboard-canvas{border-width:5px!important;border-radius:17px!important}.chat-box{height:210px!important}}
+</style>
+<style id="ceramic-v61">
+:root{--cer-bg:#f4efe6;--cer-surface:#fbf8f2;--cer-edge:#d8cdbc;--cer-ink:#40392f;--cer-blue:#527b86;--cer-green:#73866c;--cer-rose:#b98279;--cer-gold:#b79a62;--cer-shadow:0 14px 34px rgba(72,57,39,.13)}
+body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparent 25%),radial-gradient(circle at 95% 15%,rgba(82,123,134,.10),transparent 28%),var(--cer-bg)!important;color:var(--cer-ink)}
+#main-app-container{background:rgba(255,252,247,.94)!important;border:1px solid rgba(181,166,142,.35)!important;box-shadow:0 20px 55px rgba(67,54,38,.13),inset 0 1px rgba(255,255,255,.9)!important}
+.tool-box,.vcx-panel{background:linear-gradient(145deg,rgba(255,252,247,.97),rgba(239,233,223,.94))!important;border-color:var(--cer-edge)!important;box-shadow:var(--cer-shadow)!important;position:relative;overflow:hidden}
+.tool-box:before,.vcx-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.75),transparent 28%),repeating-linear-gradient(0deg,rgba(80,65,48,.018) 0,rgba(80,65,48,.018) 1px,transparent 1px,transparent 5px);opacity:.7}
+.tool-box>* ,.vcx-panel>*{position:relative;z-index:1}
+#whiteboard-canvas{background:#fcfaf5!important;border:10px solid #ddd3c3!important;border-radius:26px!important;box-shadow:inset 0 0 0 1px #cfc1ad,inset 0 0 30px rgba(113,91,61,.07),0 15px 32px rgba(70,58,42,.14)!important}
+.cer-wb-toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px;margin:0 0 10px;border-radius:18px;background:linear-gradient(145deg,#eee7da,#faf7f0);border:1px solid #d7c9b5;box-shadow:inset 0 1px #fff,0 7px 16px rgba(70,58,42,.08)}
+.cer-tool,.cer-swatch{border:1px solid #cdbda7!important;background:#f9f5ed!important;color:#51483d!important;border-radius:12px!important;width:auto!important;min-width:38px!important;height:34px!important;margin:0!important;padding:5px 10px!important;box-shadow:0 3px 7px rgba(70,58,42,.08),inset 0 1px rgba(255,255,255,.9)!important;cursor:pointer}
+.cer-tool.active{background:#dce7e7!important;border-color:#91aeb3!important;box-shadow:inset 0 2px 5px rgba(64,82,84,.12)!important}
+.cer-swatch{min-width:30px!important;width:30px!important;padding:0!important;border-radius:50%!important}
+.cer-swatch[data-c="#527b86"]{background:#527b86!important}.cer-swatch[data-c="#73866c"]{background:#73866c!important}.cer-swatch[data-c="#b98279"]{background:#b98279!important}.cer-swatch[data-c="#b79a62"]{background:#b79a62!important}.cer-swatch[data-c="#40392f"]{background:#40392f!important}.cer-swatch[data-c="#7b6a8f"]{background:#7b6a8f!important}
+.cer-range{width:90px!important;margin:0!important;accent-color:#527b86}
+.cer-note-layer{position:absolute;inset:10px;pointer-events:none;z-index:4}.cer-note{position:absolute;pointer-events:auto;width:150px;min-height:72px;padding:10px 12px;background:linear-gradient(145deg,#fffdf8,#eee5d5);border:1px solid #d3c2aa;border-radius:14px;box-shadow:0 10px 20px rgba(65,52,37,.16);font-size:13px;cursor:move;resize:both;overflow:auto}.cer-note b{display:block;font-size:11px;color:#7c6c58;margin-bottom:4px}
+.cer-chat-shell{border-radius:24px;padding:4px;background:linear-gradient(145deg,#e3d9ca,#faf7f0);box-shadow:inset 0 1px #fff,0 10px 25px rgba(70,58,42,.10)}
+#chat-messages{background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.85),transparent 35%),linear-gradient(160deg,#f7f2e9,#e9e0d2)!important;border:1px solid #d5c6b2!important;border-radius:20px!important;height:250px!important;padding:12px!important}
+#chat-messages .cer-chat-bubble{max-width:88%;width:max-content;background:rgba(255,255,255,.78);border:1px solid rgba(126,105,79,.16);border-radius:16px 16px 5px 16px!important;padding:9px 12px!important;margin:7px 0!important;box-shadow:0 5px 12px rgba(70,58,42,.07)!important}
+#chat-messages .cer-chat-bubble.cer-me{margin-right:auto;margin-left:0;background:#e1ebe7;border-color:#b8cdc5;border-radius:16px 16px 16px 5px!important}
+.cer-chat-meta{font-size:10px;color:#887a68;margin-bottom:3px}.cer-chat-compose{display:flex;gap:7px;margin-top:8px}.cer-chat-compose input{margin:0!important;background:#fffdf8!important}.cer-chat-compose button{width:auto!important;margin:0!important;border-radius:12px!important;background:#527b86!important}
+.cer-palette-label{font-size:11px;color:#786b5b;font-weight:700;margin-right:2px}
+@media(max-width:600px){.cer-wb-toolbar{gap:5px}.cer-tool{padding:5px 7px!important;min-width:34px!important}.cer-range{width:70px!important}#chat-messages{height:210px!important}}
+:root[data-theme="dark"]{--cer-bg:#171613;--cer-surface:#211f1a;--cer-edge:#51493d;--cer-ink:#eee8dc}
+:root[data-theme="dark"] #main-app-container{background:rgba(31,29,25,.96)!important}:root[data-theme="dark"] .tool-box,:root[data-theme="dark"] .vcx-panel{background:linear-gradient(145deg,#292620,#201e1a)!important}:root[data-theme="dark"] .cer-wb-toolbar{background:linear-gradient(145deg,#2b2822,#1e1c18);border-color:#554b3e}:root[data-theme="dark"] .cer-tool{background:#2f2b25!important;color:#eee7db!important;border-color:#5a4f41!important}:root[data-theme="dark"] #whiteboard-canvas{background:#eee9df!important}
+</style></head>
+<body><div id="ceramic-brand"><span class="ceramic-badge">🏺 Ceramic Classroom · Studio</span></div><div id="v5-live-pill">● LIVE</div><script>document.addEventListener('DOMContentLoaded',()=>{const r=document.getElementById('room-section'),p=document.getElementById('v5-live-pill');if(!r||!p)return;const f=()=>p.style.display=r.classList.contains('hidden')?'none':'block';new MutationObserver(f).observe(r,{attributes:true,attributeFilter:['class']});f()});</script>
     <div class="container" id="main-app-container">
         <!-- סרגל עליון -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -344,7 +390,27 @@
                                 <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger);" data-i18n="btn_clear">נקה</button>
                             </div>
                         </div>
-                        <canvas id="whiteboard-canvas" height="200"></canvas>
+                        <div class="cer-wb-toolbar" aria-label="Ceramic whiteboard tools">
+  <span class="cer-palette-label">כלי יצירה</span>
+  <button type="button" class="cer-tool active" data-wb="pen" onclick="cerSetTool('pen')">🖌️ עט</button>
+  <button type="button" class="cer-tool" data-wb="highlighter" onclick="cerSetTool('highlighter')">🖍️ זיגוג</button>
+  <button type="button" class="cer-tool" data-wb="eraser" onclick="cerSetTool('eraser')">🧽 מחיקה</button>
+  <button type="button" class="cer-tool" data-wb="rect" onclick="cerSetTool('rect')">▭</button>
+  <button type="button" class="cer-tool" data-wb="circle" onclick="cerSetTool('circle')">◯</button>
+  <button type="button" class="cer-tool" onclick="cerUndo()">↶</button>
+  <button type="button" class="cer-tool" onclick="cerRedo()">↷</button>
+  <button type="button" class="cer-tool" onclick="cerGrid()">▦</button>
+  <button type="button" class="cer-tool" onclick="cerAddNote()">📝 אריח</button>
+  <span class="cer-palette-label">גלזורות</span>
+  <button type="button" class="cer-swatch" data-c="#527b86" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#73866c" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#b98279" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#b79a62" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#40392f" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#7b6a8f" onclick="cerColor(this.dataset.c)"></button>
+  <span class="cer-palette-label">עובי</span><input class="cer-range" id="cer-brush-size" type="range" min="1" max="24" value="3" oninput="cerSize(this.value)">
+</div>
+<div style="position:relative"><canvas id="whiteboard-canvas" height="260"></canvas><div id="cer-note-layer" class="cer-note-layer"></div></div>
                     </div>
 
                     <!-- PDF -->
@@ -515,9 +581,8 @@
                     <!-- צ'אט -->
                     <div class="tool-box">
                         <h4 style="margin-bottom: 8px;" data-i18n="chat_title">💬 צ'אט כיתתי</h4>
-                        <div id="chat-messages" class="chat-box"></div>
-                        <input type="text" id="chat-input" data-i18n-placeholder="placeholder_chat" placeholder="הקלד הודעה...">
-                        <button onclick="sendChatMessage()" style="padding: 6px;" data-i18n="btn_send">שלח</button>
+                        <div class="cer-chat-shell"><div id="chat-messages" class="chat-box"></div></div>
+                        <div class="cer-chat-compose"><input type="text" id="chat-input" data-i18n-placeholder="placeholder_chat" placeholder="הקלד הודעה..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}"><button onclick="sendChatMessage()" data-i18n="btn_send">שלח</button></div>
                     </div>
 
                     <!-- מחשבון -->
@@ -1098,15 +1163,15 @@
             const color = document.getElementById('brush-color').value;
 
             if (wbMode === 'pen') {
-                ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
+                ctx.lineWidth = window.cerBrushSize || 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'pen', x, y, color } });
             } else if (wbMode === 'highlighter') {
-                ctx.lineWidth = 12; ctx.lineCap = 'square'; ctx.strokeStyle = color + '40';
+                ctx.lineWidth = Math.max(8, (window.cerBrushSize || 3) * 2.5); ctx.lineCap = 'square'; ctx.strokeStyle = color + '40';
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'highlighter', x, y, color } });
             } else if (wbMode === 'eraser') {
-                ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = Math.max(12, (window.cerBrushSize || 3) * 4); ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
                 ctx.lineTo(x, y); ctx.stroke();
                 if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'eraser', x, y } });
             } else if ((wbMode === 'rect' || wbMode === 'circle') && snapshot) {
@@ -2447,5 +2512,26 @@ ${p.payload.text}`)}});
         <button class="floating-feature-btn" onclick="toggleFloatingFeatures()">✕<span class="floating-feature-label">סגור</span></button>
     </div>
 
-</body>
+<script id="ceramic-v61-js">
+(function(){
+  const board=document.getElementById('whiteboard-canvas'); if(!board)return;
+  let history=[],future=[],grid=false;
+  function snap(){try{return board.toDataURL('image/png')}catch(e){return null}}
+  function save(){const x=snap();if(x){history.push(x);if(history.length>30)history.shift();future=[]}}
+  window.cerSetTool=function(m){if(window.changeWbMode)window.changeWbMode(m);document.querySelectorAll('.cer-tool[data-wb]').forEach(b=>b.classList.toggle('active',b.dataset.wb===m));document.getElementById('wb-tool-mode').value=m;};
+  window.cerColor=function(c){const el=document.getElementById('brush-color');if(el)el.value=c};
+  window.cerSize=function(v){window.cerBrushSize=Number(v)||3};
+  window.cerGrid=function(){grid=!grid;board.style.backgroundImage=grid?'linear-gradient(rgba(82,123,134,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(82,123,134,.08) 1px,transparent 1px)':'none';board.style.backgroundSize='24px 24px';};
+  window.cerUndo=function(){if(!history.length)return;const cur=snap();if(cur)future.push(cur);const img=new Image();img.onload=()=>{ctx.clearRect(0,0,board.width,board.height);ctx.drawImage(img,0,0);};img.src=history.pop()};
+  window.cerRedo=function(){if(!future.length)return;const cur=snap();if(cur)history.push(cur);const img=new Image();img.onload=()=>{ctx.clearRect(0,0,board.width,board.height);ctx.drawImage(img,0,0);};img.src=future.pop()};
+  window.cerAddNote=function(){const text=prompt('כתוב טקסט לאריח הקרמי:');if(!text?.trim())return;const layer=document.getElementById('cer-note-layer');const n=document.createElement('div');n.className='cer-note';n.style.left=(20+Math.random()*55)+'%';n.style.top=(15+Math.random()*45)+'%';n.innerHTML='<b>✦ Ceramic Note</b>'+String(text).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));layer.appendChild(n);let drag=false,dx=0,dy=0;n.onpointerdown=e=>{drag=true;dx=e.clientX-n.offsetLeft;dy=e.clientY-n.offsetTop;n.setPointerCapture(e.pointerId)};n.onpointermove=e=>{if(drag){n.style.left=Math.max(0,e.clientX-dx)+'px';n.style.top=Math.max(0,e.clientY-dy)+'px'}};n.onpointerup=()=>drag=false;};
+  window.ceramicChatStyle=function(){document.querySelectorAll('#chat-messages>div').forEach((el,i)=>{el.classList.add('cer-chat-bubble');if(el.textContent?.includes((window.userName||'___')+':'))el.classList.add('cer-me');if(!el.dataset.cer){el.dataset.cer='1';el.innerHTML='<div class="cer-chat-meta">✦ '+el.querySelector('b')?.textContent.replace(':','')+'</div><div>'+el.textContent.replace(/^.*?:\s*/,'')+'</div>'}})};
+  const chat=document.getElementById('chat-messages');if(chat){new MutationObserver(()=>window.ceramicChatStyle()).observe(chat,{childList:true});}
+  const ctx=board.getContext('2d'); const oldMouse=board.onmousedown;
+  // Capture a snapshot before each new stroke without replacing the existing realtime drawing logic.
+  board.addEventListener('pointerdown',()=>save(),{capture:true});
+  board.addEventListener('pointerup',()=>setTimeout(()=>{window.ceramicChatStyle()},0),{capture:true});
+  window.cerBrushSize=3;
+})();
+</script></body>
 </html>
