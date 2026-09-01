@@ -1330,19 +1330,53 @@
         };
 
         window.handleAuthSubmit = async () => {
-            const email = document.getElementById('email').value, password = document.getElementById('password').value;
-            if (!email || !password) return alert('נא למלא שדות');
-            if (isReg) {
-                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('full_name').value, role: document.getElementById('role').value } } });
-                if (error) return alert(error.message);
-                alert('נרשמת בהצלחה!'); toggleAuthMode();
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert(error.message);
-                checkUserSession();
-            }
-        };
+           const email = document.getElementById('email').value;
+           const password = document.getElementById('password').value;
+           if (!email || !password) return alert('נא למלא שדות');
+  
+           if (isReg) {
+    // נזהה את הכתובת הנוכחית של הדף ללא פרמטרים או Hash
+           const redirectUrl = window.location.origin + window.location.pathname;
+    
+           const { data, error } = await supabase.auth.signUp({
+           password,
+           options: {
+           emailRedirectTo: redirectUrl, // מפנה את הקישור במייל חזרה לדף זה
+           data: {
+           full_name: document.getElementById('full_name').value,
+           role: document.getElementById('role').value
+        }
+       }
+   });
+    
+           if (error) return alert(error.message);
 
+    // בדיקה האם נדרש אישור מייל או שהמשתמש כבר מחובר
+    if (data?.user && (!data?.session)) {
+      alert('נרשמת בהצלחה! נשלח אליך מייל לאישור החשבון. יש ללחוץ על הקישור במייל.');
+    } else {
+      alert('נרשמת והתחברת בהצלחה!');
+      checkUserSession();
+    }
+    toggleAuthMode();
+        }   else {
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) return alert(error.message);
+            checkUserSession();
+                  }
+        };
+        // מאזין לשינויי סטטוס אימות (למשל כאשר חוזרים מקישור אימות במייל)
+        supabase.auth.onAuthStateChange((event, session) => {
+           if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+           checkUserSession();
+        }
+        });
+		
+		
+		
+		
+		
+		
         window.handleForgotPassword = async () => {
             const email = document.getElementById('email').value;
             if (!email) return alert('הזן אימייל');
