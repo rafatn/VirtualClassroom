@@ -1708,14 +1708,31 @@
             });
         }
 
-        function closeRtcPeer(remoteUserId) {
+        function closeRtcPeer(remoteUserId, removeTile = true) {
+            if (!remoteUserId || remoteUserId === userId) return;
             const pc = rtcPeers.get(remoteUserId);
             if (pc) {
                 try { pc.onicecandidate = null; pc.ontrack = null; pc.close(); } catch(e) {}
                 rtcPeers.delete(remoteUserId);
             }
-            const video = getVideoElementForUser(remoteUserId);
-            if (video) video.srcObject = null;
+
+            // When a participant leaves, do not leave a frozen/black camera tile
+            // on screen. Remove the entire remote tile, not only its MediaStream.
+            const grid = document.getElementById('video-grid-container');
+            const tile = grid?.querySelector(`.video-tile[data-userid=\"${CSS.escape(remoteUserId)}\"]`);
+            if (tile) {
+                const video = tile.querySelector('video');
+                if (video) {
+                    try { video.pause(); } catch(e) {}
+                    video.srcObject = null;
+                    video.removeAttribute('src');
+                }
+                if (removeTile) tile.remove();
+            } else {
+                const video = getVideoElementForUser(remoteUserId);
+                if (video) video.srcObject = null;
+            }
+
             rtcIceQueues.delete(remoteUserId);
             rtcRemoteStreams.delete(remoteUserId);
         }
@@ -1829,7 +1846,10 @@
                         }
                     }
                 } else if (payload.type === 'bye') {
-                    closeRtcPeer(payload.fromUserId);
+                    // Participant explicitly left: immediately remove their video tile.
+                    closeRtcPeer(payload.fromUserId, true);
+                    // Refresh the participant list so the name/device entry disappears too.
+                    if (roomId) fetchParticipants(roomId);
                 }
             } catch (e) {
                 console.error('WebRTC signaling error:', e);
@@ -2132,7 +2152,7 @@
             if (activeChannel) {
                 for (const remoteUserId of rtcPeers.keys()) {
                     try { await sendRtcSignal(remoteUserId, 'bye', {}); } catch(e) {}
-                    closeRtcPeer(remoteUserId);
+                    closeRtcPeer(remoteUserId, true);
                 }
                 rtcPeers.clear();
                 rtcReady = false;
