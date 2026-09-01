@@ -146,7 +146,19 @@
             .floating-feature-btn { min-width:44px; height:40px; padding:6px 8px !important; font-size:11px !important; }
         }
 
-    </style>
+    
+        /* ===== Virtual Classroom X - new feature center ===== */
+        .vcx-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+        .vcx-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+        .vcx-stat b{display:block;font-size:22px;color:var(--primary)} .vcx-stat span{font-size:11px;color:var(--muted)}
+        .vcx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .vcx-panel{background:var(--tool);border:1px solid var(--border);border-radius:10px;padding:12px}
+        .vcx-list{max-height:180px;overflow:auto;font-size:13px}.vcx-item{background:var(--card);border:1px solid var(--border);padding:8px;border-radius:7px;margin-bottom:6px}
+        .vcx-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.vcx-row>*{flex:1}.vcx-row button{width:auto;margin:0}
+        .vcx-badge{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--primary);color:#fff;font-size:10px}
+        .vcx-hand{animation:flashAlert 1s infinite}.vcx-hidden{display:none!important}
+        @media(max-width:800px){.vcx-grid{grid-template-columns:1fr}.vcx-stat-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
     <div class="container" id="main-app-container">
@@ -186,7 +198,6 @@
             <button id="auth-action-btn" onclick="handleAuthSubmit()" data-i18n="btn_login">התחבר</button>
             <div style="text-align: center;"><button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()" data-i18n="link_forgot">שכחת סיסמה?</button></div>
             <button onclick="toggleAuthMode()" style="background: var(--muted);" data-i18n="btn_toggle_auth">עבור להרשמה / התחברות</button>
-            <button type="button" onclick="resendConfirmationEmail()" style="background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-top: 4px;">📧 שלח שוב מייל אישור</button>
         </div>
 
         <!-- איפוס סיסמה -->
@@ -215,6 +226,19 @@
             <div id="student-panel">
                 <h4 data-i18n="active_rooms">🏫 חדרים פעילים</h4>
                 <div id="rooms-list" data-i18n="loading_rooms">טוען חדרים...</div>
+            </div>
+            <div class="tool-box" id="vcx-dashboard-center">
+                <h4>🚀 מרכז המערכת — פיצ'רים חדשים</h4>
+                <div class="vcx-stat-grid">
+                    <div class="vcx-stat"><b id="vcx-stat-rooms">0</b><span>שיעורים פעילים</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-students">0</b><span>תלמידים בחדר</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-attendance">0%</b><span>נוכחות נוכחית</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-notify">0</b><span>התראות</span></div>
+                </div>
+                <div class="vcx-grid">
+                    <div class="vcx-panel"><b>🔔 התראות</b><div id="vcx-notifications" class="vcx-list" style="margin-top:8px">אין התראות חדשות.</div></div>
+                    <div class="vcx-panel"><b>📅 לוח שיעורים</b><div id="vcx-schedule" class="vcx-list" style="margin-top:8px">השיעורים הפעילים יופיעו כאן.</div></div>
+                </div>
             </div>
         </div>
 
@@ -247,6 +271,33 @@
                 <h3 style="margin:8px 0;color:var(--primary);">ממתין לאישור המורה</h3>
                 <p style="margin:0;color:var(--muted);">המצלמה והמיקרופון מוכנים, אך לא תתחבר/י לשיעור עד שהמורה יאשר את הכניסה.</p>
                 <div id="waiting-status" style="margin-top:10px;font-weight:700;color:var(--warning);">ממתין לאישור...</div>
+            </div>
+
+            <div class="tool-box" id="vcx-live-center">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+                    <h4 style="margin:0">🎛️ מרכז ניהול שיעור מתקדם</h4>
+                    <div class="vcx-row" style="flex:0 0 auto">
+                        <button onclick="vcxNotifyClass()">🔔 הודעה לכיתה</button>
+                        <button onclick="vcxOpenQ()">❓ שאלות ותשובות</button>
+                        <button onclick="vcxToggleGradebook()">📊 ציונים</button>
+                    </div>
+                </div>
+                <div class="vcx-stat-grid">
+                    <div class="vcx-stat"><b id="vcx-live-count">0</b><span>מחוברים</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-hands">0</b><span>ידיים מורמות</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-cams">0</b><span>מצלמות פעילות</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-mics">0</b><span>מיקרופונים פעילים</span></div>
+                </div>
+                <div id="vcx-live-panels" class="vcx-grid">
+                    <div class="vcx-panel"><b>🙋 תור דיבור</b><div id="vcx-hand-queue" class="vcx-list">אין ידיים מורמות.</div></div>
+                    <div class="vcx-panel"><b>❓ שאלות ותשובות</b><div id="vcx-q-list" class="vcx-list">אין שאלות.</div></div>
+                    <div class="vcx-panel vcx-hidden" id="vcx-grade-panel"><b>📊 ספר ציונים</b><div id="vcx-grade-list" class="vcx-list">אין ציונים עדיין.</div></div>
+                    <div class="vcx-panel"><b>📁 חומרי שיעור</b>
+                        <input type="file" id="vcx-file-input" multiple style="margin-top:8px">
+                        <button onclick="vcxUploadFiles()" style="margin-top:4px">העלה קבצים</button>
+                        <div id="vcx-file-list" class="vcx-list" style="margin-top:8px">אין קבצים.</div>
+                    </div>
+                </div>
             </div>
 
             <div class="grid-container">
@@ -804,107 +855,16 @@
             alert(isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
         };
 
-        // ===== אתחול מאובטח של אימות / הרשמה =====
-        function getAuthRedirectUrl() {
-            // תמיד חוזרים לאותו דף שממנו נשלחה ההרשמה/איפוס הסיסמה.
-            return window.location.origin + window.location.pathname;
-        }
-
-        function authMessage(error) {
-            const msg = String(error?.message || error || '');
-            const m = msg.toLowerCase();
-            if (m.includes('email not confirmed')) return 'האימייל עדיין לא אושר. פתח/י את הודעת האישור שנשלחה אליך ואשר/י את כתובת האימייל.';
-            if (m.includes('invalid login credentials')) return 'האימייל או הסיסמה אינם נכונים.';
-            if (m.includes('user already registered')) return 'כתובת האימייל כבר רשומה. נסה/י להתחבר.';
-            if (m.includes('password should be at least')) return 'הסיסמה חייבת להכיל לפחות 6 תווים.';
-            if (m.includes('rate limit')) return 'נשלחו יותר מדי בקשות. המתן/י כמה דקות ונסה/י שוב.';
-            if (m.includes('smtp') || m.includes('email')) return 'לא ניתן לשלוח את הודעת האימייל. בדוק/י את הגדרות SMTP של Supabase ו-Brevo.';
-            return msg || 'אירעה שגיאה. נסה/י שוב.';
-        }
-
-        async function ensureProfile(user) {
-            if (!user) return null;
-            const meta = user.user_metadata || {};
-            const fullName = String(meta.full_name || user.email?.split('@')[0] || 'משתמש').trim();
-            const requestedRole = meta.role === 'teacher' ? 'teacher' : 'student';
-
-            // אם Trigger ב-Supabase כבר יצר את הפרופיל, נשמור עליו ולא נדרוס אותו.
-            const existing = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-            if (existing.data) return existing.data;
-            if (existing.error && existing.error.code !== 'PGRST116') {
-                console.warn('Profile lookup:', existing.error);
-            }
-
-            const { data, error } = await supabase.from('profiles').upsert([{
-                id: user.id,
-                full_name: fullName,
-                role: requestedRole
-            }], { onConflict: 'id' }).select().single();
-
-            if (error) {
-                console.error('Profile creation:', error);
-                throw new Error('המשתמש נוצר ב-Supabase Auth, אך לא ניתן ליצור את פרופיל המשתמש. יש לבדוק RLS/Policies בטבלת profiles.');
-            }
-            return data;
-        }
-
-        function clearAuthForm() {
-            ['email','password','full_name'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-        }
-
-        function showAuthNotice(message, type = 'info') {
-            let box = document.getElementById('auth-notice');
-            if (!box) {
-                box = document.createElement('div');
-                box.id = 'auth-notice';
-                const form = document.getElementById('auth-section');
-                form?.insertBefore(box, form.firstChild);
-            }
-            box.textContent = message;
-            box.style.cssText = `display:block;margin-bottom:12px;padding:12px;border-radius:8px;border:1px solid ${type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--primary)'};background:var(--tool);color:var(--text);font-size:14px;line-height:1.5;`;
-        }
-
-        function hideAuthNotice() {
-            const box = document.getElementById('auth-notice');
-            if (box) box.style.display = 'none';
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
             document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
-
-            // Supabase recovery link: do not attempt normal login while changing password.
-            if (window.location.hash.includes('type=recovery')) {
-                showSec('reset-password-section');
-            } else {
-                checkUserSession();
-            }
-
+            if (window.location.hash.includes('type=recovery')) { showSec('reset-password-section'); return; }
+            checkUserSession();
             fetchRates();
             initWhiteboard();
             initPdf();
             initSpeech();
             initMyWeather();
             loadPersonalNotes();
-        });
-
-        // Handles email confirmation and password recovery redirects reliably.
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Supabase auth event:', event);
-            if (event === 'PASSWORD_RECOVERY') {
-                showSec('reset-password-section');
-                return;
-            }
-            if (event === 'SIGNED_IN' && session?.user && !window.location.hash.includes('type=recovery')) {
-                try {
-                    await finishAuthenticatedLogin(session.user);
-                } catch (e) {
-                    console.error(e);
-                    showAuthNotice(e.message || 'לא ניתן להשלים את הכניסה.', 'error');
-                }
-            }
-            if (event === 'SIGNED_OUT') {
-                showSec('auth-section');
-            }
         });
 
         window.savePersonalNotes = () => {
@@ -1422,137 +1382,44 @@
         };
 
         window.handleAuthSubmit = async () => {
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('auth-action-btn');
-            hideAuthNotice();
-
-            if (!email || !password) return showAuthNotice('נא למלא אימייל וסיסמה.', 'error');
-            if (!/^\S+@\S+\.\S+$/.test(email)) return showAuthNotice('נא להזין כתובת אימייל תקינה.', 'error');
-            if (password.length < 6) return showAuthNotice('הסיסמה חייבת להכיל לפחות 6 תווים.', 'error');
-
+            const email = document.getElementById('email').value, password = document.getElementById('password').value;
+            if (!email || !password) return alert('נא למלא שדות');
             if (isReg) {
-                const fullName = document.getElementById('full_name').value.trim();
-                const selectedRole = document.getElementById('role').value === 'teacher' ? 'teacher' : 'student';
-                if (!fullName) return showAuthNotice('נא להזין שם מלא.', 'error');
-
-                btn.disabled = true;
-                btn.textContent = 'שולח הרשמה...';
-                try {
-                    const { data, error } = await supabase.auth.signUp({
-                        email,
-                        password,
-                        options: {
-                            emailRedirectTo: getAuthRedirectUrl(),
-                            data: { full_name: fullName, role: selectedRole }
-                        }
-                    });
-                    if (error) throw error;
-
-                    // כאשר Confirm Email מופעל, session יהיה null עד שהמשתמש ילחץ על הקישור במייל.
-                    if (data.session && data.user) {
-                        await finishAuthenticatedLogin(data.user);
-                    } else {
-                        showAuthNotice('✅ ההרשמה הושלמה. נשלח אליך מייל אישור דרך מערכת הדואר. יש לפתוח את המייל ולאשר את כתובת האימייל לפני ההתחברות.', 'success');
-                        clearAuthForm();
-                        if (isReg) toggleAuthMode();
-                    }
-                } catch (e) {
-                    console.error('Registration error:', e);
-                    showAuthNotice(authMessage(e), 'error');
-                } finally {
-                    btn.disabled = false;
-                    const t = translations[currentLang];
-                    btn.textContent = isReg ? t.btn_register : t.btn_login;
-                }
+                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('full_name').value, role: document.getElementById('role').value } } });
+                if (error) return alert(error.message);
+                alert('נרשמת בהצלחה!'); toggleAuthMode();
             } else {
-                btn.disabled = true;
-                btn.textContent = 'מתחבר...';
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    await finishAuthenticatedLogin(data.user);
-                } catch (e) {
-                    console.error('Login error:', e);
-                    showAuthNotice(authMessage(e), 'error');
-                } finally {
-                    btn.disabled = false;
-                    const t = translations[currentLang];
-                    btn.textContent = isReg ? t.btn_register : t.btn_login;
-                }
-            }
-        };
-
-        window.resendConfirmationEmail = async () => {
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            hideAuthNotice();
-            if (!email) return showAuthNotice('הזן/י את האימייל שנרשמת איתו.', 'error');
-            try {
-                const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: getAuthRedirectUrl() } });
-                if (error) throw error;
-                showAuthNotice('📧 מייל אישור חדש נשלח. בדוק/י גם את תיקיית הספאם.', 'success');
-            } catch (e) {
-                console.error('Resend confirmation:', e);
-                showAuthNotice(authMessage(e), 'error');
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert(error.message);
+                checkUserSession();
             }
         };
 
         window.handleForgotPassword = async () => {
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            hideAuthNotice();
-            if (!email) return showAuthNotice('הזן/י את כתובת האימייל שלך.', 'error');
-            if (!/^\S+@\S+\.\S+$/.test(email)) return showAuthNotice('נא להזין כתובת אימייל תקינה.', 'error');
-            try {
-                const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: getAuthRedirectUrl() });
-                if (error) throw error;
-                showAuthNotice('📧 הוראות לאיפוס הסיסמה נשלחו לאימייל. בדוק/י גם את תיקיית הספאם.', 'success');
-            } catch (e) {
-                console.error('Reset password error:', e);
-                showAuthNotice(authMessage(e), 'error');
-            }
+            const email = document.getElementById('email').value;
+            if (!email) return alert('הזן אימייל');
+            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if (error) alert(error.message); else alert('הוראות איפוס נשלחו!');
         };
 
         window.handleUpdatePassword = async () => {
             const p = document.getElementById('new-password').value;
-            if (!p || p.length < 6) return alert('הסיסמה חייבת להכיל לפחות 6 תווים.');
-            try {
-                const { error } = await supabase.auth.updateUser({ password: p });
-                if (error) throw error;
-                alert('הסיסמה עודכנה בהצלחה!');
-                window.history.replaceState({}, document.title, getAuthRedirectUrl());
-                await checkUserSession();
-            } catch (e) {
-                console.error('Update password error:', e);
-                alert(authMessage(e));
-            }
+            if (!p || p.length < 6) return alert('סיסמה קצרה מדי');
+            const { error } = await supabase.auth.updateUser({ password: p });
+            if (error) alert(error.message); else { alert('הסיסמה עודכנה!'); window.location.hash = ''; checkUserSession(); }
         };
 
-        async function finishAuthenticatedLogin(user) {
-            if (!user) throw new Error('לא נמצא משתמש מחובר.');
-            const profile = await ensureProfile(user);
-            if (!profile) throw new Error('לא נמצא פרופיל משתמש.');
-            userId = user.id;
-            role = profile.role === 'teacher' ? 'teacher' : 'student';
-            userName = profile.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'משתמש';
-            const t = translations[currentLang];
-            const welcome = document.getElementById('welcome-user');
-            if (welcome) welcome.innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
-            document.getElementById('teacher-panel')?.classList.toggle('hidden', role !== 'teacher');
-            hideAuthNotice();
-            showSec('dashboard-section');
-            loadRooms();
-        }
-
         async function checkUserSession() {
-            try {
-                const { data: { user }, error } = await supabase.auth.getUser();
-                if (error || !user) { showSec('auth-section'); return; }
-                await finishAuthenticatedLogin(user);
-            } catch (e) {
-                console.error('Session error:', e);
-                showSec('auth-section');
-                showAuthNotice(e.message || 'לא ניתן לטעון את המשתמש.', 'error');
-            }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { showSec('auth-section'); return; }
+            userId = user.id;
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (!profile) return;
+            role = profile.role; userName = profile.full_name;
+            const t = translations[currentLang];
+            document.getElementById('welcome-user').innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            document.getElementById('teacher-panel').classList.toggle('hidden', role !== 'teacher');
+            showSec('dashboard-section'); loadRooms();
         }
         window.logout = async () => { await supabase.auth.signOut(); window.location.reload(); };
 
@@ -1766,6 +1633,7 @@
                         if (role === 'teacher' || sessionParticipants.some(x => x.user_id === userId && x.status === 'approved')) await startWebRTC();
                     }
                 });
+            vcxInitRoom(id);
         };
 
         async function initStream() {
@@ -2273,7 +2141,7 @@
                         <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
                             <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? '🔇 השתק' : '🎤 הפעל'}</button>
                             <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? '📷 כבה' : '📹 הפעל'}</button>
-                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;">הקפץ ⚡</button>
+                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;">הקפץ ⚡</button><button onclick="vcxGradeStudent('${p.user_id}','${displayName.replace("'","\'")}')" style="width:auto;padding:2px 8px;font-size:11px;background:var(--primary);margin:0;color:#fff;">📊 ציון</button>
                         </div>
                     ` : ''}
                 </div>
@@ -2341,9 +2209,12 @@
             catch(e) { document.getElementById('calc-result').innerText = 'Error'; }
         };
 
-        window.sendChatMessage = () => {
-            const inp = document.getElementById('chat-input'); if (!inp.value) return;
-            document.getElementById('chat-messages').innerHTML += `<div><b>Me:</b> ${inp.value}</div>`; inp.value = '';
+        window.sendChatMessage = async () => {
+            const inp = document.getElementById('chat-input'); if (!inp.value.trim()) return;
+            const msg = inp.value.trim();
+            vcxAppendChat(userName, msg);
+            if (activeChannel) await activeChannel.send({type:'broadcast',event:'vcx_chat',payload:{userId,user:userName,text:msg,at:Date.now()}});
+            inp.value = '';
         };
 
         window.leaveRoom = async () => {
@@ -2458,6 +2329,96 @@
                 toggle.style.display = 'none';
             }
         }
+        // ===== Virtual Classroom X: complete feature layer =====
+        let vcxRoomStartedAt = 0;
+        let vcxQuestions = [];
+        let vcxGrades = {};
+        let vcxNotifications = JSON.parse(localStorage.getItem('vcx_notifications') || '[]');
+        let vcxFileCache = [];
+
+        function vcxEsc(v){ const d=document.createElement('div'); d.textContent=v??''; return d.innerHTML; }
+        function vcxNotify(text){
+            vcxNotifications.unshift({text,at:new Date().toLocaleString('he-IL')});
+            vcxNotifications=vcxNotifications.slice(0,30); localStorage.setItem('vcx_notifications',JSON.stringify(vcxNotifications));
+            vcxRenderNotifications();
+            if ('Notification' in window && Notification.permission==='granted') try{new Notification('כיתה וירטואלית',{body:text})}catch(e){}
+        }
+        function vcxRenderNotifications(){
+            const el=document.getElementById('vcx-notifications'); if(!el)return;
+            el.innerHTML=vcxNotifications.length?vcxNotifications.slice(0,8).map(n=>`<div class="vcx-item">🔔 ${vcxEsc(n.text)}<div style="font-size:10px;color:var(--muted)">${vcxEsc(n.at)}</div></div>`).join(''):'אין התראות חדשות.';
+            const st=document.getElementById('vcx-stat-notify');if(st)st.textContent=vcxNotifications.length;
+        }
+        window.vcxNotifyClass=async()=>{
+            if(role!=='teacher'||!activeChannel)return alert('רק המורה יכול לשלוח הודעה לכיתה.');
+            const text=prompt('כתוב הודעה לכל הכיתה:'); if(!text?.trim())return;
+            await activeChannel.send({type:'broadcast',event:'vcx_notification',payload:{text:text.trim(),from:userName}});
+            vcxNotify(`נשלחה הודעה לכיתה: ${text.trim()}`);
+        };
+        window.vcxOpenQ=()=>{
+            const q=prompt(role==='teacher'?'שאלה/הודעה לפתיחת דיון (אופציונלי):':'כתוב שאלה למורה:');
+            if(!q?.trim())return;
+            if(role==='student'){ activeChannel?.send({type:'broadcast',event:'vcx_question',payload:{id:crypto.randomUUID(),userId,user:userName,text:q.trim(),at:Date.now()}}); vcxNotify('השאלה נשלחה למורה.'); }
+            else { vcxQuestions.push({id:crypto.randomUUID(),userId,user:userName,text:q.trim(),at:Date.now()}); vcxRenderQuestions(); }
+        };
+        function vcxRenderQuestions(){
+            const el=document.getElementById('vcx-q-list');if(!el)return;
+            el.innerHTML=vcxQuestions.length?vcxQuestions.map(q=>`<div class="vcx-item"><b>❓ ${vcxEsc(q.user)}</b><br>${vcxEsc(q.text)}<div class="vcx-row" style="margin-top:5px"><button onclick="vcxAnswerQ('${q.id}')">💬 ענה</button><button onclick="vcxRemoveQ('${q.id}')">✓ טופל</button></div></div>`).join(''):'אין שאלות.';
+        }
+        window.vcxAnswerQ=async(id)=>{const q=vcxQuestions.find(x=>x.id===id);if(!q)return;const a=prompt('תשובת המורה:');if(!a?.trim())return;await activeChannel?.send({type:'broadcast',event:'vcx_question_answer',payload:{id,userId:q.userId,text:a.trim(),from:userName}});vcxRemoveQ(id)};
+        window.vcxRemoveQ=id=>{vcxQuestions=vcxQuestions.filter(q=>q.id!==id);vcxRenderQuestions()};
+        window.vcxToggleGradebook=()=>document.getElementById('vcx-grade-panel')?.classList.toggle('vcx-hidden');
+        function vcxRenderGrades(){
+            const el=document.getElementById('vcx-grade-list');if(!el)return;const arr=Object.entries(vcxGrades);
+            el.innerHTML=arr.length?arr.map(([uid,g])=>`<div class="vcx-item"><b>${vcxEsc(g.user)}</b> — ${g.grade}/100 ${g.note?`<small>${vcxEsc(g.note)}</small>`:''}</div>`).join(''):'אין ציונים עדיין.';
+        }
+        window.vcxGradeStudent=async(uid,name)=>{if(role!=='teacher')return;const grade=prompt(`ציון ל-${name} (0-100):`);if(grade===null)return;const n=Number(grade);if(!Number.isFinite(n)||n<0||n>100)return alert('ציון לא תקין');const note=prompt('הערה (אופציונלי):')||'';vcxGrades[uid]={user:name,grade:n,note};vcxRenderGrades();await activeChannel?.send({type:'broadcast',event:'vcx_grade',payload:{uid,user:name,grade:n,note}})};
+        function vcxAppendChat(user,text){const box=document.getElementById('chat-messages');if(!box)return;box.innerHTML+=`<div><b>${vcxEsc(user)}:</b> ${vcxEsc(text)}</div>`;box.scrollTop=box.scrollHeight}
+        async function vcxUploadFiles(){
+            const input=document.getElementById('vcx-file-input');if(!input?.files?.length)return alert('בחר קבצים.');
+            // Uses Supabase Storage bucket class-files when configured; otherwise creates a local downloadable copy.
+            for(const file of input.files){
+                const path=`${roomId}/${Date.now()}_${file.name.replace(/[^\\w.\\-א-ת]/g,'_')}`;
+                try{
+                    const {error}=await supabase.storage.from('class-files').upload(path,file,{upsert:false});
+                    if(error)throw error;
+                    const {data}=supabase.storage.from('class-files').getPublicUrl(path);
+                    vcxFileCache.push({name:file.name,url:data.publicUrl});
+                }catch(e){
+                    const url=URL.createObjectURL(file);vcxFileCache.push({name:file.name,url});
+                }
+                await activeChannel?.send({type:'broadcast',event:'vcx_file',payload:{name:file.name,url:vcxFileCache.at(-1).url}});
+            }
+            vcxRenderFiles();input.value='';
+        }
+        function vcxRenderFiles(){const el=document.getElementById('vcx-file-list');if(!el)return;el.innerHTML=vcxFileCache.length?vcxFileCache.map(f=>`<div class="vcx-item">📄 <a href="${vcxEsc(f.url)}" target="_blank" rel="noopener">${vcxEsc(f.name)}</a></div>`).join(''):'אין קבצים.'}
+        function vcxUpdateLiveStats(){
+            const approved=sessionParticipants.filter(p=>p.status==='approved');
+            const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+            set('vcx-live-count',approved.length);set('vcx-live-hands',approved.filter(p=>p.hand_raised).length);set('vcx-live-cams',approved.filter(p=>p.cam_active).length);set('vcx-live-mics',approved.filter(p=>p.mic_active).length);
+            set('vcx-stat-students',approved.filter(p=>p.profiles?.role==='student').length);set('vcx-stat-attendance',approved.length?Math.round(approved.filter(p=>p.profiles?.role==='student').length/Math.max(1,approved.length- (role==='teacher'?1:0))*100)+'%':'0%');
+            const hands=document.getElementById('vcx-hand-queue');
+            if(hands){const raised=approved.filter(p=>p.hand_raised);hands.innerHTML=raised.length?raised.map(p=>`<div class="vcx-item vcx-hand">🙋 ${vcxEsc(p.profiles?.full_name||'תלמיד')} ${role==='teacher'?`<button onclick="vcxLowerHand('${p.user_id}')" style="width:auto;padding:3px 7px;float:left">הורד יד</button>`:''}</div>`).join(''):'אין ידיים מורמות.'}
+        }
+        window.vcxLowerHand=async(uid)=>{if(role!=='teacher'||!roomId)return;await supabase.from('room_participants').update({hand_raised:false}).eq('room_id',roomId).eq('user_id',uid);await activeChannel?.send({type:'broadcast',event:'vcx_hand_clear',payload:{uid}});fetchParticipants(roomId)};
+        async function vcxInitRoom(id){
+            vcxRoomStartedAt=Date.now();vcxQuestions=[];vcxGrades={};vcxFileCache=[];vcxRenderQuestions();vcxRenderGrades();vcxRenderFiles();vcxUpdateLiveStats();
+            if('Notification' in window && Notification.permission==='default'){try{Notification.requestPermission()}catch(e){}}
+            setInterval(()=>{if(roomId===id)vcxUpdateLiveStats()},2000);
+            // Reuse the existing room channel for all new live features.
+            if(activeChannel){
+                activeChannel.on('broadcast',{event:'vcx_chat'},p=>{if(p.payload?.userId!==userId)vcxAppendChat(p.payload.user,p.payload.text)});
+                activeChannel.on('broadcast',{event:'vcx_notification'},p=>{if(p.payload?.from!==userName)vcxNotify(p.payload?.text||'התקבלה הודעה חדשה')});
+                activeChannel.on('broadcast',{event:'vcx_question'},p=>{if(role==='teacher'&&p.payload?.userId!==userId){vcxQuestions.push(p.payload);vcxRenderQuestions();playBeepSound()}});
+                activeChannel.on('broadcast',{event:'vcx_question_answer'},p=>{if(p.payload?.userId===userId){vcxNotify(`תשובת המורה: ${p.payload.text}`);alert(`💬 תשובת המורה:
+${p.payload.text}`)}});
+                activeChannel.on('broadcast',{event:'vcx_grade'},p=>{vcxGrades[p.payload.uid]={user:p.payload.user,grade:p.payload.grade,note:p.payload.note};vcxRenderGrades();if(p.payload.uid===userId)vcxNotify(`קיבלת ציון ${p.payload.grade}`)});
+                activeChannel.on('broadcast',{event:'vcx_file'},p=>{if(p.payload?.name){vcxFileCache.push(p.payload);vcxRenderFiles();vcxNotify(`קובץ חדש: ${p.payload.name}`)}});
+                activeChannel.on('broadcast',{event:'vcx_hand_clear'},p=>{if(p.payload?.uid)vcxUpdateLiveStats()});
+            }
+            vcxNotify('נכנסת לשיעור בהצלחה.');
+        }
+        vcxRenderNotifications();
+
         const _floatingObserver = new MutationObserver(updateFloatingBarVisibility);
         document.addEventListener('DOMContentLoaded', () => {
             const room = document.getElementById('room-section');
