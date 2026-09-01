@@ -186,6 +186,7 @@
             <button id="auth-action-btn" onclick="handleAuthSubmit()" data-i18n="btn_login">התחבר</button>
             <div style="text-align: center;"><button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()" data-i18n="link_forgot">שכחת סיסמה?</button></div>
             <button onclick="toggleAuthMode()" style="background: var(--muted);" data-i18n="btn_toggle_auth">עבור להרשמה / התחברות</button>
+            <button type="button" onclick="resendConfirmationEmail()" style="background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-top: 4px;">📧 שלח שוב מייל אישור</button>
         </div>
 
         <!-- איפוס סיסמה -->
@@ -803,16 +804,107 @@
             alert(isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
         };
 
+        // ===== אתחול מאובטח של אימות / הרשמה =====
+        function getAuthRedirectUrl() {
+            // תמיד חוזרים לאותו דף שממנו נשלחה ההרשמה/איפוס הסיסמה.
+            return window.location.origin + window.location.pathname;
+        }
+
+        function authMessage(error) {
+            const msg = String(error?.message || error || '');
+            const m = msg.toLowerCase();
+            if (m.includes('email not confirmed')) return 'האימייל עדיין לא אושר. פתח/י את הודעת האישור שנשלחה אליך ואשר/י את כתובת האימייל.';
+            if (m.includes('invalid login credentials')) return 'האימייל או הסיסמה אינם נכונים.';
+            if (m.includes('user already registered')) return 'כתובת האימייל כבר רשומה. נסה/י להתחבר.';
+            if (m.includes('password should be at least')) return 'הסיסמה חייבת להכיל לפחות 6 תווים.';
+            if (m.includes('rate limit')) return 'נשלחו יותר מדי בקשות. המתן/י כמה דקות ונסה/י שוב.';
+            if (m.includes('smtp') || m.includes('email')) return 'לא ניתן לשלוח את הודעת האימייל. בדוק/י את הגדרות SMTP של Supabase ו-Brevo.';
+            return msg || 'אירעה שגיאה. נסה/י שוב.';
+        }
+
+        async function ensureProfile(user) {
+            if (!user) return null;
+            const meta = user.user_metadata || {};
+            const fullName = String(meta.full_name || user.email?.split('@')[0] || 'משתמש').trim();
+            const requestedRole = meta.role === 'teacher' ? 'teacher' : 'student';
+
+            // אם Trigger ב-Supabase כבר יצר את הפרופיל, נשמור עליו ולא נדרוס אותו.
+            const existing = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+            if (existing.data) return existing.data;
+            if (existing.error && existing.error.code !== 'PGRST116') {
+                console.warn('Profile lookup:', existing.error);
+            }
+
+            const { data, error } = await supabase.from('profiles').upsert([{
+                id: user.id,
+                full_name: fullName,
+                role: requestedRole
+            }], { onConflict: 'id' }).select().single();
+
+            if (error) {
+                console.error('Profile creation:', error);
+                throw new Error('המשתמש נוצר ב-Supabase Auth, אך לא ניתן ליצור את פרופיל המשתמש. יש לבדוק RLS/Policies בטבלת profiles.');
+            }
+            return data;
+        }
+
+        function clearAuthForm() {
+            ['email','password','full_name'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        }
+
+        function showAuthNotice(message, type = 'info') {
+            let box = document.getElementById('auth-notice');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'auth-notice';
+                const form = document.getElementById('auth-section');
+                form?.insertBefore(box, form.firstChild);
+            }
+            box.textContent = message;
+            box.style.cssText = `display:block;margin-bottom:12px;padding:12px;border-radius:8px;border:1px solid ${type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--primary)'};background:var(--tool);color:var(--text);font-size:14px;line-height:1.5;`;
+        }
+
+        function hideAuthNotice() {
+            const box = document.getElementById('auth-notice');
+            if (box) box.style.display = 'none';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
-            if (window.location.hash.includes('type=recovery')) { showSec('reset-password-section'); return; }
-            checkUserSession();
+
+            // Supabase recovery link: do not attempt normal login while changing password.
+            if (window.location.hash.includes('type=recovery')) {
+                showSec('reset-password-section');
+            } else {
+                checkUserSession();
+            }
+
             fetchRates();
             initWhiteboard();
             initPdf();
             initSpeech();
             initMyWeather();
             loadPersonalNotes();
+        });
+
+        // Handles email confirmation and password recovery redirects reliably.
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Supabase auth event:', event);
+            if (event === 'PASSWORD_RECOVERY') {
+                showSec('reset-password-section');
+                return;
+            }
+            if (event === 'SIGNED_IN' && session?.user && !window.location.hash.includes('type=recovery')) {
+                try {
+                    await finishAuthenticatedLogin(session.user);
+                } catch (e) {
+                    console.error(e);
+                    showAuthNotice(e.message || 'לא ניתן להשלים את הכניסה.', 'error');
+                }
+            }
+            if (event === 'SIGNED_OUT') {
+                showSec('auth-section');
+            }
         });
 
         window.savePersonalNotes = () => {
@@ -1330,44 +1422,137 @@
         };
 
         window.handleAuthSubmit = async () => {
-            const email = document.getElementById('email').value, password = document.getElementById('password').value;
-            if (!email || !password) return alert('נא למלא שדות');
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('auth-action-btn');
+            hideAuthNotice();
+
+            if (!email || !password) return showAuthNotice('נא למלא אימייל וסיסמה.', 'error');
+            if (!/^\S+@\S+\.\S+$/.test(email)) return showAuthNotice('נא להזין כתובת אימייל תקינה.', 'error');
+            if (password.length < 6) return showAuthNotice('הסיסמה חייבת להכיל לפחות 6 תווים.', 'error');
+
             if (isReg) {
-                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('full_name').value, role: document.getElementById('role').value } } });
-                if (error) return alert(error.message);
-                alert('נרשמת בהצלחה!'); toggleAuthMode();
+                const fullName = document.getElementById('full_name').value.trim();
+                const selectedRole = document.getElementById('role').value === 'teacher' ? 'teacher' : 'student';
+                if (!fullName) return showAuthNotice('נא להזין שם מלא.', 'error');
+
+                btn.disabled = true;
+                btn.textContent = 'שולח הרשמה...';
+                try {
+                    const { data, error } = await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            emailRedirectTo: getAuthRedirectUrl(),
+                            data: { full_name: fullName, role: selectedRole }
+                        }
+                    });
+                    if (error) throw error;
+
+                    // כאשר Confirm Email מופעל, session יהיה null עד שהמשתמש ילחץ על הקישור במייל.
+                    if (data.session && data.user) {
+                        await finishAuthenticatedLogin(data.user);
+                    } else {
+                        showAuthNotice('✅ ההרשמה הושלמה. נשלח אליך מייל אישור דרך מערכת הדואר. יש לפתוח את המייל ולאשר את כתובת האימייל לפני ההתחברות.', 'success');
+                        clearAuthForm();
+                        if (isReg) toggleAuthMode();
+                    }
+                } catch (e) {
+                    console.error('Registration error:', e);
+                    showAuthNotice(authMessage(e), 'error');
+                } finally {
+                    btn.disabled = false;
+                    const t = translations[currentLang];
+                    btn.textContent = isReg ? t.btn_register : t.btn_login;
+                }
             } else {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert(error.message);
-                checkUserSession();
+                btn.disabled = true;
+                btn.textContent = 'מתחבר...';
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    await finishAuthenticatedLogin(data.user);
+                } catch (e) {
+                    console.error('Login error:', e);
+                    showAuthNotice(authMessage(e), 'error');
+                } finally {
+                    btn.disabled = false;
+                    const t = translations[currentLang];
+                    btn.textContent = isReg ? t.btn_register : t.btn_login;
+                }
+            }
+        };
+
+        window.resendConfirmationEmail = async () => {
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            hideAuthNotice();
+            if (!email) return showAuthNotice('הזן/י את האימייל שנרשמת איתו.', 'error');
+            try {
+                const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: getAuthRedirectUrl() } });
+                if (error) throw error;
+                showAuthNotice('📧 מייל אישור חדש נשלח. בדוק/י גם את תיקיית הספאם.', 'success');
+            } catch (e) {
+                console.error('Resend confirmation:', e);
+                showAuthNotice(authMessage(e), 'error');
             }
         };
 
         window.handleForgotPassword = async () => {
-            const email = document.getElementById('email').value;
-            if (!email) return alert('הזן אימייל');
-            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-            if (error) alert(error.message); else alert('הוראות איפוס נשלחו!');
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            hideAuthNotice();
+            if (!email) return showAuthNotice('הזן/י את כתובת האימייל שלך.', 'error');
+            if (!/^\S+@\S+\.\S+$/.test(email)) return showAuthNotice('נא להזין כתובת אימייל תקינה.', 'error');
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: getAuthRedirectUrl() });
+                if (error) throw error;
+                showAuthNotice('📧 הוראות לאיפוס הסיסמה נשלחו לאימייל. בדוק/י גם את תיקיית הספאם.', 'success');
+            } catch (e) {
+                console.error('Reset password error:', e);
+                showAuthNotice(authMessage(e), 'error');
+            }
         };
 
         window.handleUpdatePassword = async () => {
             const p = document.getElementById('new-password').value;
-            if (!p || p.length < 6) return alert('סיסמה קצרה מדי');
-            const { error } = await supabase.auth.updateUser({ password: p });
-            if (error) alert(error.message); else { alert('הסיסמה עודכנה!'); window.location.hash = ''; checkUserSession(); }
+            if (!p || p.length < 6) return alert('הסיסמה חייבת להכיל לפחות 6 תווים.');
+            try {
+                const { error } = await supabase.auth.updateUser({ password: p });
+                if (error) throw error;
+                alert('הסיסמה עודכנה בהצלחה!');
+                window.history.replaceState({}, document.title, getAuthRedirectUrl());
+                await checkUserSession();
+            } catch (e) {
+                console.error('Update password error:', e);
+                alert(authMessage(e));
+            }
         };
 
-        async function checkUserSession() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) { showSec('auth-section'); return; }
+        async function finishAuthenticatedLogin(user) {
+            if (!user) throw new Error('לא נמצא משתמש מחובר.');
+            const profile = await ensureProfile(user);
+            if (!profile) throw new Error('לא נמצא פרופיל משתמש.');
             userId = user.id;
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            if (!profile) return;
-            role = profile.role; userName = profile.full_name;
+            role = profile.role === 'teacher' ? 'teacher' : 'student';
+            userName = profile.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'משתמש';
             const t = translations[currentLang];
-            document.getElementById('welcome-user').innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
-            document.getElementById('teacher-panel').classList.toggle('hidden', role !== 'teacher');
-            showSec('dashboard-section'); loadRooms();
+            const welcome = document.getElementById('welcome-user');
+            if (welcome) welcome.innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            document.getElementById('teacher-panel')?.classList.toggle('hidden', role !== 'teacher');
+            hideAuthNotice();
+            showSec('dashboard-section');
+            loadRooms();
+        }
+
+        async function checkUserSession() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error || !user) { showSec('auth-section'); return; }
+                await finishAuthenticatedLogin(user);
+            } catch (e) {
+                console.error('Session error:', e);
+                showSec('auth-section');
+                showAuthNotice(e.message || 'לא ניתן לטעון את המשתמש.', 'error');
+            }
         }
         window.logout = async () => { await supabase.auth.signOut(); window.location.reload(); };
 
