@@ -1430,6 +1430,10 @@
 
             activeChannel = supabase.channel(`room_${id}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
+                    if (p.eventType === 'DELETE' && p.old?.user_id && p.old.user_id !== userId) {
+                        closeRtcPeer(p.old.user_id, true);
+                        participantMeta.delete(p.old.user_id);
+                    }
                     fetchParticipants(id);
                     if (role === 'student' && p.new && p.new.user_id === userId) {
                         if (p.new.status === 'approved') {
@@ -1504,6 +1508,17 @@
                             if (btn) btn.innerText = translations[currentLang].btn_mic_unmute;
                         }
                     }
+                })
+                .on('broadcast', { event: 'participant_left' }, async p => {
+                    const m = p.payload || {};
+                    if (!m.userId || m.userId === userId) return;
+                    // Explicit leave notification: remove the participant's video immediately.
+                    closeRtcPeer(m.userId, true);
+                    rtcPeers.delete(m.userId);
+                    rtcIceQueues.delete(m.userId);
+                    rtcRemoteStreams.delete(m.userId);
+                    participantMeta.delete(m.userId);
+                    if (roomId) await fetchParticipants(roomId);
                 })
                 .on('broadcast', { event: 'participant_info' }, async p => {
                     const m = p.payload;
@@ -2149,20 +2164,77 @@
         window.leaveRoom = async () => {
             if (isTranscribing) toggleSpeechRecognition();
             stopAmbientSound();
-            if (activeChannel) {
-                for (const remoteUserId of rtcPeers.keys()) {
-                    try { await sendRtcSignal(remoteUserId, 'bye', {}); } catch(e) {}
-                    closeRtcPeer(remoteUserId, true);
-                }
-                rtcPeers.clear();
-                rtcReady = false;
-                rtcStarting = false;
-                supabase.removeChannel(activeChannel);
-                activeChannel = null;
+
+            const leavingRoomId = roomId;
+            const leavingUserId = userId;
+            const channel = activeChannel;
+
+            // Tell every other participant first. This is the reliable UI cleanup path;
+            // database DELETE/realtime can be delayed or blocked by RLS policies.
+            if (channel && leavingUserId) {
+                try {
+                    await channel.send({
+                        type: 'broadcast',
+                        event: 'participant_left',
+                        payload: { userId: leavingUserId, roomId: leavingRoomId }
+                    });
+                } catch (e) { console.warn('participant_left broadcast:', e); }
             }
-            if (roomId && userId) await supabase.from('room_participants').delete().eq('room_id', roomId).eq('user_id', userId);
-            showSec('dashboard-section'); loadRooms();
+
+            // Close all local peer connections and remove remote tiles.
+            for (const remoteUserId of Array.from(rtcPeers.keys())) {
+                closeRtcPeer(remoteUserId, true);
+            }
+            rtcPeers.clear();
+            rtcIceQueues.clear();
+            rtcRemoteStreams.clear();
+            rtcReady = false;
+            rtcStarting = false;
+
+            // Stop camera/microphone tracks so the browser releases the devices.
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+                mediaStream = null;
+            }
+
+            // Remove our participant row while we are still connected to Realtime.
+            if (leavingRoomId && leavingUserId) {
+                try {
+                    await supabase.from('room_participants')
+                        .delete()
+                        .eq('room_id', leavingRoomId)
+                        .eq('user_id', leavingUserId);
+                } catch (e) { console.warn('participant delete:', e); }
+            }
+
+            if (channel) {
+                try { await supabase.removeChannel(channel); } catch(e) {}
+            }
+            activeChannel = null;
+            roomId = null;
+            sessionParticipants = [];
+            participantMeta.clear();
+
+            // Remove every non-local/remote video tile left by this room.
+            const grid = document.getElementById('video-grid-container');
+            if (grid) grid.querySelectorAll('.video-tile.remote-video').forEach(t => t.remove());
+
+            showSec('dashboard-section');
+            loadRooms();
         };
+
+        // Best-effort cleanup if the user closes the tab/browser or navigates away.
+        window.addEventListener('pagehide', () => {
+            try {
+                if (activeChannel && userId) {
+                    activeChannel.send({
+                        type: 'broadcast', event: 'participant_left',
+                        payload: { userId, roomId }
+                    });
+                }
+            } catch (e) {}
+            if (mediaStream) mediaStream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+        });
 
         function showSec(id) {
             ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(s => {
