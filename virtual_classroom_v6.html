@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>כיתה וירטואלית חכמה - פרימיום אולטימטיבי</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root[data-theme="light"] {
+            --primary: #4f46e5; --primary-hover: #4338ca; --bg: #f8fafc; --card: #ffffff;
+            --text: #1e293b; --muted: #64748b; --border: #e2e8f0; --tool: #f1f5f9;
+            --danger: #ef4444; --success: #10b981; --warning: #f59e0b;
+        }
+        :root[data-theme="dark"] {
+            --primary: #6366f1; --primary-hover: #4f46e5; --bg: #0f172a; --card: #1e293b;
+            --text: #f8fafc; --muted: #94a3b8; --border: #334155; --tool: #111827;
+            --danger: #f87171; --success: #34d399; --warning: #fbbf24;
+        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: background 0.3s; }
+        .container { max-width: 1200px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2, h3, h4 { color: var(--text); margin-top: 0; }
+        .hidden { display: none !important; }
+        input, select, button, textarea { display: block; width: 100%; margin-bottom: 12px; padding: 10px; font-size: 15px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; background: var(--card); color: var(--text); outline: none; }
+        button { background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        button:hover { background: var(--primary-hover); }
+        .grid-container { display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px; }
+        @media (max-width: 900px) { .grid-container { grid-template-columns: 1fr; } }
+        .tool-box { background: var(--tool); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .room-item, .participant-card { background: var(--card); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        video { width: 100%; height: 140px; background: #000; border-radius: 6px; object-fit: cover; }
+        
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .video-tile { background: #000; border-radius: 8px; overflow: hidden; position: relative; border: 2px solid var(--border); }
+        /* ===== תצוגת תלמיד: המורה הוא הווידאו הראשי ===== */
+        body.student-view #video-grid-container {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            align-items: start;
+        }
+        body.student-view #video-grid-container .video-tile.teacher-video {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            border-width: 3px;
+        }
+        body.student-view #video-grid-container .video-tile.teacher-video video {
+            width: 100% !important;
+            height: 500px !important;
+            min-height: 500px !important;
+            max-height: 70vh !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+        body.student-view #video-grid-container .video-tile:not(.teacher-video) {
+            max-width: 260px;
+        }
+        body.student-view #video-grid-container .video-tile:not(.teacher-video) video {
+            height: 150px !important;
+            min-height: 150px !important;
+        }
+        @media (max-width: 700px) {
+            body.student-view #video-grid-container {
+                grid-template-columns: 1fr;
+            }
+            body.student-view #video-grid-container .video-tile.teacher-video video {
+                height: 360px !important;
+                min-height: 360px !important;
+                max-height: 65vh !important;
+            }
+        }
+        .video-tile.remote-video { border-color: var(--primary); }
+        .video-tile.remote-video::after { content: 'LIVE'; position:absolute; top:5px; left:5px; background:rgba(16,185,129,.9); color:#fff; font-size:9px; padding:2px 5px; border-radius:4px; }
+        .video-user-label { position: absolute; bottom: 4px; right: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; padding: 3px 6px; font-size: 11px; border-radius: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 4px solid var(--primary); }
+        .participant-name-color { display:inline-flex; align-items:center; gap:6px; font-weight:700; }
+        .participant-color-dot { width:10px; height:10px; border-radius:50%; display:inline-block; flex:0 0 10px; box-shadow:0 0 0 2px rgba(255,255,255,.25); }
+        .participant-device { font-size:10px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+        .participant-device span { background:var(--tool); border:1px solid var(--border); border-radius:4px; padding:1px 5px; }
+
+        .chat-box, .transcript-box { height: 100px; overflow-y: auto; border: 1px solid var(--border); padding: 8px; background: var(--card); border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
+        #whiteboard-canvas, #pdf-canvas { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: crosshair; display: block; }
+        hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
+        .top-bar-btn { background: var(--muted); color: #fff; padding: 6px 12px; border-radius: 6px; width: auto; display: inline-block; font-size: 14px; }
+        .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; width: auto; display: inline; padding: 0; }
+        .weather-badge { font-size: 11px; background: var(--tool); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 3px; }
+        
+        @keyframes flashAlert {
+            0% { background-color: rgba(239, 68, 68, 0.2); }
+            50% { background-color: rgba(239, 68, 68, 0.6); }
+            100% { background-color: rgba(239, 68, 68, 0.2); }
+        }
+        .attention-active { animation: flashAlert 1s infinite; border: 2px solid var(--danger) !important; }
+
+        /* סרגל פיצ'רים צף */
+        #floating-features-bar {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px;
+            max-width: calc(100vw - 36px);
+            overflow-x: auto;
+            background: rgba(15,23,42,.92);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0,0,0,.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        #floating-features-bar.hidden { display:none !important; }
+        .floating-feature-btn {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            min-width: 48px;
+            height: 42px;
+            margin: 0 !important;
+            padding: 7px 11px !important;
+            border: 1px solid rgba(255,255,255,.14) !important;
+            border-radius: 12px !important;
+            background: rgba(255,255,255,.10) !important;
+            color: #fff !important;
+            font-size: 12px !important;
+            line-height: 1.1;
+            white-space: nowrap;
+            box-shadow: none !important;
+        }
+        .floating-feature-btn:hover { background: rgba(255,255,255,.22) !important; transform: translateY(-2px); }
+        .floating-feature-btn.active { background: var(--primary) !important; }
+        .floating-feature-btn.danger { background: rgba(239,68,68,.78) !important; }
+        .floating-feature-btn.success { background: rgba(16,185,129,.78) !important; }
+        .floating-feature-label { display:block; font-size:9px; opacity:.85; margin-top:2px; }
+        #floating-features-toggle {
+            position: fixed; right: 18px; bottom: 18px; z-index:10000;
+            width:48px !important; height:48px; margin:0 !important; padding:0 !important;
+            border-radius:50% !important; background:var(--primary) !important; color:#fff !important;
+            box-shadow:0 8px 25px rgba(0,0,0,.3); font-size:21px; display:none;
+        }
+        #floating-features-bar.collapsed { display:none; }
+        @media(max-width:700px) {
+            #floating-features-bar { left:8px; right:8px; bottom:8px; max-width:none; border-radius:15px; }
+            #floating-features-toggle { right:12px; bottom:12px; }
+            .floating-feature-btn { min-width:44px; height:40px; padding:6px 8px !important; font-size:11px !important; }
+        }
+
+    
+        /* ===== Virtual Classroom X - new feature center ===== */
+        .vcx-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+        .vcx-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+        .vcx-stat b{display:block;font-size:22px;color:var(--primary)} .vcx-stat span{font-size:11px;color:var(--muted)}
+        .vcx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .vcx-panel{background:var(--tool);border:1px solid var(--border);border-radius:10px;padding:12px}
+        .vcx-list{max-height:180px;overflow:auto;font-size:13px}.vcx-item{background:var(--card);border:1px solid var(--border);padding:8px;border-radius:7px;margin-bottom:6px}
+        .vcx-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.vcx-row>*{flex:1}.vcx-row button{width:auto;margin:0}
+        .vcx-badge{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--primary);color:#fff;font-size:10px}
+        .vcx-hand{animation:flashAlert 1s infinite}.vcx-hidden{display:none!important}
+        @media(max-width:800px){.vcx-grid{grid-template-columns:1fr}.vcx-stat-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style id="v5-modern-design">:root{--v5-bg:#f3f6fb;--v5-surface:rgba(255,255,255,.96);--v5-border:#e4e9f2;--v5-text:#172033;--v5-muted:#6b778c;--v5-accent:#4f46e5;--v5-shadow:0 14px 40px rgba(15,23,42,.09)}:root[data-theme="dark"]{--v5-bg:#07111f;--v5-surface:rgba(15,23,42,.96);--v5-border:#26344a;--v5-text:#f8fafc;--v5-muted:#94a3b8;--v5-shadow:0 14px 40px rgba(0,0,0,.28)}body{background:radial-gradient(circle at 5% 0%,rgba(99,102,241,.10),transparent 28%),radial-gradient(circle at 100% 15%,rgba(14,165,233,.08),transparent 25%),var(--v5-bg)!important;color:var(--v5-text)}.container{max-width:1500px!important;padding:24px!important;border-radius:24px!important;background:var(--v5-surface)!important;box-shadow:var(--v5-shadow)!important}.grid-container{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)!important;gap:18px!important}.tool-box,.vcx-panel,.vcx-stat,.room-item,.participant-card{border-radius:16px!important;border:1px solid var(--v5-border)!important;box-shadow:0 6px 22px rgba(15,23,42,.06)!important}.tool-box{padding:16px!important;background:var(--tool)!important}.video-tile{border-radius:16px!important;overflow:hidden!important;box-shadow:0 8px 26px rgba(15,23,42,.16)!important}.video-tile video{border-radius:16px!important}.room-header,.lesson-header{border-radius:20px!important;box-shadow:var(--v5-shadow)!important}input,select,textarea{border-radius:12px!important;border-color:var(--v5-border)!important}.floating-feature-btn{border-radius:12px!important}.vcx-stat-grid{gap:10px}.vcx-grid{gap:14px}@media(max-width:900px){.grid-container{grid-template-columns:1fr!important}.container{padding:14px!important;border-radius:16px!important}}@media(max-width:600px){body{padding:8px!important}.container{padding:10px!important}.grid-container{gap:10px!important}.video-tile{min-height:120px!important}.video-tile video{min-height:120px!important}#floating-features-bar{left:8px!important;right:8px!important;bottom:8px!important;max-width:none!important;border-radius:16px!important}.floating-feature-btn{min-width:48px!important;height:42px!important}}#v5-live-pill{position:fixed;top:14px;left:14px;z-index:10001;display:none;padding:7px 11px;border-radius:999px;background:#dc2626;color:white;font-weight:800;font-size:12px;box-shadow:0 8px 25px rgba(0,0,0,.2)}.v5-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px}.v5-section-title h3,.v5-section-title h4{margin:0}</style><style id="ceramic-v6-design">
+:root{--cer-bg:#eee9df;--cer-surface:#f8f5ee;--cer-surface2:#e9e2d5;--cer-ink:#263238;--cer-muted:#71808a;--cer-glaze:#6d9ca3;--cer-glaze2:#9db9b0;--cer-clay:#b9785b;--cer-line:rgba(70,65,55,.14);--cer-shadow:0 18px 45px rgba(70,58,42,.13)}
+:root[data-theme="dark"]{--cer-bg:#1d2425;--cer-surface:#293132;--cer-surface2:#222a2b;--cer-ink:#edf2ef;--cer-muted:#aebbb7;--cer-glaze:#86b8bc;--cer-glaze2:#739d91;--cer-clay:#c98a6a;--cer-line:rgba(240,235,220,.13);--cer-shadow:0 20px 50px rgba(0,0,0,.28)}
+*{box-sizing:border-box}body{background:radial-gradient(circle at 12% 8%,rgba(255,255,255,.7),transparent 24%),radial-gradient(circle at 88% 18%,rgba(109,156,163,.12),transparent 25%),var(--cer-bg)!important;color:var(--cer-ink)!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;background-image:radial-gradient(rgba(70,60,45,.16) .7px,transparent .7px);background-size:9px 9px;mix-blend-mode:multiply;z-index:-1}
+.container{max-width:1540px!important;background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(246,241,232,.96))!important;border:1px solid var(--cer-line)!important;border-radius:30px!important;box-shadow:var(--cer-shadow)!important;padding:24px!important}
+:root[data-theme="dark"] .container{background:linear-gradient(145deg,rgba(47,56,57,.98),rgba(35,43,44,.98))!important}
+.tool-box,.vcx-panel,.vcx-stat,.room-item,.participant-card{background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(235,229,218,.7))!important;border:1px solid var(--cer-line)!important;border-radius:21px!important;box-shadow:0 9px 25px rgba(72,59,43,.09),inset 0 1px rgba(255,255,255,.7)!important}
+:root[data-theme="dark"] .tool-box,:root[data-theme="dark"] .vcx-panel,:root[data-theme="dark"] .vcx-stat,:root[data-theme="dark"] .room-item,:root[data-theme="dark"] .participant-card{background:linear-gradient(145deg,#303a3b,#263031)!important}
+button,.top-bar-btn{border-radius:13px!important;border:1px solid var(--cer-line)!important;transition:.2s ease!important;box-shadow:0 4px 10px rgba(70,58,42,.08)!important}button:hover,.top-bar-btn:hover{transform:translateY(-1px);filter:saturate(1.06)}
+input,select,textarea{background:rgba(255,255,255,.62)!important;border:1px solid var(--cer-line)!important;border-radius:14px!important;color:var(--cer-ink)!important} :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{background:#202829!important}
+.video-tile{border:2px solid rgba(255,255,255,.75)!important;border-radius:23px!important;box-shadow:0 16px 34px rgba(54,47,38,.17)!important;background:#d9d4ca!important;overflow:hidden!important}.video-tile video{border-radius:21px!important}
+#whiteboard-canvas{background:#fbfaf5!important;border:8px solid #e3ddd0!important;border-radius:24px!important;box-shadow:inset 0 0 0 1px var(--cer-line),0 12px 28px rgba(70,58,42,.12)!important}
+.chat-box{height:240px!important;background:linear-gradient(160deg,#f8f5ee,#e9e2d7)!important;border:1px solid var(--cer-line)!important;border-radius:22px!important;padding:14px!important;box-shadow:inset 0 2px 12px rgba(70,58,42,.06)!important}
+.chat-box>*{animation:cerFade .25s ease}.chat-box div{background:rgba(255,255,255,.55);border:1px solid rgba(80,70,55,.08);border-radius:15px!important;padding:8px 11px;margin:6px 0!important;box-shadow:0 4px 10px rgba(70,58,42,.05)}
+#vcx-live-center{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(231,226,216,.65))!important;border-radius:24px!important;border:1px solid var(--cer-line)!important;padding:14px!important}
+.vcx-stat{position:relative;overflow:hidden}.vcx-stat:after{content:"";position:absolute;inset:auto -20% -45% -20%;height:70%;background:radial-gradient(circle,var(--cer-glaze),transparent 65%);opacity:.09}
+.room-header,.lesson-header{border-radius:24px!important;background:linear-gradient(135deg,rgba(248,245,238,.95),rgba(221,231,226,.8))!important;border:1px solid var(--cer-line)!important;box-shadow:var(--cer-shadow)!important}
+#floating-features-bar{background:rgba(248,245,238,.9)!important;border:1px solid var(--cer-line)!important;backdrop-filter:blur(16px);border-radius:22px!important;box-shadow:0 15px 35px rgba(60,52,43,.15)!important}.floating-feature-btn{border-radius:15px!important;background:linear-gradient(145deg,#faf8f2,#e4ddd0)!important}
+.ceramic-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(109,156,163,.13);border:1px solid rgba(109,156,163,.25);font-size:12px;font-weight:700;color:var(--cer-glaze)}
+@keyframes cerFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}@media(max-width:900px){.container{padding:14px!important;border-radius:20px!important}.grid-container{grid-template-columns:1fr!important}}@media(max-width:600px){body{padding:6px!important}.container{padding:9px!important;border-radius:16px!important}.video-tile{border-radius:17px!important}#whiteboard-canvas{border-width:5px!important;border-radius:17px!important}.chat-box{height:210px!important}}
+</style>
+<style id="ceramic-v61">
+:root{--cer-bg:#f4efe6;--cer-surface:#fbf8f2;--cer-edge:#d8cdbc;--cer-ink:#40392f;--cer-blue:#527b86;--cer-green:#73866c;--cer-rose:#b98279;--cer-gold:#b79a62;--cer-shadow:0 14px 34px rgba(72,57,39,.13)}
+body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparent 25%),radial-gradient(circle at 95% 15%,rgba(82,123,134,.10),transparent 28%),var(--cer-bg)!important;color:var(--cer-ink)}
+#main-app-container{background:rgba(255,252,247,.94)!important;border:1px solid rgba(181,166,142,.35)!important;box-shadow:0 20px 55px rgba(67,54,38,.13),inset 0 1px rgba(255,255,255,.9)!important}
+.tool-box,.vcx-panel{background:linear-gradient(145deg,rgba(255,252,247,.97),rgba(239,233,223,.94))!important;border-color:var(--cer-edge)!important;box-shadow:var(--cer-shadow)!important;position:relative;overflow:hidden}
+.tool-box:before,.vcx-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.75),transparent 28%),repeating-linear-gradient(0deg,rgba(80,65,48,.018) 0,rgba(80,65,48,.018) 1px,transparent 1px,transparent 5px);opacity:.7}
+.tool-box>* ,.vcx-panel>*{position:relative;z-index:1}
+#whiteboard-canvas{background:#fcfaf5!important;border:10px solid #ddd3c3!important;border-radius:26px!important;box-shadow:inset 0 0 0 1px #cfc1ad,inset 0 0 30px rgba(113,91,61,.07),0 15px 32px rgba(70,58,42,.14)!important}
+.cer-wb-toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:9px;margin:0 0 10px;border-radius:18px;background:linear-gradient(145deg,#eee7da,#faf7f0);border:1px solid #d7c9b5;box-shadow:inset 0 1px #fff,0 7px 16px rgba(70,58,42,.08)}
+.cer-tool,.cer-swatch{border:1px solid #cdbda7!important;background:#f9f5ed!important;color:#51483d!important;border-radius:12px!important;width:auto!important;min-width:38px!important;height:34px!important;margin:0!important;padding:5px 10px!important;box-shadow:0 3px 7px rgba(70,58,42,.08),inset 0 1px rgba(255,255,255,.9)!important;cursor:pointer}
+.cer-tool.active{background:#dce7e7!important;border-color:#91aeb3!important;box-shadow:inset 0 2px 5px rgba(64,82,84,.12)!important}
+.cer-swatch{min-width:30px!important;width:30px!important;padding:0!important;border-radius:50%!important}
+.cer-swatch[data-c="#527b86"]{background:#527b86!important}.cer-swatch[data-c="#73866c"]{background:#73866c!important}.cer-swatch[data-c="#b98279"]{background:#b98279!important}.cer-swatch[data-c="#b79a62"]{background:#b79a62!important}.cer-swatch[data-c="#40392f"]{background:#40392f!important}.cer-swatch[data-c="#7b6a8f"]{background:#7b6a8f!important}
+.cer-range{width:90px!important;margin:0!important;accent-color:#527b86}
+.cer-note-layer{position:absolute;inset:10px;pointer-events:none;z-index:4}.cer-note{position:absolute;pointer-events:auto;width:150px;min-height:72px;padding:10px 12px;background:linear-gradient(145deg,#fffdf8,#eee5d5);border:1px solid #d3c2aa;border-radius:14px;box-shadow:0 10px 20px rgba(65,52,37,.16);font-size:13px;cursor:move;resize:both;overflow:auto}.cer-note b{display:block;font-size:11px;color:#7c6c58;margin-bottom:4px}
+.cer-chat-shell{border-radius:24px;padding:4px;background:linear-gradient(145deg,#e3d9ca,#faf7f0);box-shadow:inset 0 1px #fff,0 10px 25px rgba(70,58,42,.10)}
+#chat-messages{background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.85),transparent 35%),linear-gradient(160deg,#f7f2e9,#e9e0d2)!important;border:1px solid #d5c6b2!important;border-radius:20px!important;height:250px!important;padding:12px!important}
+#chat-messages .cer-chat-bubble{max-width:88%;width:max-content;background:rgba(255,255,255,.78);border:1px solid rgba(126,105,79,.16);border-radius:16px 16px 5px 16px!important;padding:9px 12px!important;margin:7px 0!important;box-shadow:0 5px 12px rgba(70,58,42,.07)!important}
+#chat-messages .cer-chat-bubble.cer-me{margin-right:auto;margin-left:0;background:#e1ebe7;border-color:#b8cdc5;border-radius:16px 16px 16px 5px!important}
+.cer-chat-meta{font-size:10px;color:#887a68;margin-bottom:3px}.cer-chat-compose{display:flex;gap:7px;margin-top:8px}.cer-chat-compose input{margin:0!important;background:#fffdf8!important}.cer-chat-compose button{width:auto!important;margin:0!important;border-radius:12px!important;background:#527b86!important}
+.cer-palette-label{font-size:11px;color:#786b5b;font-weight:700;margin-right:2px}
+@media(max-width:600px){.cer-wb-toolbar{gap:5px}.cer-tool{padding:5px 7px!important;min-width:34px!important}.cer-range{width:70px!important}#chat-messages{height:210px!important}}
+:root[data-theme="dark"]{--cer-bg:#171613;--cer-surface:#211f1a;--cer-edge:#51493d;--cer-ink:#eee8dc}
+:root[data-theme="dark"] #main-app-container{background:rgba(31,29,25,.96)!important}:root[data-theme="dark"] .tool-box,:root[data-theme="dark"] .vcx-panel{background:linear-gradient(145deg,#292620,#201e1a)!important}:root[data-theme="dark"] .cer-wb-toolbar{background:linear-gradient(145deg,#2b2822,#1e1c18);border-color:#554b3e}:root[data-theme="dark"] .cer-tool{background:#2f2b25!important;color:#eee7db!important;border-color:#5a4f41!important}:root[data-theme="dark"] #whiteboard-canvas{background:#eee9df!important}
+</style></head>
+<body><div id="ceramic-brand"><span class="ceramic-badge">🏺 Ceramic Classroom · Studio</span></div><div id="v5-live-pill">● LIVE</div><script>document.addEventListener('DOMContentLoaded',()=>{const r=document.getElementById('room-section'),p=document.getElementById('v5-live-pill');if(!r||!p)return;const f=()=>p.style.display=r.classList.contains('hidden')?'none':'block';new MutationObserver(f).observe(r,{attributes:true,attributeFilter:['class']});f()});</script>
+    <div class="container" id="main-app-container">
+        <!-- סרגל עליון -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--primary); margin: 0;" data-i18n="app_title">🎓 כיתה וירטואלית חכמה</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="global-lang-select" class="top-bar-btn" style="margin:0; padding: 5px 10px;" onchange="changeAppLanguage(this.value)">
+                    <option value="he">🇮🇱 עברית</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇧🇷 Português</option>
+                    <option value="am">🇪🇹 አማርኛ</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+                <button class="top-bar-btn" onclick="toggleTheme()" data-i18n="toggle_theme">🌓 מצב כהה / בהיר</button>
+            </div>
+        </div>
+
+        <!-- התחברות -->
+        <div id="auth-section" style="max-width: 400px; margin: 0 auto;">
+            <h3 id="form-title" style="text-align: center;" data-i18n="auth_login_title">התחברות למערכת</h3>
+            <input type="email" id="email" data-i18n-placeholder="placeholder_email" placeholder="אימייל">
+            <input type="password" id="password" data-i18n-placeholder="placeholder_password" placeholder="סיסמה">
+            <div id="register-fields" class="hidden">
+                <input type="text" id="full_name" data-i18n-placeholder="placeholder_fullname" placeholder="שם מלא">
+                <select id="role">
+                    <option value="student" data-i18n="role_student">תלמיד 👨‍🎓</option>
+                    <option value="teacher" data-i18n="role_teacher">מורה 👨‍🏫</option>
+                </select>
+            </div>
+            <button id="auth-action-btn" onclick="handleAuthSubmit()" data-i18n="btn_login">התחבר</button>
+            <div style="text-align: center;"><button type="button" class="link-btn" id="forgot-password-link" onclick="handleForgotPassword()" data-i18n="link_forgot">שכחת סיסמה?</button></div>
+            <button onclick="toggleAuthMode()" style="background: var(--muted);" data-i18n="btn_toggle_auth">עבור להרשמה / התחברות</button>
+        </div>
+
+        <!-- איפוס סיסמה -->
+        <div id="reset-password-section" class="hidden" style="max-width: 400px; margin: 0 auto;">
+            <h3 style="text-align: center;" data-i18n="reset_title">הגדרת סיסמה חדשה</h3>
+            <input type="password" id="new-password" data-i18n-placeholder="placeholder_new_password" placeholder="סיסמה חדשה (לפחות 6 תווים)">
+            <button onclick="handleUpdatePassword()" style="background: var(--success);" data-i18n="btn_save_password">שמור סיסמה</button>
+        </div>
+
+        <!-- לוח בקרה ראשי -->
+        <div id="dashboard-section" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--tool); padding: 15px; border-radius: 8px;">
+                <h3 id="welcome-user" style="margin: 0;">שלום</h3>
+                <button onclick="logout()" style="background: var(--danger); width: auto; padding: 6px 14px; margin: 0;" data-i18n="btn_logout">התנתק</button>
+            </div>
+            <hr>
+            <div class="tool-box" style="text-align: center;">
+                <h4 style="margin-bottom: 6px;" data-i18n="currency_title">💱 שערי מטבעות חיים</h4>
+                <div id="currency-rates" style="font-weight: 600; color: var(--primary);" data-i18n="loading_rates">טוען שערים...</div>
+            </div>
+            <div id="teacher-panel" class="hidden tool-box">
+                <h4 data-i18n="teacher_open_room">👨‍🏫 פתיחת חדר חדש</h4>
+                <input type="text" id="room-title-input" data-i18n-placeholder="placeholder_room_title" placeholder="שם השיעור">
+                <button onclick="createAndOpenRoom()" style="background: var(--success);" data-i18n="btn_open_room">פתח חדר</button>
+            </div>
+            <div id="student-panel">
+                <h4 data-i18n="active_rooms">🏫 חדרים פעילים</h4>
+                <div id="rooms-list" data-i18n="loading_rooms">טוען חדרים...</div>
+            </div>
+            <div class="tool-box" id="vcx-dashboard-center">
+                <h4>🚀 מרכז המערכת — פיצ'רים חדשים</h4>
+                <div class="vcx-stat-grid">
+                    <div class="vcx-stat"><b id="vcx-stat-rooms">0</b><span>שיעורים פעילים</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-students">0</b><span>תלמידים בחדר</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-attendance">0%</b><span>נוכחות נוכחית</span></div>
+                    <div class="vcx-stat"><b id="vcx-stat-notify">0</b><span>התראות</span></div>
+                </div>
+                <div class="vcx-grid">
+                    <div class="vcx-panel"><b>🔔 התראות</b><div id="vcx-notifications" class="vcx-list" style="margin-top:8px">אין התראות חדשות.</div></div>
+                    <div class="vcx-panel"><b>📅 לוח שיעורים</b><div id="vcx-schedule" class="vcx-list" style="margin-top:8px">השיעורים הפעילים יופיעו כאן.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- חלון השיעור -->
+        <div id="room-section" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 id="current-room-title" style="margin: 0; color: var(--primary);">שם החדר</h3>
+                <div>
+                    <button onclick="toggleFocusMode()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--primary); margin-left: 8px;" data-i18n="btn_focus_mode">🎯 מצב פוקוס</button>
+                    <button id="raise-hand-btn" onclick="toggleRaiseHand()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--warning); color: #000;" data-i18n="btn_raise_hand">🙋‍♂️ הרם יד</button>
+                    <button onclick="leaveRoom()" style="display: inline-block; width: auto; padding: 6px 14px; background: var(--danger); margin-left: 8px;" data-i18n="btn_leave_room">צא מהחדר 🚪</button>
+                </div>
+            </div>
+            
+            <!-- טיימר כיתתי משותף -->
+            <div class="tool-box" style="display: flex; justify-content: space-between; align-items: center; background: var(--card);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>⏱️ טיימר כיתתי:</span>
+                    <span id="timer-display" style="font-size: 18px; font-weight: bold; color: var(--primary);">00:00</span>
+                </div>
+                <div id="teacher-timer-controls" class="hidden" style="display: flex; gap: 6px; margin:0;">
+                    <input type="number" id="timer-minutes" placeholder="דקות" value="5" style="width: 70px; margin:0; padding:4px;">
+                    <button onclick="startSharedTimer()" style="width: auto; padding: 4px 10px; margin:0; background: var(--success);" data-i18n="btn_start_timer">הפעל</button>
+                    <button onclick="stopSharedTimer()" style="width: auto; padding: 4px 10px; margin:0; background: var(--danger);" data-i18n="btn_stop_timer">אפס</button>
+                </div>
+            </div>
+
+            <div id="student-waiting-room" class="hidden" style="margin-bottom:12px;padding:22px;border:2px solid var(--warning);border-radius:14px;background:var(--card);text-align:center;box-shadow:0 8px 25px rgba(0,0,0,.12);">
+                <div style="font-size:42px;">⏳</div>
+                <h3 style="margin:8px 0;color:var(--primary);">ממתין לאישור המורה</h3>
+                <p style="margin:0;color:var(--muted);">המצלמה והמיקרופון מוכנים, אך לא תתחבר/י לשיעור עד שהמורה יאשר את הכניסה.</p>
+                <div id="waiting-status" style="margin-top:10px;font-weight:700;color:var(--warning);">ממתין לאישור...</div>
+            </div>
+
+            <div class="tool-box" id="vcx-live-center">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+                    <h4 style="margin:0">🎛️ מרכז ניהול שיעור מתקדם</h4>
+                    <div class="vcx-row" style="flex:0 0 auto">
+                        <button onclick="vcxNotifyClass()">🔔 הודעה לכיתה</button>
+                        <button onclick="vcxOpenQ()">❓ שאלות ותשובות</button>
+                        <button onclick="vcxToggleGradebook()">📊 ציונים</button>
+                    </div>
+                </div>
+                <div class="vcx-stat-grid">
+                    <div class="vcx-stat"><b id="vcx-live-count">0</b><span>מחוברים</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-hands">0</b><span>ידיים מורמות</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-cams">0</b><span>מצלמות פעילות</span></div>
+                    <div class="vcx-stat"><b id="vcx-live-mics">0</b><span>מיקרופונים פעילים</span></div>
+                </div>
+                <div id="vcx-live-panels" class="vcx-grid">
+                    <div class="vcx-panel"><b>🙋 תור דיבור</b><div id="vcx-hand-queue" class="vcx-list">אין ידיים מורמות.</div></div>
+                    <div class="vcx-panel"><b>❓ שאלות ותשובות</b><div id="vcx-q-list" class="vcx-list">אין שאלות.</div></div>
+                    <div class="vcx-panel vcx-hidden" id="vcx-grade-panel"><b>📊 ספר ציונים</b><div id="vcx-grade-list" class="vcx-list">אין ציונים עדיין.</div></div>
+                    <div class="vcx-panel"><b>📁 חומרי שיעור</b>
+                        <input type="file" id="vcx-file-input" multiple style="margin-top:8px">
+                        <button onclick="vcxUploadFiles()" style="margin-top:4px">העלה קבצים</button>
+                        <div id="vcx-file-list" class="vcx-list" style="margin-top:8px">אין קבצים.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div>
+                    <!-- רשת וידאו משתתפים (Grid) -->
+                    <div class="video-grid" id="video-grid-container">
+                        <div class="video-tile">
+                            <video id="local-video" autoplay muted playsinline></video>
+                            <div class="video-user-label" id="video-user-label">טוען שם...</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <button id="toggle-cam-btn" onclick="toggleMyCamera()" style="background: var(--warning); color: #000; padding: 8px; width: auto; flex:1;" data-i18n="btn_cam_off">📷 כבה מצלמה</button>
+                        <button id="toggle-mic-btn" onclick="toggleMyMicrophone()" style="background: var(--warning); color: #000; padding: 8px; width: auto; flex:1;" data-i18n="btn_mic_mute">🎤 השתק מיקרופון</button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button onclick="startScreenShare()" style="padding: 8px; width: auto; flex:1;" data-i18n="btn_share_screen">🖥️ שתף מסך</button>
+                        <button onclick="startRecording()" style="background: var(--success); padding: 8px; width: auto; flex:1;" data-i18n="btn_record">🔴 הקלטה</button>
+                        <button onclick="stopAndSaveRecording()" style="background: var(--danger); padding: 8px; width: auto; flex:1;" class="hidden" id="stop-rec-btn" data-i18n="btn_stop_record">⏹️ עצור הקלטה</button>
+                    </div>
+
+                    <!-- יוטיוב -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 8px;" data-i18n="youtube_title">📺 שיתוף סרטון YouTube</h4>
+                        <div style="display: flex; gap: 8px;"><input type="text" id="youtube-url-input" data-i18n-placeholder="placeholder_yt" placeholder="קישור YouTube..." style="margin:0;"><button onclick="shareYouTubeVideo()" style="width: auto; margin:0; background: var(--danger);" data-i18n="btn_show">הצג</button></div>
+                        <div id="youtube-player-container" style="margin-top: 10px;" class="hidden"><iframe id="shared-yt-frame" width="100%" height="240" src="" frameborder="0" allowfullscreen style="border-radius: 6px;"></iframe></div>
+                    </div>
+
+                    <!-- לוח לבן משודרג -->
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                            <h4 style="margin: 0;" data-i18n="whiteboard_title">🎨 לוח לבן שיתופי</h4>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select id="wb-tool-mode" style="width: auto; margin:0; padding:4px; font-size:13px;" onchange="changeWbMode(this.value)">
+                                    <option value="pen">✏️ עט</option>
+                                    <option value="highlighter">🖍️ מרקר</option>
+                                    <option value="eraser">🧹 מחק</option>
+                                    <option value="rect">🔲 מלבן</option>
+                                    <option value="circle">⚪ עיגול</option>
+                                </select>
+                                <input type="color" id="brush-color" value="#4f46e5" style="display: inline-block; width: 35px; height: 30px; padding: 0; vertical-align: middle;">
+                                <button onclick="clearWhiteboard()" style="display: inline-block; width: auto; padding: 5px 10px; margin: 0; background: var(--danger);" data-i18n="btn_clear">נקה</button>
+                            </div>
+                        </div>
+                        <div class="cer-wb-toolbar" aria-label="Ceramic whiteboard tools">
+  <span class="cer-palette-label">כלי יצירה</span>
+  <button type="button" class="cer-tool active" data-wb="pen" onclick="cerSetTool('pen')">🖌️ עט</button>
+  <button type="button" class="cer-tool" data-wb="highlighter" onclick="cerSetTool('highlighter')">🖍️ זיגוג</button>
+  <button type="button" class="cer-tool" data-wb="eraser" onclick="cerSetTool('eraser')">🧽 מחיקה</button>
+  <button type="button" class="cer-tool" data-wb="rect" onclick="cerSetTool('rect')">▭</button>
+  <button type="button" class="cer-tool" data-wb="circle" onclick="cerSetTool('circle')">◯</button>
+  <button type="button" class="cer-tool" onclick="cerUndo()">↶</button>
+  <button type="button" class="cer-tool" onclick="cerRedo()">↷</button>
+  <button type="button" class="cer-tool" onclick="cerGrid()">▦</button>
+  <button type="button" class="cer-tool" onclick="cerAddNote()">📝 אריח</button>
+  <span class="cer-palette-label">גלזורות</span>
+  <button type="button" class="cer-swatch" data-c="#527b86" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#73866c" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#b98279" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#b79a62" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#40392f" onclick="cerColor(this.dataset.c)"></button>
+  <button type="button" class="cer-swatch" data-c="#7b6a8f" onclick="cerColor(this.dataset.c)"></button>
+  <span class="cer-palette-label">עובי</span><input class="cer-range" id="cer-brush-size" type="range" min="1" max="24" value="3" oninput="cerSize(this.value)">
+</div>
+<div style="position:relative"><canvas id="whiteboard-canvas" height="260"></canvas><div id="cer-note-layer" class="cer-note-layer"></div></div>
+                    </div>
+
+                    <!-- PDF -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 8px;" data-i18n="pdf_title">📄 הצגת PDF</h4>
+                        <input type="file" id="pdf-upload" accept="application/pdf" style="margin-bottom: 8px; padding: 6px;">
+                        <canvas id="pdf-canvas" style="max-height: 220px; object-fit: contain;"></canvas>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;" id="pdf-controls" class="hidden">
+                            <button onclick="prevPage()" style="width: auto; padding: 6px 12px; margin: 0;" data-i18n="btn_pdf_prev">◀ קודם</button>
+                            <span id="pdf-page-info" style="font-weight: bold; font-size: 14px;">עמוד 0 מתוך 0</span>
+                            <button onclick="nextPage()" style="width: auto; padding: 6px 12px; margin: 0;" data-i18n="btn_pdf_next">הבא ▶</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- נגן צלילי רקע ומוזיקת ריכוז (Ambient Sound) -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="ambient_title">🎵 מוזיקת רקע וצלילי ריכוז</h4>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="playAmbientSound('rain')" style="background:var(--primary); padding:6px; font-size:12px;">🌧️ גשם</button>
+                            <button onclick="playAmbientSound('lofi')" style="background:var(--primary); padding:6px; font-size:12px;">🎧 Lo-Fi</button>
+                            <button onclick="stopAmbientSound()" style="background:var(--danger); padding:6px; font-size:12px;" data-i18n="btn_stop_sound">עצור 🔇</button>
+                        </div>
+                    </div>
+
+                    <!-- לוח הפתקיות הדביקות השיתופי (Brainstorming) -->
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;" data-i18n="sticky_title">💡 פתקיות רעיונות שיתופיות</h4>
+                            <button onclick="openNewStickyModal()" style="width:auto; padding:3px 8px; font-size:11px; margin:0; background:var(--success);" data-i18n="btn_add_sticky">+ הוסף פתקית</button>
+                        </div>
+                        <div id="sticky-notes-container" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" data-i18n="no_stickies">אין פתקיות עדיין.</div>
+                    </div>
+
+                    <!-- פאנל ניהול שאלות פרטיות למורה -->
+                    <div class="tool-box hidden" id="teacher-private-q-box">
+                        <h4 style="margin-bottom: 6px; color: var(--warning);" data-i18n="private_q_title">📥 שאלות פרטיות מתלמידים</h4>
+                        <div id="teacher-private-q-list" style="max-height: 120px; overflow-y: auto; font-size: 13px;" data-i18n="no_private_q">אין שאלות פרטיות ממתינות.</div>
+                    </div>
+
+                    <!-- אנליטיקה וסטטיסטיקה כיתתית למורה -->
+                    <div class="tool-box hidden" id="teacher-analytics-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="analytics_title">📈 מדד מעורבות כיתתי</h4>
+                        <canvas id="analytics-chart" height="130"></canvas>
+                    </div>
+
+                    <!-- חדרי דיונים (Breakout Rooms) -->
+                    <div class="tool-box hidden" id="teacher-breakout-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="breakout_title">🔀 פיצול לחדרי דיונים</h4>
+                        <input type="text" id="breakout-group-name" placeholder="שם הקבוצה (למשל: קבוצה א')" style="margin:0 0 6px 0; padding:6px;">
+                        <button onclick="launchBreakoutRoom()" style="background:var(--success); padding:6px;" data-i18n="btn_create_breakout">צור חדר דיונים</button>
+                        <div id="active-breakout-display" style="font-size: 13px; margin-top: 6px; color:var(--primary);"></div>
+                    </div>
+
+                    <!-- מטלות כיתה -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="assignment_title">📋 מטלת כיתה</h4>
+                        <div id="teacher-assignment-creator" class="hidden">
+                            <input type="text" id="assignment-text" placeholder="הגדר משימה לכיתה..." style="margin:0 0 6px 0; padding:6px;">
+                            <button onclick="publishAssignment()" style="background:var(--success); padding:6px;" data-i18n="btn_pub_assignment">פרסם מטלה</button>
+                        </div>
+                        <div id="student-assignment-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_assignment">אין מטלה פעילה כרגע.</p></div>
+                    </div>
+
+                    <!-- חידון מהיר (Quiz) + Leaderboard -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="quiz_title">🏆 חידון מהיר & טבלת מובילים</h4>
+                        <div id="teacher-quiz-creator" class="hidden">
+                            <input type="text" id="quiz-q" placeholder="שאלה מהירה..." style="margin:0 0 4px 0; padding:6px;">
+                            <input type="text" id="quiz-ans" placeholder="תשובה נכונה..." style="margin:0 0 6px 0; padding:6px;">
+                            <button onclick="startQuiz()" style="background:var(--warning); color:#000; padding:6px;" data-i18n="btn_start_quiz">הפעל חידון</button>
+                        </div>
+                        <div id="student-quiz-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_quiz">אין חידון פעיל.</p></div>
+                        <div id="class-leaderboard" style="font-size: 12px; margin-top: 8px; background:var(--card); padding:6px; border-radius:4px; border:1px solid var(--border);">
+                            <b>🏅 מובילים בכיתה:</b> <span id="leaderboard-content">אין עדיין ניקוד</span>
+                        </div>
+                    </div>
+
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0;" data-i18n="participants_title">👥 משתתפים וחיוויי שליטה</h4>
+                            <div style="display: flex; gap: 4px;">
+                                <button id="mute-all-btn" class="hidden" onclick="teacherMuteAll()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--warning); color:#000; margin: 0;" data-i18n="btn_mute_all">השתק הכל 🔇</button>
+                                <button id="download-report-btn" class="hidden" onclick="downloadAttendanceReport()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;" data-i18n="btn_report">הפק דוח 📊</button>
+                            </div>
+                        </div>
+                        <div id="participants-list" style="max-height: 150px; overflow-y: auto;"></div>
+                    </div>
+
+                    <!-- סקרים ואנונימיות -->
+                    <div class="tool-box" id="poll-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;" data-i18n="poll_title">📊 סקר כיתתי חי</h4>
+                            <label style="font-size: 11px; display: flex; align-items: center; gap: 4px;" id="anon-label-wrapper">
+                                <input type="checkbox" id="anon-poll-check" style="width:auto; margin:0;"> אנונימי 🕵️‍♂️
+                            </label>
+                        </div>
+                        <div id="teacher-poll-creator" class="hidden">
+                            <input type="text" id="poll-question" data-i18n-placeholder="placeholder_poll_q" placeholder="שאלה">
+                            <input type="text" id="poll-opt1" data-i18n-placeholder="placeholder_poll_opt1" placeholder="תשובה א'">
+                            <input type="text" id="poll-opt2" data-i18n-placeholder="placeholder_poll_opt2" placeholder="תשובה ב'">
+                            <button onclick="publishPoll()" style="background: var(--success); padding: 6px;" data-i18n="btn_publish_poll">הפעל סקר</button>
+                        </div>
+                        <div id="student-poll-taker"><p style="color: var(--muted); font-size: 13px; margin: 0;" data-i18n="no_active_poll">אין סקר פעיל.</p></div>
+                        <div id="poll-results-view" class="hidden" style="margin-top: 10px;"><canvas id="poll-chart" height="150"></canvas></div>
+                    </div>
+
+                    <!-- משוב סוף שיעור -->
+                    <div class="tool-box" id="feedback-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="feedback_title">📝 משוב והערכה עצמית (Exit Ticket)</h4>
+                        <div id="teacher-feedback-creator" class="hidden">
+                            <button onclick="triggerExitTicket()" style="background:var(--warning); color:#000; padding:6px;" data-i18n="btn_launch_feedback">הפעל משוב סוף שיעור 📋</button>
+                            <div id="feedback-results-display" style="font-size: 12px; margin-top: 6px;" data-i18n="no_feedback_data">אין נתוני משוב עדיין.</div>
+                        </div>
+                        <div id="student-feedback-view"><p style="color:var(--muted); font-size: 13px; margin:0;" data-i18n="no_active_feedback">המידה והמורה יפעיל משוב, הוא יופיע כאן.</p></div>
+                    </div>
+
+                    <!-- תמלול וסיכום AI -->
+                    <div class="tool-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <h4 style="margin: 0;" data-i18n="transcript_title">🗣️ תמלול וסיכום AI מתקדם</h4>
+                            <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                                <select id="transcript-lang" style="margin: 0; padding: 2px 4px; font-size: 11px; width: auto;" onchange="changeTranscriptLang(this.value)">
+                                    <option value="he-IL">עברית 🇮🇱</option>
+                                    <option value="ar-SA">ערבית 🇸🇦</option>
+                                    <option value="en-US">אנגלית 🇺🇸</option>
+                                    <option value="ru-RU">רוסית 🇷🇺</option>
+                                    <option value="es-ES">ספרדית 🇪🇸</option>
+                                    <option value="fr-FR">צרפתית 🇫🇷</option>
+                                    <option value="am-ET">אמהרית 🇪🇹</option>
+                                    <option value="de-DE">גרמנית 🇩🇪</option>
+                                    <option value="it-IT">איטלקית 🇮🇹</option>
+                                    <option value="pt-BR">פורטוגזית 🇧🇷</option>
+                                    <option value="zh-CN">סינית 🇨🇳</option>
+                                </select>
+                                <button id="toggle-transcript-btn" onclick="toggleSpeechRecognition()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--success); margin: 0;" data-i18n="btn_transcript_start">הפעל</button>
+                                <button onclick="generateAdvancedAiSummary()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--primary); margin: 0;" data-i18n="btn_ai_summary">סיכום חכם 🤖</button>
+                                <button onclick="downloadTranscript()" style="width: auto; padding: 3px 8px; font-size: 11px; background: var(--muted); margin: 0;" data-i18n="btn_save">שמור</button>
+                            </div>
+                        </div>
+                        <div id="transcript-messages" class="transcript-box" data-i18n="transcript_stopped">תמלול מופסק...</div>
+                    </div>
+
+                    <!-- עוזר AI אינטליגנטי לתלמיד -->
+                    <div class="tool-box" id="ai-tutor-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="ai_tutor_title">🤖 עוזר לימודים חכם (AI Tutor)</h4>
+                        <div id="ai-tutor-messages" class="chat-box" style="height: 90px;">
+                            <div style="color: var(--primary);"><b>AI Tutor:</b> שאל אותי כל שאלה על החומר הנלמד!</div>
+                        </div>
+                        <input type="text" id="ai-tutor-input" data-i18n-placeholder="placeholder_ai_tutor" placeholder="שאל שאלה את עוזר ה-AI..." style="margin-bottom:6px; padding:6px;">
+                        <button onclick="askAiTutor()" style="background: var(--primary); padding:6px;" data-i18n="btn_ask_ai">שאל את ה-AI 💡</button>
+                    </div>
+
+                    <!-- שליחת שאלה פרטית למורה -->
+                    <div class="tool-box" id="student-private-q-container">
+                        <h4 style="margin-bottom: 6px;" data-i18n="student_private_q_title">🔒 פנייה פרטית למורה</h4>
+                        <input type="text" id="student-private-input" placeholder="יש לך שאלה אישית שלא תרצה שכולם יראו?" style="margin-bottom:6px; padding:6px;">
+                        <button onclick="sendPrivateQuestionToTeacher()" style="background: var(--warning); color:#000; padding:6px;" data-i18n="btn_send_private">שלח למורה באופן דיסקרטי ✉️</button>
+                    </div>
+
+                    <!-- מחברת אישית לתלמיד -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 6px;" data-i18n="notepad_title">📝 מחברת הערות אישית</h4>
+                        <textarea id="student-notepad" rows="3" data-i18n-placeholder="placeholder_notepad" placeholder="כתוב כאן את הסיכומים שלך..." oninput="savePersonalNotes()"></textarea>
+                    </div>
+
+                    <!-- צ'אט -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 8px;" data-i18n="chat_title">💬 צ'אט כיתתי</h4>
+                        <div class="cer-chat-shell"><div id="chat-messages" class="chat-box"></div></div>
+                        <div class="cer-chat-compose"><input type="text" id="chat-input" data-i18n-placeholder="placeholder_chat" placeholder="הקלד הודעה..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}"><button onclick="sendChatMessage()" data-i18n="btn_send">שלח</button></div>
+                    </div>
+
+                    <!-- מחשבון -->
+                    <div class="tool-box">
+                        <h4 style="margin-bottom: 8px;" data-i18n="calc_title">🧮 מחשבון מדעי</h4>
+                        <input type="text" id="calc-input" data-i18n-placeholder="placeholder_calc" placeholder="למשל: Math.sqrt(144)">
+                        <button onclick="calculateMath()" style="background: #8b5cf6; padding: 6px;" data-i18n="btn_calc">חשב</button>
+                        <p id="calc-result" style="font-weight: bold; font-size: 14px; color: var(--primary); margin: 2px 0 0 0;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        const supabase = createClient('https://ufivtmlumzhdsljjckqv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmaXZ0bWx1bXpoZHNsampja3F2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIxMjEsImV4cCI6MjEwMzUwODEyMX0.qW-A_JdOZifQtkAmPku6XJWDV-_AVfI8M8GGMdSNLIw');
+
+        const translations = {
+            he: {
+                app_title: "🎓 כיתה וירטואלית חכמה",
+                toggle_theme: "🌓 מצב כהה / בהיר",
+                auth_login_title: "התחברות למערכת",
+                auth_register_title: "הרשמה למערכת",
+                placeholder_email: "אימייל",
+                placeholder_password: "סיסמה",
+                placeholder_fullname: "שם מלא",
+                role_student: "תלמיד 👨‍🎓",
+                role_teacher: "מורה 👨‍🏫",
+                btn_login: "התחבר",
+                btn_register: "הירשם",
+                link_forgot: "שכחת סיסמה?",
+                btn_toggle_auth: "עבור להרשמה / התחברות",
+                reset_title: "הגדרת סיסמה חדשה",
+                placeholder_new_password: "סיסמה חדשה (לפחות 6 תווים)",
+                btn_save_password: "שמור סיסמה",
+                welcome_prefix: "שלום",
+                btn_logout: "התנתק",
+                currency_title: "💱 שערי מטבעות חיים",
+                loading_rates: "טוען שערים...",
+                teacher_open_room: "👨‍🏫 פתיחת חדר חדש",
+                placeholder_room_title: "שם השיעור",
+                btn_open_room: "פתח חדר",
+                active_rooms: "🏫 חדרים פעילים",
+                loading_rooms: "טוען חדרים...",
+                btn_raise_hand: "🙋‍♂️ הרם יד",
+                btn_lower_hand: "🙋‍♂️ הורד יד",
+                btn_focus_mode: "🎯 מצב פוקוס",
+                btn_leave_room: "צא מהחדר 🚪",
+                btn_cam_off: "📷 כבה מצלמה",
+                btn_cam_on: "📷 הפעל מצלמה",
+                btn_mic_mute: "🎤 השתק מיקרופון",
+                btn_mic_unmute: "🎤 הפעל מיקרופון",
+                btn_share_screen: "🖥️ שתף מסך",
+                btn_record: "🔴 הקלטה",
+                btn_stop_record: "⏹️ עצור הקלטה",
+                youtube_title: "📺 שיתוף סרטון YouTube",
+                placeholder_yt: "קישור YouTube...",
+                btn_show: "הצג",
+                whiteboard_title: "🎨 לוח לבן שיתופי",
+                btn_clear: "נקה",
+                pdf_title: "📄 הצגת PDF",
+                btn_pdf_prev: "◀ קודם",
+                btn_pdf_next: "הבא ▶",
+                participants_title: "👥 משתתפים וחיוויי שליטה",
+                btn_mute_all: "השתק הכל 🔇",
+                btn_ping_student: "הקפץ מסך ⚡",
+                btn_report: "הפק דוח 📊",
+                poll_title: "📊 סקר כיתתי חי",
+                placeholder_poll_q: "שאלה",
+                placeholder_poll_opt1: "תשובה א'",
+                placeholder_poll_opt2: "תשובה ב'",
+                btn_publish_poll: "הפעל סקר",
+                no_active_poll: "אין סקר פעיל.",
+                transcript_title: "🗣️ תמלול וסיכום AI מתקדם",
+                btn_transcript_start: "הפעל",
+                btn_transcript_stop: "עצור",
+                btn_ai_summary: "סיכום חכם 🤖",
+                btn_save: "שמור",
+                transcript_stopped: "תמלול מופסק...",
+                notepad_title: "📝 מחברת הערות אישית",
+                placeholder_notepad: "כתוב כאן את הסיכומים שלך...",
+                chat_title: "💬 צ'אט כיתתי",
+                placeholder_chat: "הקלד הודעה...",
+                btn_send: "שלח",
+                calc_title: "🧮 מחשבון מדעי",
+                placeholder_calc: "למשל: Math.sqrt(144)",
+                btn_calc: "חשב",
+                btn_start_timer: "הפעל",
+                btn_stop_timer: "אפס",
+                breakout_title: "🔀 פיצול לחדרי דיונים",
+                btn_create_breakout: "צור חדר דיונים",
+                assignment_title: "📋 מטלת כיתה",
+                btn_pub_assignment: "פרסם מטלה",
+                no_active_assignment: "אין מטלה פעילה כרגע.",
+                quiz_title: "🏆 חידון מהיר & טבלת מובילים",
+                btn_start_quiz: "הפעל חידון",
+                no_active_quiz: "אין חידון פעיל.",
+                ai_tutor_title: "🤖 עוזר לימודים חכם (AI Tutor)",
+                placeholder_ai_tutor: "שאל שאלה את עוזר ה-AI...",
+                btn_ask_ai: "שאל את ה-AI 💡",
+                student_private_q_title: "🔒 פנייה פרטית למורה",
+                btn_send_private: "שלח למורה באופן דיסקרטי ✉️",
+                private_q_title: "📥 שאלות פרטיות מתלמידים",
+                no_private_q: "אין שאלות פרטיות ממתינות.",
+                analytics_title: "📈 מדד מעורבות כיתתי",
+                ambient_title: "🎵 מוזיקת רקע וצלילי ריכוז",
+                btn_stop_sound: "עצור 🔇",
+                sticky_title: "💡 פתקיות רעיונות שיתופיות",
+                btn_add_sticky: "+ הוסף פתקית",
+                no_stickies: "אין פתקיות עדיין.",
+                feedback_title: "📝 משוב והערכה עצמית (Exit Ticket)",
+                btn_launch_feedback: "הפעל משוב סוף שיעור 📋",
+                no_feedback_data: "אין נתוני משוב עדיין.",
+                no_active_feedback: "המידה והמורה יפעיל משוב, הוא יופיע כאן."
+            },
+            en: {
+                app_title: "🎓 Smart Virtual Classroom",
+                toggle_theme: "🌓 Dark / Light Mode",
+                auth_login_title: "System Login",
+                auth_register_title: "System Registration",
+                placeholder_email: "Email",
+                placeholder_password: "Password",
+                placeholder_fullname: "Full Name",
+                role_student: "Student 👨‍🎓",
+                role_teacher: "Teacher 👨‍🏫",
+                btn_login: "Login",
+                btn_register: "Register",
+                link_forgot: "Forgot Password?",
+                btn_toggle_auth: "Switch to Register / Login",
+                reset_title: "Set New Password",
+                placeholder_new_password: "New Password (min 6 chars)",
+                btn_save_password: "Save Password",
+                welcome_prefix: "Hello",
+                btn_logout: "Logout",
+                currency_title: "💱 Live Currency Rates",
+                loading_rates: "Loading rates...",
+                teacher_open_room: "👨‍🏫 Open New Room",
+                placeholder_room_title: "Lesson Name",
+                btn_open_room: "Open Room",
+                active_rooms: "🏫 Active Rooms",
+                loading_rooms: "Loading rooms...",
+                btn_raise_hand: "🙋‍♂️ Raise Hand",
+                btn_lower_hand: "🙋‍♂️ Lower Hand",
+                btn_focus_mode: "🎯 Focus Mode",
+                btn_leave_room: "Leave Room 🚪",
+                btn_cam_off: "📷 Turn Off Camera",
+                btn_cam_on: "📷 Turn On Camera",
+                btn_mic_mute: "🎤 Mute Mic",
+                btn_mic_unmute: "🎤 Unmute Mic",
+                btn_share_screen: "🖥️ Share Screen",
+                btn_record: "🔴 Record",
+                btn_stop_record: "⏹️ Stop Recording",
+                youtube_title: "📺 Share YouTube Video",
+                placeholder_yt: "YouTube link...",
+                btn_show: "Show",
+                whiteboard_title: "🎨 Collaborative Whiteboard",
+                btn_clear: "Clear",
+                pdf_title: "📄 PDF Viewer",
+                btn_pdf_prev: "◀ Prev",
+                btn_pdf_next: "Next ▶",
+                participants_title: "👥 Participants & Controls",
+                btn_mute_all: "Mute All 🔇",
+                btn_ping_student: "Ping Screen ⚡",
+                btn_report: "Get Report 📊",
+                poll_title: "📊 Live Class Poll",
+                placeholder_poll_q: "Question",
+                placeholder_poll_opt1: "Option A",
+                placeholder_poll_opt2: "Option B",
+                btn_publish_poll: "Launch Poll",
+                no_active_poll: "No active poll.",
+                transcript_title: "🗣️ Transcript & AI Summary",
+                btn_transcript_start: "Start",
+                btn_transcript_stop: "Stop",
+                btn_ai_summary: "AI Summary 🤖",
+                btn_save: "Save",
+                transcript_stopped: "Transcription stopped...",
+                notepad_title: "📝 Personal Notepad",
+                placeholder_notepad: "Type your notes here...",
+                chat_title: "💬 Class Chat",
+                placeholder_chat: "Type a message...",
+                btn_send: "Send",
+                calc_title: "🧮 Scientific Calculator",
+                placeholder_calc: "e.g., Math.sqrt(144)",
+                btn_calc: "Calculate",
+                btn_start_timer: "Start",
+                btn_stop_timer: "Reset",
+                breakout_title: "🔀 Breakout Rooms",
+                btn_create_breakout: "Create Room",
+                assignment_title: "📋 Class Assignment",
+                btn_pub_assignment: "Publish Assignment",
+                no_active_assignment: "No active assignment.",
+                quiz_title: "🏆 Live Quiz & Leaderboard",
+                btn_start_quiz: "Start Quiz",
+                no_active_quiz: "No active quiz.",
+                ai_tutor_title: "🤖 AI Study Assistant",
+                placeholder_ai_tutor: "Ask AI a study question...",
+                btn_ask_ai: "Ask AI 💡",
+                student_private_q_title: "🔒 Private Question to Teacher",
+                btn_send_private: "Send Discreetly ✉️",
+                private_q_title: "📥 Private Student Questions",
+                no_private_q: "No pending private questions.",
+                analytics_title: "📈 Class Engagement Index",
+                ambient_title: "🎵 Focus Ambient Sounds",
+                btn_stop_sound: "Stop 🔇",
+                sticky_title: "💡 Collaborative Sticky Notes",
+                btn_add_sticky: "+ Add Note",
+                no_stickies: "No notes yet.",
+                feedback_title: "📝 Exit Ticket & Self Assessment",
+                btn_launch_feedback: "Launch Exit Ticket 📋",
+                no_feedback_data: "No feedback data yet.",
+                no_active_feedback: "When the teacher launches feedback, it will appear here."
+            }
+        };
+
+        let currentLang = 'he';
+        window.changeAppLanguage = (lang) => {
+            currentLang = translations[lang] ? lang : 'en';
+            const t = translations[currentLang];
+            const isRtl = ['he', 'ar', 'am'].includes(currentLang);
+            document.documentElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', currentLang);
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.innerText = t[key];
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
+        };
+
+        let isReg = false, userId = null, roomId = null, activeChannel = null, role = 'student', userName = 'משתמש';
+        const participantMeta = new Map();
+
+        function hashString(str) { let h = 0; for (let i = 0; i < String(str).length; i++) h = ((h << 5) - h + String(str).charCodeAt(i)) | 0; return Math.abs(h); }
+        function participantColor(uid) {
+            const palette = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#d946ef','#ec4899','#64748b'];
+            return palette[hashString(uid || 'user') % palette.length];
+        }
+        function detectOS() {
+            const ua = navigator.userAgent || '';
+            if (/Windows NT/i.test(ua)) return 'Windows';
+            if (/Android/i.test(ua)) return 'Android';
+            if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+            if (/Mac OS X/i.test(ua)) return 'macOS';
+            if (/Linux/i.test(ua)) return 'Linux';
+            return 'Unknown';
+        }
+        function detectBrowser() {
+            const ua = navigator.userAgent || '';
+            if (/Edg\//i.test(ua)) return 'Edge';
+            if (/OPR\//i.test(ua)) return 'Opera';
+            if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
+            if (/Firefox\//i.test(ua)) return 'Firefox';
+            if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) return 'Chrome';
+            if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) return 'Safari';
+            return 'Browser';
+        }
+        function myParticipantMeta() { return { userId, userName, role, color: participantColor(userId), os: detectOS(), browser: detectBrowser() }; }
+        function getParticipantMeta(uid, fallbackName, fallbackRole) {
+            return participantMeta.get(uid) || { userId: uid, userName: fallbackName || 'משתמש', role: fallbackRole || 'student', color: participantColor(uid), os: 'לא ידוע', browser: 'לא ידוע' };
+        }
+        function escapeHtml(v) { const d=document.createElement('div'); d.textContent=String(v ?? ''); return d.innerHTML; }
+
+        let mediaStream = null, mediaRecorder, chunks = [], recognition = null, isTranscribing = false, transcriptText = "";
+        let handRaised = false, pollChart = null, pollData = { question: '', options: [], votes: {} }, sessionParticipants = [];
+        let myWeatherInfo = "⏳ טוען מזג אוויר...";
+        let timerInterval = null, currentQuiz = null, scoresMap = {}, isFocusActive = false;
+        let wbMode = 'pen', analyticsChartInstance = null, ambientAudioNode = null;
+        let stickyNotesList = [];
+
+        // WebRTC: המורה יוזם חיבור לכל תלמיד; תלמידים מקבלים את המורה בלבד.
+        const rtcPeers = new Map();
+        const rtcIceQueues = new Map();
+        const rtcRemoteStreams = new Map();
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+        let rtcReady = false;
+        let rtcStarting = false;
+
+        function playBeepSound() {
+            try {
+                const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = 'sine'; osc.frequency.value = 587.33;
+                gain.gain.setValueAtTime(0.1, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.3);
+                osc.connect(gain); gain.connect(ctxAudio.destination);
+                osc.start(); osc.stop(ctxAudio.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        async function initMyWeather() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                const lat = data.latitude, lon = data.longitude, city = data.city || "מיקום לא ידוע";
+                if (lat && lon) {
+                    const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                    const weatherData = await weatherRes.json();
+                    if (weatherData && weatherData.current_weather) {
+                        myWeatherInfo = `${city}: ${weatherData.current_weather.temperature}°C 🌤️`;
+                    } else { myWeatherInfo = `${city}: לא זמין`; }
+                }
+            } catch (e) { myWeatherInfo = "🌤️ מידע לא זמין"; }
+        }
+
+        window.toggleTheme = () => {
+            const h = document.documentElement;
+            const next = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            h.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        };
+
+        window.toggleFocusMode = () => {
+            isFocusActive = !isFocusActive;
+            const boxes = document.querySelectorAll('.tool-box');
+            boxes.forEach(box => {
+                if(isFocusActive) {
+                    if(!box.contains(document.getElementById('video-grid-container')) && !box.contains(document.getElementById('whiteboard-canvas'))) {
+                        box.classList.add('hidden');
+                    }
+                } else {
+                    box.classList.remove('hidden');
+                }
+            });
+            alert(isFocusActive ? '🎯 מצב פוקוס הופעל (הוסתרו הסחות דעת)' : 'מצב פוקוס כובה');
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+            if (window.location.hash.includes('type=recovery')) { showSec('reset-password-section'); return; }
+            checkUserSession();
+            fetchRates();
+            initWhiteboard();
+            initPdf();
+            initSpeech();
+            initMyWeather();
+            loadPersonalNotes();
+        });
+
+        window.savePersonalNotes = () => {
+            const val = document.getElementById('student-notepad').value;
+            localStorage.setItem(`notepad_${roomId || 'general'}`, val);
+        };
+        function loadPersonalNotes() {
+            const saved = localStorage.getItem(`notepad_${roomId || 'general'}`);
+            if (saved) document.getElementById('student-notepad').value = saved;
+        }
+
+        window.playAmbientSound = (type) => {
+            stopAmbientSound();
+            try {
+                const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+                if (type === 'rain') {
+                    const bufferSize = ctxAudio.sampleRate * 2;
+                    const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+                    const output = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+                    const whiteNoise = ctxAudio.createBufferSource();
+                    whiteNoise.buffer = buffer; whiteNoise.loop = true;
+                    const filter = ctxAudio.createBiquadFilter();
+                    filter.type = 'lowpass'; filter.frequency.value = 800;
+                    whiteNoise.connect(filter); filter.connect(ctxAudio.destination);
+                    whiteNoise.start(); ambientAudioNode = whiteNoise;
+                } else if (type === 'lofi') {
+                    const osc = ctxAudio.createOscillator();
+                    const gain = ctxAudio.createGain();
+                    osc.type = 'triangle'; osc.frequency.value = 220;
+                    gain.gain.setValueAtTime(0.05, ctxAudio.currentTime);
+                    osc.connect(gain); gain.connect(ctxAudio.destination);
+                    osc.start(); ambientAudioNode = osc;
+                }
+                alert(`נגן ריכוז הופעל (${type === 'rain' ? 'גשם מרגיע' : 'Lo-Fi'}) 🎧`);
+            } catch(e) { alert('לא ניתן להפעיל אודיו בדפדפן זה'); }
+        };
+
+        window.stopAmbientSound = () => {
+            if (ambientAudioNode) {
+                try { ambientAudioNode.stop(); } catch(e){}
+                ambientAudioNode = null;
+            }
+        };
+
+        window.openNewStickyModal = () => {
+            const text = prompt('כתוב רעיון או שאלה לפתקית השיתופית:');
+            if (!text) return;
+            const note = { id: Math.random(), author: userName, text, color: getRandomStickyColor() };
+            stickyNotesList.push(note);
+            renderStickyNotes();
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_sticky_note', payload: note });
+            }
+        };
+
+        function getRandomStickyColor() {
+            const colors = ['#fef08a', '#bbf7d0', '#fed7aa', '#e9d5ff', '#bae6fd'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function renderStickyNotes() {
+            const container = document.getElementById('sticky-notes-container');
+            if (!stickyNotesList.length) { container.innerHTML = `<span style="color:var(--muted); font-size:12px;">אין פתקיות עדיין.</span>`; return; }
+            container.innerHTML = stickyNotesList.map(n => `
+                <div style="background: ${n.color}; color: #1e293b; padding: 6px 10px; border-radius: 4px; font-size: 13px; border: 1px solid rgba(0,0,0,0.1);">
+                    <b>${n.author}:</b> ${n.text}
+                </div>
+            `).join('');
+        }
+
+        window.triggerExitTicket = () => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'launch_exit_ticket', payload: {} });
+                alert('כרטיס משוב (Exit Ticket) שוגר לכיתה!');
+            }
+        };
+
+        function renderStudentExitTicket() {
+            playBeepSound();
+            document.getElementById('student-feedback-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">📝 משוב סוף שיעור:</p>
+                <label style="font-size: 12px;">רמת הבנה (1-5):</label>
+                <select id="exit-rating" style="margin-bottom:4px; padding:4px;">
+                    <option value="5">5 - הבנתי מצוין! 🤩</option>
+                    <option value="4">4 - הבנתי די טוב 🙂</option>
+                    <option value="3">3 - הבנתי חלקית 😐</option>
+                    <option value="2">2 - היה די קשה 🙁</option>
+                    <option value="1">1 - לא הבנתי בכלל 🆘</option>
+                </select>
+                <input type="text" id="exit-comment" placeholder="שאלה או הערה נוספת למורה..." style="margin-bottom:4px; padding:4px;">
+                <button onclick="submitExitTicketAns()" style="background:var(--success); padding:4px;">שלח משוב למורה ✓</button>
+            `;
+        }
+
+        window.submitExitTicketAns = () => {
+            const rating = document.getElementById('exit-rating').value;
+            const comment = document.getElementById('exit-comment').value;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'exit_ticket_submitted', payload: { student: userName, rating, comment } });
+                document.getElementById('student-feedback-view').innerHTML = `<p style="color:var(--success); font-weight:bold;">תודה רבה! המשוב שלך נשלח.</p>`;
+            }
+        };
+
+        window.generateAdvancedAiSummary = () => {
+            if (!transcriptText.trim()) return alert('אין מספיק נתוני תמלול לסיכום מתקדם');
+            const summaryBox = document.getElementById('transcript-messages');
+            const lines = transcriptText.split('\n').filter(l => l.trim() !== '');
+            
+            const summaryHTML = `
+                <div style="background:var(--tool); padding:10px; border-radius:6px; margin-top:8px; border:1px solid var(--primary);">
+                    <h5 style="margin:0 0 4px 0; color:var(--primary);">🤖 סיכום שיעור מובנה (AI Executive Summary)</h5>
+                    <p style="margin:4px 0; font-size:13px;"><b>📊 סטטיסטיקה:</b> ${lines.length} משפטים תועדו בשיחה זו.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>🔑 מושגים מרכזיים:</b> למידה שיתופית, כלים אינטראקטיביים, ניהול זמן.</p>
+                    <p style="margin:4px 0; font-size:13px;"><b>📌 תאימות ופעולות להמשך:</b> מומלץ לעבור על המחברת האישית ולתרגל את השאלות שעלו בשיעור.</p>
+                    <button onclick="downloadAiSummaryFile()" style="width:auto; padding:4px 10px; margin-top:6px; background:var(--success); font-size:12px;">📥 הורד סיכום כקובץ מעוצב</button>
+                </div>
+            `;
+            summaryBox.innerHTML += summaryHTML;
+            summaryBox.scrollTop = summaryBox.scrollHeight;
+        };
+
+        window.downloadAiSummaryFile = () => {
+            const content = `===== סיכום שיעור חכם =====\n\n${transcriptText}\n\n===========================\nנוצר אוטומטית ע"י המערכת הוירטואלית החכמה.`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+            a.download = `Smart_Lesson_Summary_${Date.now()}.txt`;
+            a.click();
+        };
+
+        window.askAiTutor = () => {
+            const inp = document.getElementById('ai-tutor-input');
+            const question = inp.value.trim();
+            if (!question) return alert('נא להזין שאלה לעוזר ה-AI');
+            
+            const tutorBox = document.getElementById('ai-tutor-messages');
+            tutorBox.innerHTML += `<div><b>אתה:</b> ${question}</div>`;
+            inp.value = '';
+
+            setTimeout(() => {
+                let aiReply = "שאלה מצוינת! על פי הנושא הנלמד בכיתה כרגע, מומלץ להתמקד בעקרונות הבסיסיים ולתרגל דוגמאות מעשיות.";
+                if (question.includes('אנגלית') || question.includes('english')) {
+                    aiReply = "Learning English requires consistency! Try practicing vocabulary daily.";
+                } else if (question.includes('קוד') || question.includes('python')) {
+                    aiReply = "כדי לפתור בעיות תכנות, בדוק היטב את מבנה הקוד והשגיאות במסוף.";
+                }
+                tutorBox.innerHTML += `<div style="color: var(--primary); margin-top:4px;"><b>AI Tutor:</b> ${aiReply}</div>`;
+                tutorBox.scrollTop = tutorBox.scrollHeight;
+            }, 600);
+        };
+
+        window.sendPrivateQuestionToTeacher = () => {
+            const q = document.getElementById('student-private-input').value.trim();
+            if (!q) return alert('כתוב שאלה לשליחה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'private_question', payload: { studentName: userName, question: q } });
+                document.getElementById('student-private-input').value = '';
+                alert('השאלה נשלחה באופן דיסקרטי למורה!');
+            }
+        };
+
+        function renderTeacherPrivateQ(payload) {
+            playBeepSound();
+            const list = document.getElementById('teacher-private-q-list');
+            if (list.innerText.includes('אין')) list.innerHTML = '';
+            list.innerHTML += `<div style="background:var(--card); padding:6px; border-radius:4px; margin-bottom:4px; border:1px solid var(--border);"><b>👤 ${payload.studentName}:</b> ${payload.question}</div>`;
+        }
+
+        function updateAnalyticsChart() {
+            if (role !== 'teacher') return;
+            const total = sessionParticipants.length || 1;
+            const activeCams = sessionParticipants.filter(p => p.cam_active).length;
+            const activeMics = sessionParticipants.filter(p => p.mic_active).length;
+            const hands = sessionParticipants.filter(p => p.hand_raised).length;
+
+            const ctxAnalytics = document.getElementById('analytics-chart').getContext('2d');
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+
+            analyticsChartInstance = new Chart(ctxAnalytics, {
+                type: 'doughnut',
+                data: {
+                    labels: ['מצלמות פעילות 📷', 'מיקרופונים פתוחים 🎤', 'ידיים מורמות 🙋‍♂️'],
+                    datasets: [{
+                        data: [activeCams, activeMics, hands],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+            });
+        }
+
+        window.changeWbMode = (mode) => { wbMode = mode; };
+
+        let startX, startY, snapshot;
+        const canvas = document.getElementById('whiteboard-canvas'), ctx = canvas.getContext('2d');
+        let painting = false;
+
+        function initWhiteboard() {
+            canvas.width = canvas.offsetWidth || 600; 
+            canvas.height = 200;
+            
+            canvas.addEventListener('mousedown', e => {
+                if (canvas.width === 0 || canvas.height === 0) return;
+                painting = true;
+                const r = canvas.getBoundingClientRect();
+                startX = e.clientX - r.left; startY = e.clientY - r.top;
+                try {
+                    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                } catch(err) {
+                    snapshot = null;
+                }
+                ctx.beginPath(); ctx.moveTo(startX, startY);
+            });
+            canvas.addEventListener('mouseup', e => {
+                if (!painting) return;
+                painting = false;
+                if ((wbMode === 'rect' || wbMode === 'circle') && snapshot) {
+                    const r = canvas.getBoundingClientRect();
+                    const endX = e.clientX - r.left, endY = e.clientY - r.top;
+                    drawShape(startX, startY, endX, endY, true);
+                }
+                ctx.beginPath();
+            });
+            canvas.addEventListener('mousemove', e => draw(e, true));
+        }
+
+        function draw(e, send) {
+            if (!painting) return;
+            const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+            const color = document.getElementById('brush-color').value;
+
+            if (wbMode === 'pen') {
+                ctx.lineWidth = window.cerBrushSize || 3; ctx.lineCap = 'round'; ctx.strokeStyle = color;
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'pen', x, y, color } });
+            } else if (wbMode === 'highlighter') {
+                ctx.lineWidth = Math.max(8, (window.cerBrushSize || 3) * 2.5); ctx.lineCap = 'square'; ctx.strokeStyle = color + '40';
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'highlighter', x, y, color } });
+            } else if (wbMode === 'eraser') {
+                ctx.lineWidth = Math.max(12, (window.cerBrushSize || 3) * 4); ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff';
+                ctx.lineTo(x, y); ctx.stroke();
+                if (send && activeChannel) activeChannel.send({ type: 'broadcast', event: 'draw_action', payload: { mode: 'eraser', x, y } });
+            } else if ((wbMode === 'rect' || wbMode === 'circle') && snapshot) {
+                ctx.putImageData(snapshot, 0, 0);
+                drawShape(startX, startY, x, y, false);
+            }
+        }
+
+        function drawShape(x1, y1, x2, y2, send) {
+            const color = document.getElementById('brush-color').value;
+            ctx.strokeStyle = color; ctx.lineWidth = 2;
+            if (wbMode === 'rect') {
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            } else if (wbMode === 'circle') {
+                let radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                ctx.beginPath(); ctx.arc(x1, y1, radius, 0, 2 * Math.PI); ctx.stroke();
+            }
+            if (send && activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'draw_shape', payload: { mode: wbMode, x1, y1, x2, y2, color } });
+            }
+        }
+
+        window.clearWhiteboard = () => {
+            if (canvas.width > 0 && canvas.height > 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'clear_board', payload: {} });
+        };
+
+        window.launchBreakoutRoom = () => {
+            const gName = document.getElementById('breakout-group-name').value;
+            if (!gName) return alert('נא להזין שם קבוצה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'breakout_launch', payload: { groupName: gName } });
+                document.getElementById('active-breakout-display').innerText = `✅ חדר פעיל: ${gName}`;
+                alert('החדר נפתח בהצלחה!');
+            }
+        };
+
+        window.publishAssignment = () => {
+            const text = document.getElementById('assignment-text').value;
+            if (!text) return alert('הזן משימה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_assignment', payload: { text } });
+                alert('המשימה שוגרה לכיתה!');
+            }
+        };
+
+        function renderStudentAssignment(text) {
+            playBeepSound();
+            document.getElementById('student-assignment-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">📝 משימה: ${text}</p>
+                <textarea id='student-ans-input' rows='2' placeholder='הקלד את תשובתך כאן...' style='margin-bottom:4px;'></textarea>
+                <button onclick='submitAssignmentAns()' style='background:var(--success); padding:4px;'>הגש למורה ✓</button>
+            `;
+        }
+
+        window.submitAssignmentAns = () => {
+            const ans = document.getElementById('student-ans-input').value;
+            if (!ans) return alert('כתוב תשובה');
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'assignment_submitted', payload: { student: userName, answer: ans } });
+                document.getElementById('student-assignment-view').innerHTML = `<p style="color:var(--success); font-weight:bold;">התשובה הוגשה בהצלחה למורה!</p>`;
+            }
+        };
+
+        window.startQuiz = () => {
+            const q = document.getElementById('quiz-q').value, ans = document.getElementById('quiz-ans').value;
+            if (!q || !ans) return alert('נא למלא שאלה ותשובה');
+            currentQuiz = { q, ans };
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'launch_quiz', payload: currentQuiz });
+                alert('החידון התחיל!');
+            }
+        };
+
+        function renderStudentQuiz(quiz) {
+            playBeepSound();
+            document.getElementById('student-quiz-view').innerHTML = `
+                <p style="font-weight: bold; margin: 4px 0;">🏆 ${quiz.q}</p>
+                <input type='text' id='quiz-user-ans' placeholder='התשובה שלך...' style='margin-bottom:4px; padding:4px;'>
+                <button onclick='submitQuizAns()' style='background:var(--primary); padding:4px;'>שלח תשובה</button>
+            `;
+        }
+
+        window.submitQuizAns = () => {
+            const val = document.getElementById('quiz-user-ans').value;
+            if (!val) return;
+            const isCorrect = val.trim().toLowerCase() === currentQuiz.ans.trim().toLowerCase();
+            if (isCorrect) { scoresMap[userName] = (scoresMap[userName] || 0) + 10; }
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'quiz_answer', payload: { student: userName, correct: isCorrect, scoreBoard: scoresMap } });
+                document.getElementById('student-quiz-view').innerHTML = `<p style="font-weight: bold; color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};">${isCorrect ? '🎉 תשובה נכונה (+10 נקודות)!' : '❌ תשובה שגויה, נסה שוב'}</p>`;
+            }
+        };
+
+        function updateLeaderboardUI(board) {
+            scoresMap = board || scoresMap;
+            const sorted = Object.entries(scoresMap).sort((a,b) => b[1] - a[1]);
+            const text = sorted.length ? sorted.map(([name, score], idx) => `#${idx+1} ${name} (${score} נק')`).join(' | ') : 'אין עדיין ניקוד';
+            document.getElementById('leaderboard-content').innerText = text;
+        }
+
+        window.teacherPingStudent = (targetUserId) => {
+            if (role !== 'teacher') return;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'attention_ping', payload: { targetUserId } });
+                alert('התראת תשומת לב נשלחה לתלמיד!');
+            }
+        };
+
+        function triggerAttentionEffect() {
+            playBeepSound();
+            const container = document.getElementById('main-app-container');
+            container.classList.add('attention-active');
+            setTimeout(() => { container.classList.remove('attention-active'); }, 5000);
+            alert('⚠️ המורה הקפיץ את המסך שלך! נא להתמקד בשיעור.');
+        }
+
+        window.startSharedTimer = () => {
+            const mins = parseInt(document.getElementById('timer-minutes').value) || 5;
+            let totalSecs = mins * 60;
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'timer_sync', payload: { totalSecs, action: 'start' } });
+            runTimerCountdown(totalSecs);
+        };
+        window.stopSharedTimer = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timer-display').innerText = "00:00";
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'timer_sync', payload: { action: 'stop' } });
+        };
+        function runTimerCountdown(secs) {
+            if (timerInterval) clearInterval(timerInterval);
+            let remaining = secs;
+            timerInterval = setInterval(() => {
+                if (remaining <= 0) { clearInterval(timerInterval); alert('הזמן נגמר! ⏰'); return; }
+                remaining--;
+                let m = Math.floor(remaining / 60), s = remaining % 60;
+                document.getElementById('timer-display').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        window.shareYouTubeVideo = () => {
+            const id = (document.getElementById('youtube-url-input').value.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/) || [])[2];
+            if (!id || id.length !== 11) return alert('קישור לא תקין');
+            applyYouTube(id);
+            if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'share_youtube', payload: { videoId: id } });
+        };
+        function applyYouTube(id) {
+            document.getElementById('shared-yt-frame').src = `https://www.youtube.com/embed/${id}`;
+            document.getElementById('youtube-player-container').classList.remove('hidden');
+        }
+
+        window.publishPoll = () => {
+            const q = document.getElementById('poll-question').value, o1 = document.getElementById('poll-opt1').value, o2 = document.getElementById('poll-opt2').value;
+            const isAnon = document.getElementById('anon-poll-check').checked;
+            if (!q || !o1 || !o2) return alert('נא למלא שאלות ותשובות');
+            pollData = { question: q, options: [o1, o2], votes: {}, isAnonymous: isAnon };
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'new_poll', payload: pollData });
+                document.getElementById('teacher-poll-creator').classList.add('hidden');
+                document.getElementById('poll-results-view').classList.remove('hidden');
+                updateChart();
+                alert(isAnon ? 'סקר אנונימי שוגר בהצלחה! 🕵️‍♂️' : 'סקר רגיל שוגר!');
+            }
+        };
+
+        function renderStudentPoll(poll) {
+            playBeepSound();
+            pollData = poll;
+            let h = `<p style="font-weight: bold; margin: 4px 0;">📊 ${poll.question} ${poll.isAnonymous ? '(אנונימי 🕵️‍♂️)' : ''}</p>`;
+            poll.options.forEach((opt, idx) => h += `<button onclick="votePoll(${idx})" style="padding:6px; margin-bottom:4px; background:var(--primary);">${opt}</button>`);
+            document.getElementById('student-poll-taker').innerHTML = h;
+            document.getElementById('poll-results-view').classList.add('hidden');
+        }
+
+        window.votePoll = idx => {
+            const voterKey = pollData.isAnonymous ? `anon_${Math.random()}` : userName;
+            if (activeChannel) {
+                activeChannel.send({ type: 'broadcast', event: 'poll_vote', payload: { user: voterKey, optionIndex: idx } });
+                document.getElementById('student-poll-taker').innerHTML = `<p style="color: var(--success); font-weight: bold;">הצבעתך נקלטה! ${pollData.isAnonymous ? '(נשמר באנונימיות)' : ''}</p>`;
+            }
+        };
+
+        function updateChart(votes = {}) {
+            const counts = pollData.options.map(() => 0);
+            Object.values(votes).forEach(i => { if (counts[i] !== undefined) counts[i]++; });
+            if (pollChart) pollChart.destroy();
+            pollChart = new Chart(document.getElementById('poll-chart').getContext('2d'), {
+                type: 'bar', data: { labels: pollData.options, datasets: [{ label: 'קולות', data: counts, backgroundColor: ['#4f46e5', '#10b981'] }] },
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        function initSpeech() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return;
+            recognition = new SpeechRec(); 
+            recognition.lang = document.getElementById('transcript-lang').value;
+            recognition.interimResults = true; 
+            recognition.continuous = true;
+            
+            recognition.onresult = e => {
+                let text = '';
+                for (let i = e.resultIndex; i < e.results.length; ++i) if (e.results[i].isFinal) text += e.results[i][0].transcript;
+                if (text) {
+                    transcriptText += `${userName}: ${text}\n`;
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${userName}:</b> ${text}</div>`; box.scrollTop = box.scrollHeight;
+                    if (activeChannel) activeChannel.send({ type: 'broadcast', event: 'transcript', payload: { user: userName, text } });
+                }
+            };
+            recognition.onend = () => { if (isTranscribing) try { recognition.start(); } catch(e){} };
+        }
+
+        window.changeTranscriptLang = (newLang) => {
+            if (recognition) {
+                const wasRunning = isTranscribing;
+                if (wasRunning) { recognition.stop(); isTranscribing = false; }
+                recognition.lang = newLang;
+                if (wasRunning) { recognition.start(); isTranscribing = true; }
+            }
+        };
+
+        window.toggleSpeechRecognition = () => {
+            if (!recognition) return;
+            const t = translations[currentLang];
+            const btn = document.getElementById('toggle-transcript-btn');
+            isTranscribing = !isTranscribing;
+            isTranscribing ? recognition.start() : recognition.stop();
+            btn.innerText = isTranscribing ? t.btn_transcript_stop : t.btn_transcript_start;
+            btn.style.background = isTranscribing ? 'var(--danger)' : 'var(--success)';
+        };
+
+        window.downloadTranscript = () => {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([transcriptText], { type: 'text/plain;charset=utf-8' }));
+            a.download = 'transcript.txt'; a.click();
+        };
+
+        let pdfDoc = null, pageNum = 1;
+        const pdfCanvas = document.getElementById('pdf-canvas'), pdfCtx = pdfCanvas.getContext('2d');
+        function initPdf() {
+            document.getElementById('pdf-upload').addEventListener('change', e => {
+                const f = e.target.files[0];
+                if (f && f.type === 'application/pdf') {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        pdfjsLib.getDocument(new Uint8Array(this.result)).promise.then(pdf => {
+                            pdfDoc = pdf; document.getElementById('pdf-controls').classList.remove('hidden'); renderPage(pageNum);
+                        });
+                    };
+                    reader.readAsArrayBuffer(f);
+                }
+            });
+        }
+        function renderPage(num) {
+            pdfDoc.getPage(num).then(page => {
+                const vp = page.getViewport({ scale: 1.0 });
+                pdfCanvas.height = vp.height; pdfCanvas.width = vp.width;
+                page.render({ canvasContext: pdfCtx, viewport: vp });
+            });
+            document.getElementById('pdf-page-info',).innerText = `עמוד ${num} / ${pdfDoc.numPages}`;
+        }
+        window.prevPage = () => { if (pageNum > 1) renderPage(--pageNum); };
+        window.nextPage = () => { if (pageNum < pdfDoc.numPages) renderPage(++pageNum); };
+
+        window.toggleAuthMode = () => {
+            isReg = !isReg;
+            const t = translations[currentLang];
+            document.getElementById('form-title').innerText = isReg ? t.auth_register_title : t.auth_login_title;
+            document.getElementById('register-fields').classList.toggle('hidden', !isReg);
+            document.getElementById('auth-action-btn').innerText = isReg ? t.btn_register : t.btn_login;
+            document.getElementById('forgot-password-link').style.display = isReg ? 'none' : 'inline';
+        };
+
+        window.handleAuthSubmit = async () => {
+            const email = document.getElementById('email').value, password = document.getElementById('password').value;
+            if (!email || !password) return alert('נא למלא שדות');
+            if (isReg) {
+                const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('full_name').value, role: document.getElementById('role').value } } });
+                if (error) return alert(error.message);
+                alert('נרשמת בהצלחה!'); toggleAuthMode();
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert(error.message);
+                checkUserSession();
+            }
+        };
+
+        window.handleForgotPassword = async () => {
+            const email = document.getElementById('email').value;
+            if (!email) return alert('הזן אימייל');
+            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            if (error) alert(error.message); else alert('הוראות איפוס נשלחו!');
+        };
+
+        window.handleUpdatePassword = async () => {
+            const p = document.getElementById('new-password').value;
+            if (!p || p.length < 6) return alert('סיסמה קצרה מדי');
+            const { error } = await supabase.auth.updateUser({ password: p });
+            if (error) alert(error.message); else { alert('הסיסמה עודכנה!'); window.location.hash = ''; checkUserSession(); }
+        };
+
+        async function checkUserSession() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { showSec('auth-section'); return; }
+            userId = user.id;
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (!profile) return;
+            role = profile.role; userName = profile.full_name;
+            const t = translations[currentLang];
+            document.getElementById('welcome-user').innerText = `${t.welcome_prefix}, ${userName} (${role === 'teacher' ? 'מורה' : 'תלמיד'})`;
+            document.getElementById('teacher-panel').classList.toggle('hidden', role !== 'teacher');
+            showSec('dashboard-section'); loadRooms();
+        }
+        window.logout = async () => { await supabase.auth.signOut(); window.location.reload(); };
+
+        async function fetchRates() {
+            try {
+                const d = await (await fetch('https://api.exchangerate-api.com/v4/latest/ILS')).json();
+                document.getElementById('currency-rates').innerHTML = `💵 ${(1/d.rates.USD).toFixed(2)} ₪ | 💶 ${(1/d.rates.EUR).toFixed(2)} ₪`;
+            } catch(e){}
+        }
+
+        window.createAndOpenRoom = async () => {
+            const title = document.getElementById('room-title-input').value;
+            if (!title) return alert('הכנס כותרת');
+            const { data, error } = await supabase.from('rooms').insert([{ title, teacher_id: userId, is_active: true }]).select().single();
+            if (error) return alert(error.message);
+            enterRoom(data.id, data.title);
+        };
+
+        async function loadRooms() {
+            const { data: rooms } = await supabase.from('rooms').select(`id, title, profiles:teacher_id (full_name)`).eq('is_active', true);
+            const list = document.getElementById('rooms-list');
+            if (!rooms || !rooms.length) { list.innerHTML = `<p style="color:var(--muted)">אין חדרים פתוחים.</p>`; return; }
+            list.innerHTML = rooms.map(r => `<div class="room-item"><span><b>${r.title}</b> (מורה: ${r.profiles?.full_name || ''})</span><button onclick="enterRoom('${r.id}', '${r.title}')" style="width:auto; padding:5px 12px; margin:0;">הכנס</button></div>`).join('');
+        }
+
+        window.enterRoom = async (id, title) => {
+            roomId = id;
+            loadPersonalNotes();
+            document.getElementById('current-room-title').innerText = title;
+            document.getElementById('teacher-poll-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('download-report-btn').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('mute-all-btn').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-timer-controls').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-breakout-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-assignment-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-quiz-creator').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-feedback-creator').classList.toggle('hidden', role !== 'teacher');
+            
+            document.getElementById('teacher-private-q-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('teacher-analytics-box').classList.toggle('hidden', role !== 'teacher');
+            document.getElementById('ai-tutor-container').classList.toggle('hidden', role === 'teacher');
+            document.getElementById('student-private-q-container').classList.toggle('hidden', role === 'teacher');
+            
+            document.body.classList.toggle('student-view', role === 'student');
+            document.body.classList.toggle('teacher-view', role === 'teacher');
+            showSec('room-section'); 
+            
+            setTimeout(() => {
+                canvas.width = canvas.offsetWidth || 600;
+                canvas.height = 200;
+            }, 100);
+
+            await initStream();
+
+            await supabase.from('room_participants').upsert([{ 
+                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: role === 'teacher' ? 'approved' : 'pending', weather_info: myWeatherInfo 
+            }], { onConflict: 'room_id, user_id' });
+            
+            fetchParticipants(id);
+
+            activeChannel = supabase.channel(`room_${id}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
+                    if (p.eventType === 'DELETE' && p.old?.user_id && p.old.user_id !== userId) {
+                        closeRtcPeer(p.old.user_id, true);
+                        participantMeta.delete(p.old.user_id);
+                    }
+                    fetchParticipants(id);
+                    if (role === 'student' && p.new && p.new.user_id === userId) {
+                        if (p.new.status === 'approved') {
+                            closeStudentWaitingRoom();
+                            sessionParticipants = sessionParticipants.map(x => x.user_id === userId ? { ...x, status: 'approved' } : x);
+                            if (!rtcReady) await startWebRTC();
+                            setTimeout(() => fetchParticipants(id), 150);
+                        } else if (p.new.status === 'rejected') {
+                            showStudentWaitingRoom('rejected');
+                        }
+                    }
+                    if (role === 'student' && p.new && p.new.user_id === userId) {
+                        if (mediaStream) {
+                            if (p.new.mic_active !== undefined) {
+                                const audioTrack = mediaStream.getAudioTracks()[0];
+                                if (audioTrack && audioTrack.enabled !== p.new.mic_active) {
+                                    audioTrack.enabled = p.new.mic_active;
+                                    document.getElementById('toggle-mic-btn').innerText = p.new.mic_active ? translations[currentLang].btn_mic_mute : translations[currentLang].btn_mic_unmute;
+                                }
+                            }
+                            if (p.new.cam_active !== undefined) {
+                                const videoTrack = mediaStream.getVideoTracks()[0];
+                                if (videoTrack && videoTrack.enabled !== p.new.cam_active) {
+                                    videoTrack.enabled = p.new.cam_active;
+                                    document.getElementById('toggle-cam-btn').innerText = p.new.cam_active ? translations[currentLang].btn_cam_off : translations[currentLang].btn_cam_on;
+                                }
+                            }
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'student_approval' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || m.userId !== userId) return;
+                    if (m.status === 'approved') {
+                        closeStudentWaitingRoom();
+                        sessionParticipants = sessionParticipants.map(x => x.user_id === userId ? { ...x, status: 'approved' } : x);
+                        if (!rtcReady) await startWebRTC();
+                        setTimeout(() => fetchParticipants(id), 150);
+                    } else if (m.status === 'rejected') {
+                        showStudentWaitingRoom('rejected');
+                    }
+                })
+                .on('broadcast', { event: 'teacher_media_control' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || m.userId !== userId) return;
+                    if (!mediaStream) return;
+                    if (m.control === 'mic' && typeof m.enabled === 'boolean') {
+                        const track = mediaStream.getAudioTracks()[0];
+                        if (track) {
+                            track.enabled = m.enabled;
+                            const btn = document.getElementById('toggle-mic-btn');
+                            if (btn) btn.innerText = m.enabled ? translations[currentLang].btn_mic_mute : translations[currentLang].btn_mic_unmute;
+                        }
+                    }
+                    if (m.control === 'cam' && typeof m.enabled === 'boolean') {
+                        const track = mediaStream.getVideoTracks()[0];
+                        if (track) {
+                            track.enabled = m.enabled;
+                            const btn = document.getElementById('toggle-cam-btn');
+                            if (btn) btn.innerText = m.enabled ? translations[currentLang].btn_cam_off : translations[currentLang].btn_cam_on;
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'teacher_media_control_all' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || !mediaStream) return;
+                    if (m.control === 'mic') {
+                        const track = mediaStream.getAudioTracks()[0];
+                        if (track) {
+                            track.enabled = false;
+                            const btn = document.getElementById('toggle-mic-btn');
+                            if (btn) btn.innerText = translations[currentLang].btn_mic_unmute;
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'participant_left' }, async p => {
+                    const m = p.payload || {};
+                    if (!m.userId || m.userId === userId) return;
+                    // Explicit leave notification: remove the participant's video immediately.
+                    closeRtcPeer(m.userId, true);
+                    rtcPeers.delete(m.userId);
+                    rtcIceQueues.delete(m.userId);
+                    rtcRemoteStreams.delete(m.userId);
+                    participantMeta.delete(m.userId);
+                    if (roomId) await fetchParticipants(roomId);
+                })
+                .on('broadcast', { event: 'participant_info' }, async p => {
+                    const m = p.payload;
+                    if (!m?.userId || m.userId === userId) return;
+                    participantMeta.set(m.userId, m);
+                    fetchParticipants(id);
+                    // Send our metadata back so a newly joined participant also learns about us.
+                    if (m.replyTo === userId) await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
+                })
+                .on('broadcast', { event: 'webrtc_signal' }, async p => {
+                    if (p.payload?.type === 'ready') await handleRtcReady(p.payload);
+                    else await handleWebRTCSignal(p.payload);
+                })
+                .on('broadcast', { event: 'draw_action' }, p => {
+                    const d = p.payload;
+                    ctx.lineWidth = d.mode === 'highlighter' ? 12 : (d.mode === 'eraser' ? 20 : 3);
+                    ctx.lineCap = d.mode === 'highlighter' ? 'square' : 'round';
+                    ctx.strokeStyle = d.mode === 'eraser' ? '#ffffff' : (d.mode === 'highlighter' ? d.color + '40' : d.color);
+                    ctx.lineTo(d.x, d.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(d.x, d.y);
+                })
+                .on('broadcast', { event: 'draw_shape' }, p => {
+                    const d = p.payload;
+                    ctx.strokeStyle = d.color; ctx.lineWidth = 2;
+                    if (d.mode === 'rect') ctx.strokeRect(d.x1, d.y1, d.x2 - d.x1, d.y2 - d.y1);
+                    else if (d.mode === 'circle') {
+                        let radius = Math.sqrt(Math.pow(d.x2 - d.x1, 2) + Math.pow(d.y2 - d.y1, 2));
+                        ctx.beginPath(); ctx.arc(d.x1, d.y1, radius, 0, 2 * Math.PI); ctx.stroke();
+                    }
+                })
+                .on('broadcast', { event: 'clear_board' }, () => {
+                    if (canvas.width > 0 && canvas.height > 0) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                })
+                .on('broadcast', { event: 'share_youtube' }, p => applyYouTube(p.payload.videoId))
+                .on('broadcast', { event: 'new_poll' }, p => renderStudentPoll(p.payload))
+                .on('broadcast', { event: 'poll_vote' }, p => { if (role === 'teacher') { pollData.votes[p.payload.user] = p.payload.optionIndex; updateChart(pollData.votes); } })
+                .on('broadcast', { event: 'timer_sync' }, p => { if (p.payload.action === 'start') runTimerCountdown(p.payload.totalSecs); else stopSharedTimer(); })
+                .on('broadcast', { event: 'breakout_launch' }, p => { playBeepSound(); alert(`נפתח חדר דיונים חדש: ${p.payload.groupName}`); })
+                .on('broadcast', { event: 'new_assignment' }, p => renderStudentAssignment(p.payload.text))
+                .on('broadcast', { event: 'assignment_submitted' }, p => { if (role === 'teacher') alert(`תלמיד ${p.payload.student} הגיש מטלה: "${p.payload.answer}"`); })
+                .on('broadcast', { event: 'launch_quiz' }, p => renderStudentQuiz(p.payload))
+                .on('broadcast', { event: 'quiz_answer' }, p => { updateLeaderboardUI(p.payload.scoreBoard); })
+                .on('broadcast', { event: 'attention_ping' }, p => { if (role === 'student' && p.payload.targetUserId === userId) triggerAttentionEffect(); })
+                .on('broadcast', { event: 'private_question' }, p => { if (role === 'teacher') renderTeacherPrivateQ(p.payload); })
+                .on('broadcast', { event: 'new_sticky_note' }, p => { stickyNotesList.push(p.payload); renderStickyNotes(); })
+                .on('broadcast', { event: 'launch_exit_ticket' }, () => renderStudentExitTicket())
+                .on('broadcast', { event: 'exit_ticket_submitted' }, p => {
+                    if (role === 'teacher') {
+                        const disp = document.getElementById('feedback-results-display');
+                        disp.innerHTML += `<div style="margin-top:4px;"><b>👤 ${p.payload.student}:</b> ציון ${p.payload.rating}/5 (${p.payload.comment || 'אין הערה'})</div>`;
+                    }
+                })
+                .on('broadcast', { event: 'transcript' }, p => {
+                    const box = document.getElementById('transcript-messages');
+                    box.innerHTML += `<div><b>${p.payload.user}:</b> ${p.payload.text}</div>`; box.scrollTop = box.scrollHeight;
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        participantMeta.set(userId, myParticipantMeta());
+                        await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
+                        if (role === 'teacher' || sessionParticipants.some(x => x.user_id === userId && x.status === 'approved')) await startWebRTC();
+                    }
+                });
+            vcxInitRoom(id);
+        };
+
+        async function initStream() {
+            if (mediaStream) return mediaStream;
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const localVideoEl = document.getElementById('local-video');
+                if (localVideoEl) {
+                    localVideoEl.srcObject = mediaStream;
+                    localVideoEl.muted = true;
+                    localVideoEl.autoplay = true;
+                    localVideoEl.playsInline = true;
+                }
+                const labelEl = document.getElementById('video-user-label');
+                if (labelEl) labelEl.innerText = userName + " (את/ה)";
+                return mediaStream;
+            } catch(e){
+                console.error('Camera access error:', e);
+                alert('לא ניתן לגשת למצלמה/מיקרופון. יש לאשר הרשאה בדפדפן.');
+                return null;
+            }
+        }
+
+        function getVideoElementForUser(uid) {
+            const tile = document.querySelector(`.video-tile[data-userid="${CSS.escape(uid)}"]`);
+            return tile ? tile.querySelector('video') : null;
+        }
+
+        function ensureVideoTile(uid, name, isMe = false, isTeacher = false) {
+            const grid = document.getElementById('video-grid-container');
+            let tile = grid.querySelector(`.video-tile[data-userid="${CSS.escape(uid)}"]`);
+
+            // הקובץ המקורי מכיל אריח local-video ללא data-userid.
+            // במקום ליצור אריח שני, נהפוך את האריח הקיים לאריח של המשתמש הנוכחי.
+            if (!tile && isMe) {
+                const oldLocal = grid.querySelector('.video-tile:not([data-userid]) #local-video');
+                if (oldLocal) {
+                    tile = oldLocal.closest('.video-tile');
+                    tile.dataset.userid = uid;
+                    tile.classList.remove('remote-video');
+                    const label = tile.querySelector('.video-user-label');
+                    if (label) { label.textContent = name + ' (את/ה)'; label.style.borderRightColor = getParticipantMeta(uid, name, 'student').color; }
+                }
+            }
+
+            if (!tile) {
+                tile = document.createElement('div');
+                tile.className = 'video-tile' + (isMe ? '' : ' remote-video') + (isTeacher ? ' teacher-video' : '');
+                tile.dataset.userid = uid;
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.playsInline = true;
+                video.setAttribute('playsinline', '');
+                if (isMe) {
+                    video.id = 'local-video';
+                    video.muted = true;
+                    video.srcObject = mediaStream;
+                }
+                const label = document.createElement('div');
+                label.className = 'video-user-label';
+                const meta = getParticipantMeta(uid, name, isTeacher ? 'teacher' : 'student');
+                label.textContent = name + (isMe ? ' (את/ה)' : (isTeacher ? ' (מורה)' : ''));
+                label.style.borderRightColor = meta.color;
+                label.style.boxShadow = `inset 0 0 0 1px ${meta.color}55`;
+                tile.append(video, label);
+                grid.appendChild(tile);
+            }
+            const video = tile.querySelector('video');
+            if (isMe) {
+                video.id = 'local-video';
+                video.muted = true;
+                if (mediaStream && video.srcObject !== mediaStream) video.srcObject = mediaStream;
+
+                // IMPORTANT: there must be exactly ONE local tile.
+                // Older versions could leave the original placeholder plus
+                // a second tile for the same user, especially on students.
+                const localTiles = Array.from(grid.querySelectorAll('.video-tile')).filter(t => {
+                    const v = t.querySelector('video');
+                    return t.dataset.userid === uid || v?.id === 'local-video' || (mediaStream && v?.srcObject === mediaStream);
+                });
+                // Keep the tile we just resolved and remove every duplicate.
+                localTiles.forEach(t => {
+                    if (t !== tile) t.remove();
+                });
+                tile.dataset.userid = uid;
+                tile.classList.remove('remote-video');
+                tile.classList.toggle('teacher-video', !!isTeacher);
+            } else {
+                tile.classList.toggle('teacher-video', !!isTeacher);
+            }
+
+            // תלמיד: כל אריח שמזוהה כמורה מקבל תמיד את מחלקת הווידאו הראשי.
+            if (isTeacher && role === 'student') {
+                tile.classList.add('teacher-video');
+                video.style.width = '100%';
+                video.style.height = window.innerWidth <= 700 ? '360px' : '500px';
+                video.style.minHeight = window.innerWidth <= 700 ? '360px' : '500px';
+                video.style.objectFit = 'cover';
+            }
+            return video;
+        }
+
+        function removeDuplicateLocalTiles() {
+            const grid = document.getElementById('video-grid-container');
+            if (!grid) return;
+            const all = Array.from(grid.querySelectorAll('.video-tile'));
+            const candidates = all.filter(tile => {
+                const v = tile.querySelector('video');
+                return tile.dataset.userid === userId ||
+                       v?.id === 'local-video' ||
+                       (mediaStream && v?.srcObject === mediaStream);
+            });
+            if (candidates.length <= 1) return;
+
+            // Prefer the tile with our real local video stream.
+            const keep = candidates.find(t => t.querySelector('video')?.srcObject === mediaStream)
+                      || candidates.find(t => t.dataset.userid === userId)
+                      || candidates[0];
+
+            candidates.forEach(t => {
+                if (t !== keep) t.remove();
+            });
+            keep.dataset.userid = userId;
+            const v = keep.querySelector('video');
+            if (v) {
+                v.id = 'local-video';
+                v.srcObject = mediaStream;
+                v.muted = true;
+                v.autoplay = true;
+                v.playsInline = true;
+            }
+        }
+
+        async function sendRtcSignal(targetUserId, type, data) {
+            if (!activeChannel || !targetUserId) return;
+            await activeChannel.send({
+                type: 'broadcast',
+                event: 'webrtc_signal',
+                payload: { fromUserId: userId, fromRole: role, targetUserId, type, data }
+            });
+        }
+
+        function closeRtcPeer(remoteUserId, removeTile = true) {
+            if (!remoteUserId || remoteUserId === userId) return;
+            const pc = rtcPeers.get(remoteUserId);
+            if (pc) {
+                try { pc.onicecandidate = null; pc.ontrack = null; pc.close(); } catch(e) {}
+                rtcPeers.delete(remoteUserId);
+            }
+
+            // When a participant leaves, do not leave a frozen/black camera tile
+            // on screen. Remove the entire remote tile, not only its MediaStream.
+            const grid = document.getElementById('video-grid-container');
+            const tile = grid?.querySelector(`.video-tile[data-userid=\"${CSS.escape(remoteUserId)}\"]`);
+            if (tile) {
+                const video = tile.querySelector('video');
+                if (video) {
+                    try { video.pause(); } catch(e) {}
+                    video.srcObject = null;
+                    video.removeAttribute('src');
+                }
+                if (removeTile) tile.remove();
+            } else {
+                const video = getVideoElementForUser(remoteUserId);
+                if (video) video.srcObject = null;
+            }
+
+            rtcIceQueues.delete(remoteUserId);
+            rtcRemoteStreams.delete(remoteUserId);
+        }
+
+        async function createRtcPeer(remoteUserId, remoteName, remoteRole, createOffer = false) {
+            if (!remoteUserId || remoteUserId === userId || !mediaStream) return null;
+
+            let pc = rtcPeers.get(remoteUserId);
+            if (pc) return pc;
+
+            pc = new RTCPeerConnection(rtcConfig);
+            rtcPeers.set(remoteUserId, pc);
+
+            mediaStream.getTracks().forEach(track => {
+                try { pc.addTrack(track, mediaStream); } catch(e) { console.warn('addTrack:', e); }
+            });
+
+            pc.onicecandidate = event => {
+                if (event.candidate) sendRtcSignal(remoteUserId, 'ice', event.candidate);
+            };
+
+            pc.ontrack = event => {
+                // יש דפדפנים שבהם ontrack מגיע ללא streams[0].
+                // לכן אנו מרכיבים MediaStream מרצועות האודיו/וידאו שהתקבלו.
+                let remoteStream = rtcRemoteStreams.get(remoteUserId);
+                if (!remoteStream) {
+                    remoteStream = new MediaStream();
+                    rtcRemoteStreams.set(remoteUserId, remoteStream);
+                }
+                if (event.track && !remoteStream.getTracks().some(t => t.id === event.track.id)) {
+                    remoteStream.addTrack(event.track);
+                }
+                const video = ensureVideoTile(remoteUserId, remoteName || 'משתתף', false, remoteRole === 'teacher');
+                if (video && video.srcObject !== remoteStream) {
+                    video.srcObject = remoteStream;
+                    video.muted = false;
+                    video.autoplay = true;
+                    video.playsInline = true;
+                    video.play().catch(() => {});
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+                    if (pc.connectionState === 'failed' && role === 'teacher') {
+                        closeRtcPeer(remoteUserId);
+                        setTimeout(() => createRtcOffer(remoteUserId, remoteName, remoteRole), 1000);
+                    }
+                }
+            };
+
+            if (createOffer) await createRtcOfferOnPeer(pc, remoteUserId);
+            return pc;
+        }
+
+        async function createRtcOfferOnPeer(pc, remoteUserId) {
+            const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+            await pc.setLocalDescription(offer);
+            await sendRtcSignal(remoteUserId, 'offer', pc.localDescription);
+        }
+
+        async function createRtcOffer(remoteUserId, remoteName, remoteRole) {
+            if (role !== 'teacher') return;
+            closeRtcPeer(remoteUserId);
+            const pc = await createRtcPeer(remoteUserId, remoteName, remoteRole, false);
+            if (pc) await createRtcOfferOnPeer(pc, remoteUserId);
+        }
+
+        async function handleWebRTCSignal(payload) {
+            if (!payload || payload.fromUserId === userId) return;
+            // READY is broadcast to the whole room; only the teacher handles it.
+            if (payload.type === 'ready') {
+                await handleRtcReady(payload);
+                return;
+            }
+            if (payload.targetUserId !== userId) return;
+            const remote = sessionParticipants.find(p => p.user_id === payload.fromUserId);
+            const remoteName = remote?.profiles?.full_name || 'משתתף';
+            const remoteRole = remote?.profiles?.role || payload.fromRole || 'student';
+
+            try {
+                if (payload.type === 'offer') {
+                    // תלמיד מקבל Offer מהמורה. המורה בלבד יוצר Offers.
+                    if (role !== 'student' || remoteRole !== 'teacher') return;
+                    closeRtcPeer(payload.fromUserId);
+                    const pc = await createRtcPeer(payload.fromUserId, remoteName, remoteRole, false);
+                    await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
+                    const queuedIce = rtcIceQueues.get(payload.fromUserId) || [];
+                    for (const candidate of queuedIce) {
+                        try { await pc.addIceCandidate(candidate); } catch(e) { console.warn('Queued ICE:', e); }
+                    }
+                    rtcIceQueues.delete(payload.fromUserId);
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    await sendRtcSignal(payload.fromUserId, 'answer', pc.localDescription);
+                } else if (payload.type === 'answer') {
+                    // המורה מקבל Answer מהתלמיד.
+                    if (role !== 'teacher') return;
+                    const pc = rtcPeers.get(payload.fromUserId);
+                    if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
+                } else if (payload.type === 'ice') {
+                    const pc = rtcPeers.get(payload.fromUserId);
+                    if (pc && payload.data) {
+                        const candidate = new RTCIceCandidate(payload.data);
+                        // ICE יכול להגיע לפני setRemoteDescription. שומרים אותו לתור.
+                        if (pc.remoteDescription && pc.remoteDescription.type) {
+                            try { await pc.addIceCandidate(candidate); } catch(e) { console.warn('ICE:', e); }
+                        } else {
+                            if (!rtcIceQueues.has(payload.fromUserId)) rtcIceQueues.set(payload.fromUserId, []);
+                            rtcIceQueues.get(payload.fromUserId).push(candidate);
+                        }
+                    }
+                } else if (payload.type === 'bye') {
+                    // Participant explicitly left: immediately remove their video tile.
+                    closeRtcPeer(payload.fromUserId, true);
+                    // Refresh the participant list so the name/device entry disappears too.
+                    if (roomId) fetchParticipants(roomId);
+                }
+            } catch (e) {
+                console.error('WebRTC signaling error:', e);
+            }
+        }
+
+        async function startWebRTC() {
+            if (!activeChannel || !mediaStream || rtcReady || rtcStarting) return;
+            rtcStarting = true;
+            try {
+                rtcReady = true;
+                // התלמיד מודיע למורה שהוא מוכן לקבל Offer.
+                // המורה יכול גם לשלוח Offers מחדש כאשר תלמיד מופיע ברשימת המשתתפים.
+                await activeChannel.send({
+                    type: 'broadcast',
+                    event: 'webrtc_signal',
+                    payload: { fromUserId: userId, fromRole: role, targetUserId: null, type: 'ready', data: { ...myParticipantMeta() } }
+                });
+
+                if (role === 'teacher') {
+                    const approved = sessionParticipants.filter(p => p.status === 'approved' && p.user_id !== userId && p.profiles?.role === 'student');
+                    for (const p of approved) {
+                        await createRtcOffer(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                    }
+                }
+            } finally {
+                rtcStarting = false;
+            }
+        }
+
+        async function handleRtcReady(payload) {
+            if (role !== 'teacher' || !payload?.data?.userId || payload.data.userId === userId) return;
+            participantMeta.set(payload.data.userId, payload.data);
+            const student = sessionParticipants.find(p => p.user_id === payload.data.userId);
+            // The participant row may arrive a moment after the READY broadcast.
+            // In that case, still create the peer; the database status is only a UI gate.
+            if (student && student.status === 'approved') {
+                await createRtcOffer(
+                    payload.data.userId,
+                    payload.data.userName || student?.profiles?.full_name || 'תלמיד',
+                    'student'
+                );
+            }
+        }
+
+        window.approveStudent = async (targetUserId) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error(error); alert('לא ניתן לאשר את התלמיד. בדוק הרשאות Supabase.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type: 'broadcast', event: 'student_approval', payload: { userId: targetUserId, status: 'approved' } });
+            }
+            await fetchParticipants(roomId);
+        };
+
+        window.rejectStudent = async (targetUserId) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants').update({ status: 'rejected' }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error(error); alert('לא ניתן לדחות את התלמיד. בדוק הרשאות Supabase.'); return; }
+            await fetchParticipants(roomId);
+        };
+
+        window.teacherToggleMic = async (targetUserId, newMicState) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ mic_active: !!newMicState })
+                .eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error('teacherToggleMic:', error); alert('לא ניתן לשנות את המיקרופון של התלמיד.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control', payload:{ userId:targetUserId, control:'mic', enabled:!!newMicState } });
+            }
+            await fetchParticipants(roomId);
+        };
+
+        window.teacherToggleCam = async (targetUserId, newCamState) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ cam_active: !!newCamState })
+                .eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error('teacherToggleCam:', error); alert('לא ניתן לשנות את המצלמה של התלמיד.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control', payload:{ userId:targetUserId, control:'cam', enabled:!!newCamState } });
+            }
+            await fetchParticipants(roomId);
+        };
+
+        window.teacherMuteAll = async () => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ mic_active: false }).eq('room_id', roomId).neq('user_id', userId);
+            if (error) { console.error('teacherMuteAll:', error); alert('לא ניתן להשתיק את התלמידים.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control_all', payload:{ control:'mic', enabled:false } });
+            }
+            await fetchParticipants(roomId);
+            alert('כל התלמידים הושתקו בהצלחה 🔇');
+        };
+
+        window.toggleRaiseHand = async () => {
+            handRaised = !handRaised;
+            if (handRaised && role === 'teacher') playBeepSound();
+            const t = translations[currentLang];
+            const btn = document.getElementById('raise-hand-btn');
+            btn.style.background = handRaised ? 'var(--danger)' : 'var(--warning)';
+            btn.innerText = handRaised ? t.btn_lower_hand : t.btn_raise_hand;
+            await supabase.from('room_participants').update({ hand_raised: handRaised }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyCamera = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getVideoTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-cam-btn').innerText = t.enabled ? tr.btn_cam_off : tr.btn_cam_on;
+            await supabase.from('room_participants').update({ cam_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        window.toggleMyMicrophone = async () => {
+            if (!mediaStream) return;
+            const t = mediaStream.getAudioTracks()[0]; t.enabled = !t.enabled;
+            const tr = translations[currentLang];
+            document.getElementById('toggle-mic-btn').innerText = t.enabled ? tr.btn_mic_mute : tr.btn_mic_unmute;
+            await supabase.from('room_participants').update({ mic_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
+        };
+
+        function closeStudentWaitingRoom() {
+            const waiting = document.getElementById('student-waiting-room');
+            if (!waiting) return;
+            waiting.classList.add('hidden');
+            waiting.style.display = 'none';
+            waiting.setAttribute('aria-hidden', 'true');
+        }
+
+        function showStudentWaitingRoom(state = 'pending') {
+            const waiting = document.getElementById('student-waiting-room');
+            if (!waiting) return;
+            waiting.classList.remove('hidden');
+            waiting.style.display = '';
+            waiting.setAttribute('aria-hidden', 'false');
+            const h = waiting.querySelector('h3');
+            const st = document.getElementById('waiting-status');
+            if (state === 'rejected') {
+                if (h) h.textContent = 'הכניסה לחדר נדחתה';
+                if (st) { st.textContent = 'המורה דחה את בקשת הכניסה.'; st.style.color = 'var(--danger)'; }
+            } else {
+                if (h) h.textContent = 'ממתין לאישור המורה';
+                if (st) { st.textContent = 'ממתין לאישור...'; st.style.color = 'var(--warning)'; }
+            }
+        }
+
+        async function fetchParticipants(id) {
+            const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
+            if (!data) return;
+            sessionParticipants = data;
+            data.forEach(p => { if (!participantMeta.has(p.user_id)) participantMeta.set(p.user_id, { userId:p.user_id, userName:p.profiles?.full_name || 'משתמש', role:p.profiles?.role || 'student', color:participantColor(p.user_id), os:'לא ידוע', browser:'לא ידוע' }); });
+            participantMeta.set(userId, myParticipantMeta());
+            const approved = data.filter(p => p.status === 'approved');
+            const pending = data.filter(p => p.status === 'pending');
+            const visible = role === 'teacher'
+                ? approved
+                : approved.filter(p => p.user_id === userId || p.profiles?.role === 'teacher');
+
+            const waiting = document.getElementById('student-waiting-room');
+            if (waiting) {
+                const meRow = data.find(p => p.user_id === userId);
+                const isPending = role === 'student' && meRow?.status === 'pending';
+                const isRejected = role === 'student' && meRow?.status === 'rejected';
+                const isApproved = role === 'student' && meRow?.status === 'approved';
+                if (isApproved) closeStudentWaitingRoom();
+                else if (isRejected) showStudentWaitingRoom('rejected');
+                else if (isPending) showStudentWaitingRoom('pending');
+                else if (role === 'student') closeStudentWaitingRoom();
+            }
+
+            const gridContainer = document.getElementById('video-grid-container');
+            const wantedIds = new Set(visible.map(p => p.user_id));
+
+            // Create/update ONLY our local tile here. Remote tiles are created only
+            // when an actual WebRTC MediaStream arrives (ontrack). This prevents
+            // black duplicate tiles for participants who have not connected yet.
+            const me = visible.find(p => p.user_id === userId);
+            if (me) {
+                ensureVideoTile(me.user_id, me.profiles?.full_name || userName || 'משתמש', true, me.profiles?.role === 'teacher');
+                removeDuplicateLocalTiles();
+            }
+
+            Array.from(gridContainer.querySelectorAll('.video-tile[data-userid]')).forEach(tile => {
+                if (!wantedIds.has(tile.dataset.userid)) {
+                    const uid = tile.dataset.userid;
+                    if (uid !== userId) closeRtcPeer(uid);
+                    tile.remove();
+                }
+            });
+
+            const localVidEl = document.getElementById('local-video');
+            if (localVidEl && mediaStream && localVidEl.srcObject !== mediaStream) {
+                localVidEl.srcObject = mediaStream;
+                localVidEl.muted = true;
+            }
+
+            document.getElementById('participants-list').innerHTML = (role === 'teacher' ? pending.map(p => {
+                const meta = getParticipantMeta(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                const displayName = escapeHtml(p.profiles?.full_name || meta.userName || 'תלמיד');
+                return `<div class="participant-card" style="border-right:4px solid var(--warning);background:rgba(245,158,11,.08);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><b>⏳ 👤 ${displayName}</b><div class="participant-device"><span>💻 ${escapeHtml(meta.os)}</span><span>🌐 ${escapeHtml(meta.browser)}</span></div></div><span>ממתין לאישור</span></div>
+                    <div style="display:flex;gap:5px;justify-content:flex-end;margin-top:5px;"><button onclick="approveStudent('${p.user_id}')" style="width:auto;padding:4px 10px;background:var(--success);margin:0;">✅ אשר</button><button onclick="rejectStudent('${p.user_id}')" style="width:auto;padding:4px 10px;background:var(--danger);margin:0;">❌ דחה</button></div>
+                </div>`;
+            }).join('') : '') + approved.map(p => {
+                const meta = getParticipantMeta(p.user_id, p.profiles?.full_name || 'משתמש', p.profiles?.role || 'student');
+                const displayName = escapeHtml(p.profiles?.full_name || meta.userName || 'משתמש');
+                return `
+                <div class="participant-card" style="flex-direction: column; align-items: stretch; gap: 4px; border-right: 4px solid ${meta.color};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; flex-direction:column; align-items:flex-start; gap: 2px; min-width:0;">
+                            <div class="participant-name-color"><span class="participant-color-dot" style="background:${meta.color}"></span><b>👤 ${displayName}</b> ${p.hand_raised ? '🙋‍♂️' : ''}</div>
+                            <div class="participant-device"><span>💻 ${escapeHtml(meta.os)}</span><span>🌐 ${escapeHtml(meta.browser)}</span></div>
+                            <span class="weather-badge">${p.weather_info || '🌤️ ---'}</span>
+                        </div>
+                        <span style="font-size: 11px; color: var(--muted);">${p.cam_active ? '📷' : '📷❌'} | ${p.mic_active ? '🎤' : '🎤❌'}</span>
+                    </div>
+                    ${role === 'teacher' && p.user_id !== userId ? `
+                        <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
+                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? '🔇 השתק' : '🎤 הפעל'}</button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? '📷 כבה' : '📹 הפעל'}</button>
+                            <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;">הקפץ ⚡</button><button onclick="vcxGradeStudent('${p.user_id}','${displayName.replace("'","\'")}')" style="width:auto;padding:2px 8px;font-size:11px;background:var(--primary);margin:0;color:#fff;">📊 ציון</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `; }).join('');
+
+            // Apply the participant color to existing remote/local video labels.
+            approved.forEach(p => {
+                const tile = document.querySelector(`.video-tile[data-userid="${CSS.escape(p.user_id)}"]`);
+                const label = tile?.querySelector('.video-user-label');
+                if (label) label.style.borderRightColor = getParticipantMeta(p.user_id, p.profiles?.full_name, p.profiles?.role).color;
+            });
+
+            if (role === 'teacher') {
+                updateAnalyticsChart();
+                // אם תלמיד נכנס אחרי המורה, ננסה לפתוח אליו חיבור.
+                if (rtcReady) {
+                    for (const p of approved.filter(x => x.profiles?.role === 'student' && x.user_id !== userId)) {
+                        if (!rtcPeers.has(p.user_id)) createRtcOffer(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                    }
+                }
+            }
+        }
+
+        window.startScreenShare = async () => {
+            try {
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                const screenTrack = displayStream.getVideoTracks()[0];
+                const localVideo = document.getElementById('local-video');
+                if (localVideo) localVideo.srcObject = displayStream;
+                for (const pc of rtcPeers.values()) {
+                    const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+                    if (sender) await sender.replaceTrack(screenTrack);
+                }
+                screenTrack.onended = async () => {
+                    const cameraTrack = mediaStream?.getVideoTracks()[0];
+                    if (cameraTrack) {
+                        if (localVideo) localVideo.srcObject = mediaStream;
+                        for (const pc of rtcPeers.values()) {
+                            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+                            if (sender) await sender.replaceTrack(cameraTrack);
+                        }
+                    }
+                };
+            } catch(e) { console.warn('Screen share cancelled:', e); }
+        };
+        window.startRecording = () => {
+            const s = document.getElementById('local-video').srcObject; if (!s) return; chunks = [];
+            mediaRecorder = new MediaRecorder(s);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.onstop = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' })); a.download = 'lesson.webm'; a.click(); };
+            mediaRecorder.start(); document.getElementById('stop-rec-btn').classList.remove('hidden');
+        };
+        window.stopAndSaveRecording = () => { if (mediaRecorder) { mediaRecorder.stop(); document.getElementById('stop-rec-btn').classList.add('hidden'); } };
+
+        window.downloadAttendanceReport = () => {
+            let r = `===== Report =====\nRoom: ${document.getElementById('current-room-title').innerText}\n\n`;
+            sessionParticipants.forEach((p, i) => r += `${i+1}. ${p.profiles?.full_name || ''} - Weather: ${p.weather_info || 'N/A'} - Cam: ${p.cam_active ? 'On' : 'Off'} | Mic: ${p.mic_active ? 'On' : 'Off'}\n`);
+            r += `\n--- Transcript ---\n${transcriptText}`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/plain;charset=utf-8' }));
+            a.download = `report_${Date.now()}.txt`; a.click();
+        };
+
+        window.calculateMath = () => {
+            try { document.getElementById('calc-result').innerText = `= ${eval(document.getElementById('calc-input').value)}`; }
+            catch(e) { document.getElementById('calc-result').innerText = 'Error'; }
+        };
+
+        window.sendChatMessage = async () => {
+            const inp = document.getElementById('chat-input'); if (!inp.value.trim()) return;
+            const msg = inp.value.trim();
+            vcxAppendChat(userName, msg);
+            if (activeChannel) await activeChannel.send({type:'broadcast',event:'vcx_chat',payload:{userId,user:userName,text:msg,at:Date.now()}});
+            inp.value = '';
+        };
+
+        window.leaveRoom = async () => {
+            if (isTranscribing) toggleSpeechRecognition();
+            stopAmbientSound();
+
+            const leavingRoomId = roomId;
+            const leavingUserId = userId;
+            const channel = activeChannel;
+
+            // Tell every other participant first. This is the reliable UI cleanup path;
+            // database DELETE/realtime can be delayed or blocked by RLS policies.
+            if (channel && leavingUserId) {
+                try {
+                    await channel.send({
+                        type: 'broadcast',
+                        event: 'participant_left',
+                        payload: { userId: leavingUserId, roomId: leavingRoomId }
+                    });
+                } catch (e) { console.warn('participant_left broadcast:', e); }
+            }
+
+            // Close all local peer connections and remove remote tiles.
+            for (const remoteUserId of Array.from(rtcPeers.keys())) {
+                closeRtcPeer(remoteUserId, true);
+            }
+            rtcPeers.clear();
+            rtcIceQueues.clear();
+            rtcRemoteStreams.clear();
+            rtcReady = false;
+            rtcStarting = false;
+
+            // Stop camera/microphone tracks so the browser releases the devices.
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+                mediaStream = null;
+            }
+
+            // Remove our participant row while we are still connected to Realtime.
+            if (leavingRoomId && leavingUserId) {
+                try {
+                    await supabase.from('room_participants')
+                        .delete()
+                        .eq('room_id', leavingRoomId)
+                        .eq('user_id', leavingUserId);
+                } catch (e) { console.warn('participant delete:', e); }
+            }
+
+            if (channel) {
+                try { await supabase.removeChannel(channel); } catch(e) {}
+            }
+            activeChannel = null;
+            roomId = null;
+            sessionParticipants = [];
+            participantMeta.clear();
+
+            // Remove every non-local/remote video tile left by this room.
+            const grid = document.getElementById('video-grid-container');
+            if (grid) grid.querySelectorAll('.video-tile.remote-video').forEach(t => t.remove());
+
+            showSec('dashboard-section');
+            loadRooms();
+        };
+
+        // Best-effort cleanup if the user closes the tab/browser or navigates away.
+        window.addEventListener('pagehide', () => {
+            try {
+                if (activeChannel && userId) {
+                    activeChannel.send({
+                        type: 'broadcast', event: 'participant_left',
+                        payload: { userId, roomId }
+                    });
+                }
+            } catch (e) {}
+            if (mediaStream) mediaStream.getTracks().forEach(t => { try { t.stop(); } catch(e) {} });
+        });
+
+        function showSec(id) {
+            ['auth-section', 'reset-password-section', 'dashboard-section', 'room-section'].forEach(s => {
+                const el = document.getElementById(s); if (el) el.classList.add('hidden');
+            });
+            const t = document.getElementById(id); if (t) t.classList.remove('hidden');
+        }
+    
+        window.toggleFloatingFeatures = () => {
+            const bar = document.getElementById('floating-features-bar');
+            const toggle = document.getElementById('floating-features-toggle');
+            if (!bar || !toggle) return;
+            const hidden = bar.classList.toggle('hidden');
+            toggle.style.display = hidden ? 'block' : 'none';
+        };
+        window.floatingGo = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+        };
+        window.floatingFindTool = (term) => {
+            const boxes = [...document.querySelectorAll('#room-section .tool-box')];
+            const box = boxes.find(b => (b.innerText || '').toLowerCase().includes(term.toLowerCase()));
+            if (box) box.scrollIntoView({behavior:'smooth', block:'center'});
+        };
+        function updateFloatingBarVisibility() {
+            const room = document.getElementById('room-section');
+            const bar = document.getElementById('floating-features-bar');
+            const toggle = document.getElementById('floating-features-toggle');
+            if (!room || !bar || !toggle) return;
+            const inRoom = !room.classList.contains('hidden');
+            if (inRoom) {
+                bar.classList.remove('hidden');
+                toggle.style.display = 'none';
+            } else {
+                bar.classList.add('hidden');
+                toggle.style.display = 'none';
+            }
+        }
+        // ===== Virtual Classroom X: complete feature layer =====
+        let vcxRoomStartedAt = 0;
+        let vcxQuestions = [];
+        let vcxGrades = {};
+        let vcxNotifications = JSON.parse(localStorage.getItem('vcx_notifications') || '[]');
+        let vcxFileCache = [];
+
+        function vcxEsc(v){ const d=document.createElement('div'); d.textContent=v??''; return d.innerHTML; }
+        function vcxNotify(text){
+            vcxNotifications.unshift({text,at:new Date().toLocaleString('he-IL')});
+            vcxNotifications=vcxNotifications.slice(0,30); localStorage.setItem('vcx_notifications',JSON.stringify(vcxNotifications));
+            vcxRenderNotifications();
+            if ('Notification' in window && Notification.permission==='granted') try{new Notification('כיתה וירטואלית',{body:text})}catch(e){}
+        }
+        function vcxRenderNotifications(){
+            const el=document.getElementById('vcx-notifications'); if(!el)return;
+            el.innerHTML=vcxNotifications.length?vcxNotifications.slice(0,8).map(n=>`<div class="vcx-item">🔔 ${vcxEsc(n.text)}<div style="font-size:10px;color:var(--muted)">${vcxEsc(n.at)}</div></div>`).join(''):'אין התראות חדשות.';
+            const st=document.getElementById('vcx-stat-notify');if(st)st.textContent=vcxNotifications.length;
+        }
+        window.vcxNotifyClass=async()=>{
+            if(role!=='teacher'||!activeChannel)return alert('רק המורה יכול לשלוח הודעה לכיתה.');
+            const text=prompt('כתוב הודעה לכל הכיתה:'); if(!text?.trim())return;
+            await activeChannel.send({type:'broadcast',event:'vcx_notification',payload:{text:text.trim(),from:userName}});
+            vcxNotify(`נשלחה הודעה לכיתה: ${text.trim()}`);
+        };
+        window.vcxOpenQ=()=>{
+            const q=prompt(role==='teacher'?'שאלה/הודעה לפתיחת דיון (אופציונלי):':'כתוב שאלה למורה:');
+            if(!q?.trim())return;
+            if(role==='student'){ activeChannel?.send({type:'broadcast',event:'vcx_question',payload:{id:crypto.randomUUID(),userId,user:userName,text:q.trim(),at:Date.now()}}); vcxNotify('השאלה נשלחה למורה.'); }
+            else { vcxQuestions.push({id:crypto.randomUUID(),userId,user:userName,text:q.trim(),at:Date.now()}); vcxRenderQuestions(); }
+        };
+        function vcxRenderQuestions(){
+            const el=document.getElementById('vcx-q-list');if(!el)return;
+            el.innerHTML=vcxQuestions.length?vcxQuestions.map(q=>`<div class="vcx-item"><b>❓ ${vcxEsc(q.user)}</b><br>${vcxEsc(q.text)}<div class="vcx-row" style="margin-top:5px"><button onclick="vcxAnswerQ('${q.id}')">💬 ענה</button><button onclick="vcxRemoveQ('${q.id}')">✓ טופל</button></div></div>`).join(''):'אין שאלות.';
+        }
+        window.vcxAnswerQ=async(id)=>{const q=vcxQuestions.find(x=>x.id===id);if(!q)return;const a=prompt('תשובת המורה:');if(!a?.trim())return;await activeChannel?.send({type:'broadcast',event:'vcx_question_answer',payload:{id,userId:q.userId,text:a.trim(),from:userName}});vcxRemoveQ(id)};
+        window.vcxRemoveQ=id=>{vcxQuestions=vcxQuestions.filter(q=>q.id!==id);vcxRenderQuestions()};
+        window.vcxToggleGradebook=()=>document.getElementById('vcx-grade-panel')?.classList.toggle('vcx-hidden');
+        function vcxRenderGrades(){
+            const el=document.getElementById('vcx-grade-list');if(!el)return;const arr=Object.entries(vcxGrades);
+            el.innerHTML=arr.length?arr.map(([uid,g])=>`<div class="vcx-item"><b>${vcxEsc(g.user)}</b> — ${g.grade}/100 ${g.note?`<small>${vcxEsc(g.note)}</small>`:''}</div>`).join(''):'אין ציונים עדיין.';
+        }
+        window.vcxGradeStudent=async(uid,name)=>{if(role!=='teacher')return;const grade=prompt(`ציון ל-${name} (0-100):`);if(grade===null)return;const n=Number(grade);if(!Number.isFinite(n)||n<0||n>100)return alert('ציון לא תקין');const note=prompt('הערה (אופציונלי):')||'';vcxGrades[uid]={user:name,grade:n,note};vcxRenderGrades();await activeChannel?.send({type:'broadcast',event:'vcx_grade',payload:{uid,user:name,grade:n,note}})};
+        function vcxAppendChat(user,text){const box=document.getElementById('chat-messages');if(!box)return;box.innerHTML+=`<div><b>${vcxEsc(user)}:</b> ${vcxEsc(text)}</div>`;box.scrollTop=box.scrollHeight}
+        async function vcxUploadFiles(){
+            const input=document.getElementById('vcx-file-input');if(!input?.files?.length)return alert('בחר קבצים.');
+            // Uses Supabase Storage bucket class-files when configured; otherwise creates a local downloadable copy.
+            for(const file of input.files){
+                const path=`${roomId}/${Date.now()}_${file.name.replace(/[^\\w.\\-א-ת]/g,'_')}`;
+                try{
+                    const {error}=await supabase.storage.from('class-files').upload(path,file,{upsert:false});
+                    if(error)throw error;
+                    const {data}=supabase.storage.from('class-files').getPublicUrl(path);
+                    vcxFileCache.push({name:file.name,url:data.publicUrl});
+                }catch(e){
+                    const url=URL.createObjectURL(file);vcxFileCache.push({name:file.name,url});
+                }
+                await activeChannel?.send({type:'broadcast',event:'vcx_file',payload:{name:file.name,url:vcxFileCache.at(-1).url}});
+            }
+            vcxRenderFiles();input.value='';
+        }
+        function vcxRenderFiles(){const el=document.getElementById('vcx-file-list');if(!el)return;el.innerHTML=vcxFileCache.length?vcxFileCache.map(f=>`<div class="vcx-item">📄 <a href="${vcxEsc(f.url)}" target="_blank" rel="noopener">${vcxEsc(f.name)}</a></div>`).join(''):'אין קבצים.'}
+        function vcxUpdateLiveStats(){
+            const approved=sessionParticipants.filter(p=>p.status==='approved');
+            const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+            set('vcx-live-count',approved.length);set('vcx-live-hands',approved.filter(p=>p.hand_raised).length);set('vcx-live-cams',approved.filter(p=>p.cam_active).length);set('vcx-live-mics',approved.filter(p=>p.mic_active).length);
+            set('vcx-stat-students',approved.filter(p=>p.profiles?.role==='student').length);set('vcx-stat-attendance',approved.length?Math.round(approved.filter(p=>p.profiles?.role==='student').length/Math.max(1,approved.length- (role==='teacher'?1:0))*100)+'%':'0%');
+            const hands=document.getElementById('vcx-hand-queue');
+            if(hands){const raised=approved.filter(p=>p.hand_raised);hands.innerHTML=raised.length?raised.map(p=>`<div class="vcx-item vcx-hand">🙋 ${vcxEsc(p.profiles?.full_name||'תלמיד')} ${role==='teacher'?`<button onclick="vcxLowerHand('${p.user_id}')" style="width:auto;padding:3px 7px;float:left">הורד יד</button>`:''}</div>`).join(''):'אין ידיים מורמות.'}
+        }
+        window.vcxLowerHand=async(uid)=>{if(role!=='teacher'||!roomId)return;await supabase.from('room_participants').update({hand_raised:false}).eq('room_id',roomId).eq('user_id',uid);await activeChannel?.send({type:'broadcast',event:'vcx_hand_clear',payload:{uid}});fetchParticipants(roomId)};
+        async function vcxInitRoom(id){
+            vcxRoomStartedAt=Date.now();vcxQuestions=[];vcxGrades={};vcxFileCache=[];vcxRenderQuestions();vcxRenderGrades();vcxRenderFiles();vcxUpdateLiveStats();
+            if('Notification' in window && Notification.permission==='default'){try{Notification.requestPermission()}catch(e){}}
+            setInterval(()=>{if(roomId===id)vcxUpdateLiveStats()},2000);
+            // Reuse the existing room channel for all new live features.
+            if(activeChannel){
+                activeChannel.on('broadcast',{event:'vcx_chat'},p=>{if(p.payload?.userId!==userId)vcxAppendChat(p.payload.user,p.payload.text)});
+                activeChannel.on('broadcast',{event:'vcx_notification'},p=>{if(p.payload?.from!==userName)vcxNotify(p.payload?.text||'התקבלה הודעה חדשה')});
+                activeChannel.on('broadcast',{event:'vcx_question'},p=>{if(role==='teacher'&&p.payload?.userId!==userId){vcxQuestions.push(p.payload);vcxRenderQuestions();playBeepSound()}});
+                activeChannel.on('broadcast',{event:'vcx_question_answer'},p=>{if(p.payload?.userId===userId){vcxNotify(`תשובת המורה: ${p.payload.text}`);alert(`💬 תשובת המורה:
+${p.payload.text}`)}});
+                activeChannel.on('broadcast',{event:'vcx_grade'},p=>{vcxGrades[p.payload.uid]={user:p.payload.user,grade:p.payload.grade,note:p.payload.note};vcxRenderGrades();if(p.payload.uid===userId)vcxNotify(`קיבלת ציון ${p.payload.grade}`)});
+                activeChannel.on('broadcast',{event:'vcx_file'},p=>{if(p.payload?.name){vcxFileCache.push(p.payload);vcxRenderFiles();vcxNotify(`קובץ חדש: ${p.payload.name}`)}});
+                activeChannel.on('broadcast',{event:'vcx_hand_clear'},p=>{if(p.payload?.uid)vcxUpdateLiveStats()});
+            }
+            vcxNotify('נכנסת לשיעור בהצלחה.');
+        }
+        vcxRenderNotifications();
+
+        const _floatingObserver = new MutationObserver(updateFloatingBarVisibility);
+        document.addEventListener('DOMContentLoaded', () => {
+            const room = document.getElementById('room-section');
+            if (room) _floatingObserver.observe(room, {attributes:true, attributeFilter:['class']});
+            updateFloatingBarVisibility();
+        });
+
+</script>
+
+    <!-- סרגל פיצ'רים צף: נשאר נגיש גם בזמן גלילה -->
+    <button id="floating-features-toggle" onclick="toggleFloatingFeatures()" title="כלי כיתה">🧰</button>
+    <div id="floating-features-bar" class="hidden" aria-label="כלי כיתה צפים">
+        <button class="floating-feature-btn" onclick="floatingGo('video-grid-container')">🎥<span class="floating-feature-label">וידאו</span></button>
+        <button class="floating-feature-btn" onclick="toggleMyCamera()">📷<span class="floating-feature-label">מצלמה</span></button>
+        <button class="floating-feature-btn" onclick="toggleMyMicrophone()">🎤<span class="floating-feature-label">מיקרופון</span></button>
+        <button class="floating-feature-btn" onclick="startScreenShare()">🖥️<span class="floating-feature-label">מסך</span></button>
+        <button class="floating-feature-btn success" onclick="startRecording()">🔴<span class="floating-feature-label">הקלטה</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('YouTube')">📺<span class="floating-feature-label">YouTube</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('לוח לבן')">✏️<span class="floating-feature-label">לוח</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('PDF')">📄<span class="floating-feature-label">PDF</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('משתתפים')">👥<span class="floating-feature-label">משתתפים</span></button>
+        <button class="floating-feature-btn" onclick="floatingFindTool('צ׳אט')">💬<span class="floating-feature-label">צ׳אט</span></button>
+        <button class="floating-feature-btn" onclick="toggleFocusMode()">🎯<span class="floating-feature-label">פוקוס</span></button>
+        <button class="floating-feature-btn" onclick="toggleRaiseHand()">🙋<span class="floating-feature-label">הרמת יד</span></button>
+        <button class="floating-feature-btn danger" onclick="leaveRoom()">🚪<span class="floating-feature-label">יציאה</span></button>
+        <button class="floating-feature-btn" onclick="toggleFloatingFeatures()">✕<span class="floating-feature-label">סגור</span></button>
+    </div>
+
+<script id="ceramic-v61-js">
+(function(){
+  const board=document.getElementById('whiteboard-canvas'); if(!board)return;
+  let history=[],future=[],grid=false;
+  function snap(){try{return board.toDataURL('image/png')}catch(e){return null}}
+  function save(){const x=snap();if(x){history.push(x);if(history.length>30)history.shift();future=[]}}
+  window.cerSetTool=function(m){if(window.changeWbMode)window.changeWbMode(m);document.querySelectorAll('.cer-tool[data-wb]').forEach(b=>b.classList.toggle('active',b.dataset.wb===m));document.getElementById('wb-tool-mode').value=m;};
+  window.cerColor=function(c){const el=document.getElementById('brush-color');if(el)el.value=c};
+  window.cerSize=function(v){window.cerBrushSize=Number(v)||3};
+  window.cerGrid=function(){grid=!grid;board.style.backgroundImage=grid?'linear-gradient(rgba(82,123,134,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(82,123,134,.08) 1px,transparent 1px)':'none';board.style.backgroundSize='24px 24px';};
+  window.cerUndo=function(){if(!history.length)return;const cur=snap();if(cur)future.push(cur);const img=new Image();img.onload=()=>{ctx.clearRect(0,0,board.width,board.height);ctx.drawImage(img,0,0);};img.src=history.pop()};
+  window.cerRedo=function(){if(!future.length)return;const cur=snap();if(cur)history.push(cur);const img=new Image();img.onload=()=>{ctx.clearRect(0,0,board.width,board.height);ctx.drawImage(img,0,0);};img.src=future.pop()};
+  window.cerAddNote=function(){const text=prompt('כתוב טקסט לאריח הקרמי:');if(!text?.trim())return;const layer=document.getElementById('cer-note-layer');const n=document.createElement('div');n.className='cer-note';n.style.left=(20+Math.random()*55)+'%';n.style.top=(15+Math.random()*45)+'%';n.innerHTML='<b>✦ Ceramic Note</b>'+String(text).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));layer.appendChild(n);let drag=false,dx=0,dy=0;n.onpointerdown=e=>{drag=true;dx=e.clientX-n.offsetLeft;dy=e.clientY-n.offsetTop;n.setPointerCapture(e.pointerId)};n.onpointermove=e=>{if(drag){n.style.left=Math.max(0,e.clientX-dx)+'px';n.style.top=Math.max(0,e.clientY-dy)+'px'}};n.onpointerup=()=>drag=false;};
+  window.ceramicChatStyle=function(){document.querySelectorAll('#chat-messages>div').forEach((el,i)=>{el.classList.add('cer-chat-bubble');if(el.textContent?.includes((window.userName||'___')+':'))el.classList.add('cer-me');if(!el.dataset.cer){el.dataset.cer='1';el.innerHTML='<div class="cer-chat-meta">✦ '+el.querySelector('b')?.textContent.replace(':','')+'</div><div>'+el.textContent.replace(/^.*?:\s*/,'')+'</div>'}})};
+  const chat=document.getElementById('chat-messages');if(chat){new MutationObserver(()=>window.ceramicChatStyle()).observe(chat,{childList:true});}
+  const ctx=board.getContext('2d'); const oldMouse=board.onmousedown;
+  // Capture a snapshot before each new stroke without replacing the existing realtime drawing logic.
+  board.addEventListener('pointerdown',()=>save(),{capture:true});
+  board.addEventListener('pointerup',()=>setTimeout(()=>{window.ceramicChatStyle()},0),{capture:true});
+  window.cerBrushSize=3;
+})();
+</script></body>
+</html>
