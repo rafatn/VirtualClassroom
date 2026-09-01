@@ -1546,7 +1546,6 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
             fetchParticipants(id);
 
             activeChannel = supabase.channel(`room_${id}`)
-            window.vcxLiveChannel = activeChannel; window.vcxLiveUser = () => ({userId, userName, role, roomId});
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
                     if (p.eventType === 'DELETE' && p.old?.user_id && p.old.user_id !== userId) {
                         closeRtcPeer(p.old.user_id, true);
@@ -2332,7 +2331,7 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
             if (channel) {
                 try { await supabase.removeChannel(channel); } catch(e) {}
             }
-            activeChannel = null; window.vcxLiveChannel = null;
+            activeChannel = null;
             roomId = null;
             sessionParticipants = [];
             participantMeta.clear();
@@ -2513,14 +2512,6 @@ ${p.payload.text}`)}});
         <button class="floating-feature-btn" onclick="toggleFloatingFeatures()">✕<span class="floating-feature-label">סגור</span></button>
     </div>
 
-<style id="ceramic-v62-css">
-#ceramic-v62{position:fixed;left:18px;bottom:18px;z-index:9998;display:flex;flex-direction:column;gap:8px;direction:rtl}
-.c62-dock{display:flex;gap:7px;align-items:center;flex-wrap:wrap;max-width:min(560px,calc(100vw - 36px));padding:10px;border:1px solid rgba(255,255,255,.45);border-radius:22px;background:rgba(250,247,239,.92);backdrop-filter:blur(16px);box-shadow:0 12px 35px rgba(57,48,39,.16)}
-.c62-btn{border:1px solid rgba(130,110,85,.18);background:linear-gradient(145deg,#fffdf8,#eee7d8);color:#4d453c;border-radius:15px;padding:8px 11px;cursor:pointer;font-weight:700;box-shadow:inset 0 1px rgba(255,255,255,.9);transition:.18s transform,.18s box-shadow}.c62-btn:hover{transform:translateY(-2px);box-shadow:0 5px 13px rgba(70,55,40,.13)}
-.c62-reactions{display:none;gap:5px}.c62-reactions.show{display:flex}.c62-reactions button{font-size:20px;padding:5px 8px;border-radius:12px;border:0;background:#fffaf1;cursor:pointer}.c62-timer{display:none;min-width:170px;text-align:center;padding:9px 12px;border-radius:16px;background:#fffaf2;border:1px solid #e7dccb;font-weight:800;color:#4b433a}.c62-timer.show{display:block}.c62-time{font-variant-numeric:tabular-nums;font-size:20px}.c62-progress{height:5px;border-radius:9px;background:#e5ded2;overflow:hidden;margin-top:6px}.c62-progress i{display:block;height:100%;width:100%;background:#8d9d7a;transform-origin:right}.c62-toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(15px);opacity:0;pointer-events:none;background:rgba(63,56,48,.94);color:#fff;padding:10px 15px;border-radius:16px;transition:.25s;z-index:10000}.c62-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.c62-reaction-float{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);font-size:44px;z-index:9999;pointer-events:none;animation:c62float 1.25s ease-out forwards}@keyframes c62float{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-170px) scale(1.4) rotate(8deg)}}
-body.c62-focus #video-grid-container~*{opacity:.28} body.c62-focus #video-grid-container{transform:scale(1.01);box-shadow:0 0 0 3px rgba(141,157,122,.28),0 20px 60px rgba(0,0,0,.18)}
-@media(max-width:600px){#ceramic-v62{left:8px;right:8px;bottom:8px}.c62-dock{max-width:none;justify-content:center}.c62-btn{padding:7px 9px}.c62-timer{min-width:145px}}
-</style>
 <script id="ceramic-v61-js">
 (function(){
   const board=document.getElementById('whiteboard-canvas'); if(!board)return;
@@ -2542,40 +2533,5 @@ body.c62-focus #video-grid-container~*{opacity:.28} body.c62-focus #video-grid-c
   board.addEventListener('pointerup',()=>setTimeout(()=>{window.ceramicChatStyle()},0),{capture:true});
   window.cerBrushSize=3;
 })();
-</script>
-<div id="ceramic-v62" aria-label="כלי כיתה חכמים">
-  <div id="c62-timer" class="c62-timer"><div>⏱️ טיימר כיתה</div><div id="c62-time" class="c62-time">05:00</div><div class="c62-progress"><i id="c62-progress"></i></div></div>
-  <div id="c62-reactions" class="c62-reactions">
-    <button onclick="c62React('👏')">👏</button><button onclick="c62React('❤️')">❤️</button><button onclick="c62React('😂')">😂</button><button onclick="c62React('💡')">💡</button><button onclick="c62React('🔥')">🔥</button><button onclick="c62React('❓')">❓</button>
-  </div>
-  <div class="c62-dock">
-    <button class="c62-btn" onclick="c62ToggleReactions()">😊 תגובה</button>
-    <button class="c62-btn" onclick="c62ToggleFocus()">🎯 פוקוס</button>
-    <button class="c62-btn" onclick="c62QuickNote()">📝 פתק</button>
-    <button class="c62-btn" onclick="c62TimerPrompt()">⏱️ טיימר</button>
-    <button class="c62-btn" onclick="c62CopyRoom()">🔗 קישור</button>
-    <button class="c62-btn" onclick="c62Connection()">📶 מצב חיבור</button>
-  </div>
-</div>
-<div id="c62-toast" class="c62-toast"></div>
-<script id="ceramic-v62-js">
-(function(){
- let timerEnd=0,timerStart=0,timerTotal=0,timerInt=null;
- const toast=(t)=>{const e=document.getElementById('c62-toast');if(!e)return;e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)};
- window.c62ToggleReactions=()=>document.getElementById('c62-reactions')?.classList.toggle('show');
- window.c62ToggleFocus=()=>{document.body.classList.toggle('c62-focus');toast(document.body.classList.contains('c62-focus')?'מצב פוקוס הופעל':'מצב פוקוס בוטל')};
- window.c62QuickNote=()=>{const t=prompt('כתוב פתק מהיר:');if(!t?.trim())return;localStorage.setItem('c62_note_'+Date.now(),t.trim());toast('📝 הפתק נשמר בדפדפן');if(window.cerAddNote){try{window.cerAddNote()}catch(e){}}};
- window.c62CopyRoom=async()=>{const info=window.vcxLiveUser?.();const id=info?.roomId||new URL(location.href).searchParams.get('room');const url=id?`${location.origin}${location.pathname}?room=${encodeURIComponent(id)}`:location.href;try{await navigator.clipboard.writeText(url);toast('🔗 קישור החדר הועתק')}catch(e){prompt('העתק את הקישור:',url)}};
- window.c62Connection=()=>{const online=navigator.onLine;const c=navigator.connection;const down=c?.downlink;toast(online?`📶 מחובר${down?` · ${down}Mbps`:''}`:'⚠️ אין חיבור לאינטרנט')};
- window.c62React=async emoji=>{const f=document.createElement('div');f.className='c62-reaction-float';f.textContent=emoji;document.body.appendChild(f);setTimeout(()=>f.remove(),1300);const ch=window.vcxLiveChannel;if(ch)try{const u=window.vcxLiveUser?.()||{};await ch.send({type:'broadcast',event:'c62_reaction',payload:{emoji,userId:u.userId,userName:u.userName}})}catch(e){}};
- window.c62TimerPrompt=async()=>{let sec=prompt('משך הטיימר בשניות (למשל 300):','300');if(sec===null)return;sec=Math.max(5,Math.min(3600,Number(sec)||300));const u=window.vcxLiveUser?.();if(u?.role==='teacher'&&window.vcxLiveChannel){timerStart=Date.now();timerTotal=sec*1000;timerEnd=Date.now()+timerTotal;await window.vcxLiveChannel.send({type:'broadcast',event:'c62_timer',payload:{start:timerStart,end:timerEnd,total:timerTotal}});c62RenderTimer()}else{timerStart=Date.now();timerTotal=sec*1000;timerEnd=Date.now()+timerTotal;c62RenderTimer();toast('⏱️ הטיימר הופעל מקומית')}};
- function c62RenderTimer(){const box=document.getElementById('c62-timer');box?.classList.add('show');clearInterval(timerInt);timerInt=setInterval(()=>{const left=Math.max(0,timerEnd-Date.now());const s=Math.ceil(left/1000),m=Math.floor(s/60),r=s%60;document.getElementById('c62-time').textContent=`${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;const pct=timerTotal?left/timerTotal:0;document.getElementById('c62-progress').style.transform=`scaleX(${Math.max(0,pct)})`;if(!left){clearInterval(timerInt);toast('⏰ הזמן הסתיים')}} ,250)}
- window.addEventListener('online',()=>toast('🌐 החיבור חזר'));window.addEventListener('offline',()=>toast('⚠️ החיבור נותק'));
- document.addEventListener('DOMContentLoaded',()=>{const ch=window.vcxLiveChannel;if(ch){} });
- // poll bridge until the room channel exists, then attach listeners once
- let attached=false;const bridge=setInterval(()=>{const ch=window.vcxLiveChannel;if(!ch||attached)return;if(!ch.on)return;attached=true;ch.on('broadcast',{event:'c62_reaction'},p=>{if(p.payload?.userId!==window.vcxLiveUser?.()){} const f=document.createElement('div');f.className='c62-reaction-float';f.textContent=p.payload?.emoji||'✨';document.body.appendChild(f);setTimeout(()=>f.remove(),1300)});ch.on('broadcast',{event:'c62_timer'},p=>{if(p.payload){timerStart=p.payload.start;timerEnd=p.payload.end;timerTotal=p.payload.total;c62RenderTimer()}})},700);
- setTimeout(()=>clearInterval(bridge),20000);
-})();
-</script>
-</body>
+</script></body>
 </html>
