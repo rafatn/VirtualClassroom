@@ -241,6 +241,13 @@
                 </div>
             </div>
 
+            <div id="student-waiting-room" class="hidden" style="margin-bottom:12px;padding:22px;border:2px solid var(--warning);border-radius:14px;background:var(--card);text-align:center;box-shadow:0 8px 25px rgba(0,0,0,.12);">
+                <div style="font-size:42px;">⏳</div>
+                <h3 style="margin:8px 0;color:var(--primary);">ממתין לאישור המורה</h3>
+                <p style="margin:0;color:var(--muted);">המצלמה והמיקרופון מוכנים, אך לא תתחבר/י לשיעור עד שהמורה יאשר את הכניסה.</p>
+                <div id="waiting-status" style="margin-top:10px;font-weight:700;color:var(--warning);">ממתין לאישור...</div>
+            </div>
+
             <div class="grid-container">
                 <div>
                     <!-- רשת וידאו משתתפים (Grid) -->
@@ -1416,14 +1423,19 @@
             await initStream();
 
             await supabase.from('room_participants').upsert([{ 
-                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: 'approved', weather_info: myWeatherInfo 
+                room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: role === 'teacher' ? 'approved' : 'pending', weather_info: myWeatherInfo 
             }], { onConflict: 'room_id, user_id' });
             
             fetchParticipants(id);
 
             activeChannel = supabase.channel(`room_${id}`)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, p => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
                     fetchParticipants(id);
+                    if (role === 'student' && p.new && p.new.user_id === userId && p.new.status === 'approved' && rtcReady === false) {
+                        const waiting = document.getElementById('student-waiting-room');
+                        if (waiting) waiting.classList.add('hidden');
+                        await startWebRTC();
+                    }
                     if (role === 'student' && p.new && p.new.user_id === userId) {
                         if (mediaStream) {
                             if (p.new.mic_active !== undefined) {
@@ -1501,7 +1513,7 @@
                     if (status === 'SUBSCRIBED') {
                         participantMeta.set(userId, myParticipantMeta());
                         await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
-                        await startWebRTC();
+                        if (role === 'teacher' || sessionParticipants.some(x => x.user_id === userId && x.status === 'approved')) await startWebRTC();
                     }
                 });
         };
@@ -1804,7 +1816,7 @@
             const student = sessionParticipants.find(p => p.user_id === payload.data.userId);
             // The participant row may arrive a moment after the READY broadcast.
             // In that case, still create the peer; the database status is only a UI gate.
-            if (!student || student.status === 'approved') {
+            if (student && student.status === 'approved') {
                 await createRtcOffer(
                     payload.data.userId,
                     payload.data.userName || student?.profiles?.full_name || 'תלמיד',
@@ -1812,6 +1824,20 @@
                 );
             }
         }
+
+        window.approveStudent = async (targetUserId) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error(error); alert('לא ניתן לאשר את התלמיד. בדוק הרשאות Supabase.'); return; }
+            await fetchParticipants(roomId);
+        };
+
+        window.rejectStudent = async (targetUserId) => {
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants').update({ status: 'rejected' }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error(error); alert('לא ניתן לדחות את התלמיד. בדוק הרשאות Supabase.'); return; }
+            await fetchParticipants(roomId);
+        };
 
         window.teacherToggleMic = async (targetUserId, newMicState) => {
             if (role !== 'teacher') return;
@@ -1862,9 +1888,24 @@
             data.forEach(p => { if (!participantMeta.has(p.user_id)) participantMeta.set(p.user_id, { userId:p.user_id, userName:p.profiles?.full_name || 'משתמש', role:p.profiles?.role || 'student', color:participantColor(p.user_id), os:'לא ידוע', browser:'לא ידוע' }); });
             participantMeta.set(userId, myParticipantMeta());
             const approved = data.filter(p => p.status === 'approved');
+            const pending = data.filter(p => p.status === 'pending');
             const visible = role === 'teacher'
                 ? approved
                 : approved.filter(p => p.user_id === userId || p.profiles?.role === 'teacher');
+
+            const waiting = document.getElementById('student-waiting-room');
+            if (waiting) {
+                const meRow = data.find(p => p.user_id === userId);
+                const isPending = role === 'student' && meRow?.status === 'pending';
+                const isRejected = role === 'student' && meRow?.status === 'rejected';
+                waiting.classList.toggle('hidden', !isPending && !isRejected);
+                if (isRejected) {
+                    const h = waiting.querySelector('h3');
+                    const st = document.getElementById('waiting-status');
+                    if (h) h.textContent = 'הכניסה לחדר נדחתה';
+                    if (st) { st.textContent = 'המורה דחה את בקשת הכניסה.'; st.style.color='var(--danger)'; }
+                }
+            }
 
             const gridContainer = document.getElementById('video-grid-container');
             const wantedIds = new Set(visible.map(p => p.user_id));
@@ -1892,7 +1933,14 @@
                 localVidEl.muted = true;
             }
 
-            document.getElementById('participants-list').innerHTML = approved.map(p => {
+            document.getElementById('participants-list').innerHTML = (role === 'teacher' ? pending.map(p => {
+                const meta = getParticipantMeta(p.user_id, p.profiles?.full_name || 'תלמיד', 'student');
+                const displayName = escapeHtml(p.profiles?.full_name || meta.userName || 'תלמיד');
+                return `<div class="participant-card" style="border-right:4px solid var(--warning);background:rgba(245,158,11,.08);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><b>⏳ 👤 ${displayName}</b><div class="participant-device"><span>💻 ${escapeHtml(meta.os)}</span><span>🌐 ${escapeHtml(meta.browser)}</span></div></div><span>ממתין לאישור</span></div>
+                    <div style="display:flex;gap:5px;justify-content:flex-end;margin-top:5px;"><button onclick="approveStudent('${p.user_id}')" style="width:auto;padding:4px 10px;background:var(--success);margin:0;">✅ אשר</button><button onclick="rejectStudent('${p.user_id}')" style="width:auto;padding:4px 10px;background:var(--danger);margin:0;">❌ דחה</button></div>
+                </div>`;
+            }).join('') : '') + approved.map(p => {
                 const meta = getParticipantMeta(p.user_id, p.profiles?.full_name || 'משתמש', p.profiles?.role || 'student');
                 const displayName = escapeHtml(p.profiles?.full_name || meta.userName || 'משתמש');
                 return `
