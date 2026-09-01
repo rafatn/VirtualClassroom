@@ -1472,6 +1472,39 @@
                         showStudentWaitingRoom('rejected');
                     }
                 })
+                .on('broadcast', { event: 'teacher_media_control' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || m.userId !== userId) return;
+                    if (!mediaStream) return;
+                    if (m.control === 'mic' && typeof m.enabled === 'boolean') {
+                        const track = mediaStream.getAudioTracks()[0];
+                        if (track) {
+                            track.enabled = m.enabled;
+                            const btn = document.getElementById('toggle-mic-btn');
+                            if (btn) btn.innerText = m.enabled ? translations[currentLang].btn_mic_mute : translations[currentLang].btn_mic_unmute;
+                        }
+                    }
+                    if (m.control === 'cam' && typeof m.enabled === 'boolean') {
+                        const track = mediaStream.getVideoTracks()[0];
+                        if (track) {
+                            track.enabled = m.enabled;
+                            const btn = document.getElementById('toggle-cam-btn');
+                            if (btn) btn.innerText = m.enabled ? translations[currentLang].btn_cam_off : translations[currentLang].btn_cam_on;
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'teacher_media_control_all' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || !mediaStream) return;
+                    if (m.control === 'mic') {
+                        const track = mediaStream.getAudioTracks()[0];
+                        if (track) {
+                            track.enabled = false;
+                            const btn = document.getElementById('toggle-mic-btn');
+                            if (btn) btn.innerText = translations[currentLang].btn_mic_unmute;
+                        }
+                    }
+                })
                 .on('broadcast', { event: 'participant_info' }, async p => {
                     const m = p.payload;
                     if (!m?.userId || m.userId === userId) return;
@@ -1860,18 +1893,38 @@
         };
 
         window.teacherToggleMic = async (targetUserId, newMicState) => {
-            if (role !== 'teacher') return;
-            await supabase.from('room_participants').update({ mic_active: newMicState }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ mic_active: !!newMicState })
+                .eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error('teacherToggleMic:', error); alert('לא ניתן לשנות את המיקרופון של התלמיד.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control', payload:{ userId:targetUserId, control:'mic', enabled:!!newMicState } });
+            }
+            await fetchParticipants(roomId);
         };
 
         window.teacherToggleCam = async (targetUserId, newCamState) => {
-            if (role !== 'teacher') return;
-            await supabase.from('room_participants').update({ cam_active: newCamState }).eq('room_id', roomId).eq('user_id', targetUserId);
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ cam_active: !!newCamState })
+                .eq('room_id', roomId).eq('user_id', targetUserId);
+            if (error) { console.error('teacherToggleCam:', error); alert('לא ניתן לשנות את המצלמה של התלמיד.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control', payload:{ userId:targetUserId, control:'cam', enabled:!!newCamState } });
+            }
+            await fetchParticipants(roomId);
         };
 
         window.teacherMuteAll = async () => {
-            if (role !== 'teacher') return;
-            await supabase.from('room_participants').update({ mic_active: false }).eq('room_id', roomId).neq('user_id', userId);
+            if (role !== 'teacher' || !roomId) return;
+            const { error } = await supabase.from('room_participants')
+                .update({ mic_active: false }).eq('room_id', roomId).neq('user_id', userId);
+            if (error) { console.error('teacherMuteAll:', error); alert('לא ניתן להשתיק את התלמידים.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type:'broadcast', event:'teacher_media_control_all', payload:{ control:'mic', enabled:false } });
+            }
+            await fetchParticipants(roomId);
             alert('כל התלמידים הושתקו בהצלחה 🔇');
         };
 
@@ -1998,8 +2051,8 @@
                     </div>
                     ${role === 'teacher' && p.user_id !== userId ? `
                         <div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px;">
-                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? 'Mute' : 'Unmute'}</button>
-                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? 'Cam Off' : 'Cam On'}</button>
+                            <button onclick="teacherToggleMic('${p.user_id}', ${!p.mic_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.mic_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.mic_active ? '🔇 השתק' : '🎤 הפעל'}</button>
+                            <button onclick="teacherToggleCam('${p.user_id}', ${!p.cam_active})" style="width: auto; padding: 2px 8px; font-size: 11px; background: ${p.cam_active ? 'var(--warning)' : 'var(--success)'}; margin:0; color: #000;">${p.cam_active ? '📷 כבה' : '📹 הפעל'}</button>
                             <button onclick="teacherPingStudent('${p.user_id}')" style="width: auto; padding: 2px 8px; font-size: 11px; background: var(--danger); margin:0; color: #fff;">הקפץ ⚡</button>
                         </div>
                     ` : ''}
