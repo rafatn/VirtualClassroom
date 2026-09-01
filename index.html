@@ -1431,10 +1431,15 @@
             activeChannel = supabase.channel(`room_${id}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
                     fetchParticipants(id);
-                    if (role === 'student' && p.new && p.new.user_id === userId && p.new.status === 'approved' && rtcReady === false) {
-                        const waiting = document.getElementById('student-waiting-room');
-                        if (waiting) waiting.classList.add('hidden');
-                        await startWebRTC();
+                    if (role === 'student' && p.new && p.new.user_id === userId) {
+                        if (p.new.status === 'approved') {
+                            closeStudentWaitingRoom();
+                            sessionParticipants = sessionParticipants.map(x => x.user_id === userId ? { ...x, status: 'approved' } : x);
+                            if (!rtcReady) await startWebRTC();
+                            setTimeout(() => fetchParticipants(id), 150);
+                        } else if (p.new.status === 'rejected') {
+                            showStudentWaitingRoom('rejected');
+                        }
                     }
                     if (role === 'student' && p.new && p.new.user_id === userId) {
                         if (mediaStream) {
@@ -1453,6 +1458,18 @@
                                 }
                             }
                         }
+                    }
+                })
+                .on('broadcast', { event: 'student_approval' }, async p => {
+                    const m = p.payload || {};
+                    if (role !== 'student' || m.userId !== userId) return;
+                    if (m.status === 'approved') {
+                        closeStudentWaitingRoom();
+                        sessionParticipants = sessionParticipants.map(x => x.user_id === userId ? { ...x, status: 'approved' } : x);
+                        if (!rtcReady) await startWebRTC();
+                        setTimeout(() => fetchParticipants(id), 150);
+                    } else if (m.status === 'rejected') {
+                        showStudentWaitingRoom('rejected');
                     }
                 })
                 .on('broadcast', { event: 'participant_info' }, async p => {
@@ -1829,6 +1846,9 @@
             if (role !== 'teacher' || !roomId) return;
             const { error } = await supabase.from('room_participants').update({ status: 'approved' }).eq('room_id', roomId).eq('user_id', targetUserId);
             if (error) { console.error(error); alert('לא ניתן לאשר את התלמיד. בדוק הרשאות Supabase.'); return; }
+            if (activeChannel) {
+                await activeChannel.send({ type: 'broadcast', event: 'student_approval', payload: { userId: targetUserId, status: 'approved' } });
+            }
             await fetchParticipants(roomId);
         };
 
@@ -1881,6 +1901,31 @@
             await supabase.from('room_participants').update({ mic_active: t.enabled }).eq('room_id', roomId).eq('user_id', userId);
         };
 
+        function closeStudentWaitingRoom() {
+            const waiting = document.getElementById('student-waiting-room');
+            if (!waiting) return;
+            waiting.classList.add('hidden');
+            waiting.style.display = 'none';
+            waiting.setAttribute('aria-hidden', 'true');
+        }
+
+        function showStudentWaitingRoom(state = 'pending') {
+            const waiting = document.getElementById('student-waiting-room');
+            if (!waiting) return;
+            waiting.classList.remove('hidden');
+            waiting.style.display = '';
+            waiting.setAttribute('aria-hidden', 'false');
+            const h = waiting.querySelector('h3');
+            const st = document.getElementById('waiting-status');
+            if (state === 'rejected') {
+                if (h) h.textContent = 'הכניסה לחדר נדחתה';
+                if (st) { st.textContent = 'המורה דחה את בקשת הכניסה.'; st.style.color = 'var(--danger)'; }
+            } else {
+                if (h) h.textContent = 'ממתין לאישור המורה';
+                if (st) { st.textContent = 'ממתין לאישור...'; st.style.color = 'var(--warning)'; }
+            }
+        }
+
         async function fetchParticipants(id) {
             const { data } = await supabase.from('room_participants').select(`*, profiles:user_id (full_name, role)`).eq('room_id', id);
             if (!data) return;
@@ -1898,13 +1943,11 @@
                 const meRow = data.find(p => p.user_id === userId);
                 const isPending = role === 'student' && meRow?.status === 'pending';
                 const isRejected = role === 'student' && meRow?.status === 'rejected';
-                waiting.classList.toggle('hidden', !isPending && !isRejected);
-                if (isRejected) {
-                    const h = waiting.querySelector('h3');
-                    const st = document.getElementById('waiting-status');
-                    if (h) h.textContent = 'הכניסה לחדר נדחתה';
-                    if (st) { st.textContent = 'המורה דחה את בקשת הכניסה.'; st.style.color='var(--danger)'; }
-                }
+                const isApproved = role === 'student' && meRow?.status === 'approved';
+                if (isApproved) closeStudentWaitingRoom();
+                else if (isRejected) showStudentWaitingRoom('rejected');
+                else if (isPending) showStudentWaitingRoom('pending');
+                else if (role === 'student') closeStudentWaitingRoom();
             }
 
             const gridContainer = document.getElementById('video-grid-container');
