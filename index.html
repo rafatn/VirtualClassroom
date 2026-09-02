@@ -2671,5 +2671,104 @@ ${p.payload.text}`)}});
 (()=>{const K='vc_v9_admin_suite';let d=JSON.parse(localStorage.getItem(K)||'{"admins":[],"courses":[],"messages":[],"certs":[],"users":[]}');const save=()=>localStorage.setItem(K,JSON.stringify(d));const esc=x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function email(){return (document.getElementById('email')?.value||localStorage.getItem('user_email')||'').trim().toLowerCase()}function isAdmin(){return d.admins.includes(email())}function status(){document.getElementById('v9-status').innerHTML=isAdmin()?'<b>🟢 מצב אדמין פעיל</b> — '+esc(email()):'<b>🔵 מצב משתמש רגיל</b> — כדי להגדיר אדמין, הזן את האימייל שלך בלשונית אדמין.'}function render(tab='admin'){status();let c=document.getElementById('v9-content');if(tab==='admin'){c.innerHTML=`<div class="v9-grid"><div class="v9-panel"><h4>🔐 הגדרת אדמין</h4><input id="v9-admin-email" type="email" placeholder="admin@example.com" value="${esc(email())}"><button onclick="V9.makeAdmin()">הגדר את האימייל כאדמין</button><p style="font-size:12px;color:var(--muted)">בגרסת HTML מקומית זו ההרשאה נשמרת בדפדפן. לאבטחה אמיתית בפרודקשן צריך שרת ואימות הרשאות.</p></div><div class="v9-panel"><h4>👑 מנהלי מערכת</h4><div class="v9-list">${d.admins.length?d.admins.map((x,i)=>`<div class="v9-row">${esc(x)} <button onclick="V9.removeAdmin(${i})" style="float:left;width:auto;background:var(--danger)">הסר</button></div>`).join(''):'אין אדמינים מוגדרים עדיין.'}</div></div></div>`}else if(tab==='courses'){c.innerHTML=`<div class="v9-panel"><h4>📚 ניהול קורסים</h4><input id="v9-course" placeholder="שם קורס"><button onclick="V9.addCourse()">הוסף קורס</button><div class="v9-list">${d.courses.map((x,i)=>`<div class="v9-row">📘 ${esc(x)} <button onclick="V9.delCourse(${i})" style="float:left;width:auto">מחק</button></div>`).join('')||'אין קורסים.'}</div></div>`}else if(tab==='messages'){c.innerHTML=`<div class="v9-panel"><h4>💬 הודעות מערכת</h4><input id="v9-msg" placeholder="כתוב הודעה"><button onclick="V9.addMsg()">פרסם</button><div class="v9-list">${d.messages.map((x,i)=>`<div class="v9-row">🔔 ${esc(x.text)}<br><small>${esc(x.date)}</small></div>`).join('')||'אין הודעות.'}</div></div>`}else if(tab==='certs'){c.innerHTML=`<div class="v9-panel"><h4>🏅 הפקת תעודה</h4><input id="v9-cert-name" placeholder="שם התלמיד"><input id="v9-cert-title" placeholder="שם ההישג"><button onclick="V9.addCert()">צור תעודה</button><div class="v9-list">${d.certs.map(x=>`<div class="v9-row">🏆 ${esc(x.name)} — ${esc(x.title)}</div>`).join('')||'אין תעודות.'}</div></div>`}else{c.innerHTML=`<div class="v9-panel"><h4>👥 משתמשים שנרשמו מקומית</h4><input id="v9-user" placeholder="שם או אימייל"><button onclick="V9.addUser()">הוסף משתמש</button><div class="v9-list">${d.users.map(x=>`<div class="v9-row">👤 ${esc(x)}</div>`).join('')||'אין משתמשים.'}</div></div>`}}window.V9={open(){document.getElementById('v9-modal').classList.add('open');render()},close(){document.getElementById('v9-modal').classList.remove('open')},tab:render,makeAdmin(){let e=(document.getElementById('v9-admin-email').value||'').trim().toLowerCase();if(!e||!e.includes('@'))return alert('הזן אימייל תקין');if(!d.admins.includes(e))d.admins.push(e);save();render()},removeAdmin(i){d.admins.splice(i,1);save();render()},addCourse(){let x=document.getElementById('v9-course').value.trim();if(x){d.courses.push(x);save();render('courses')}},delCourse(i){d.courses.splice(i,1);save();render('courses')},addMsg(){let x=document.getElementById('v9-msg').value.trim();if(x){d.messages.unshift({text:x,date:new Date().toLocaleString('he-IL')});save();render('messages')}},addCert(){let n=document.getElementById('v9-cert-name').value.trim(),t=document.getElementById('v9-cert-title').value.trim();if(n&&t){d.certs.unshift({name:n,title:t});save();render('certs')}},addUser(){let x=document.getElementById('v9-user').value.trim();if(x){d.users.push(x);save();render('users')}}};
 })();
 </script>
+
+
+<!-- V9.3 Unified Bottom Dock: collapsible bottom tools with persistent restore icon -->
+<style id="v9-bottom-dock-css">
+#vc-bottom-dock{
+  position:fixed; left:50%; transform:translateX(-50%);
+  bottom:var(--vc-bottom-dock-offset,88px); z-index:10025;
+  width:min(1180px,calc(100vw - 28px)); min-height:64px;
+  display:none; align-items:center; justify-content:center; gap:10px;
+  padding:10px 54px 10px 14px; box-sizing:border-box;
+  background:rgba(15,23,42,.96); color:#fff; direction:rtl;
+  border:1px solid rgba(255,255,255,.16); border-radius:20px;
+  box-shadow:0 14px 38px rgba(0,0,0,.28); backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+#vc-bottom-dock.vc-dock-visible{display:flex}
+#vc-bottom-dock.vc-dock-collapsed{display:none!important}
+#vc-bottom-dock .vc-dock-content{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;width:100%}
+#vc-bottom-dock .vc-dock-close{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:36px!important; height:36px!important; margin:0!important; padding:0!important;
+  border-radius:50%!important; background:rgba(255,255,255,.12)!important; color:#fff!important;
+  border:1px solid rgba(255,255,255,.18)!important; font-size:19px!important; line-height:1!important;
+}
+#vc-bottom-dock .vc-dock-close:hover{background:rgba(239,68,68,.85)!important}
+#vc-bottom-dock #v7-tools,
+#vc-bottom-dock #v8-launcher{
+  position:static!important; left:auto!important; right:auto!important; bottom:auto!important;
+  transform:none!important; margin:0!important; max-width:none!important; box-shadow:none!important;
+}
+#vc-bottom-dock #v7-tools{background:transparent!important;border:0!important;padding:0!important}
+#vc-bottom-dock #v8-launcher{gap:7px!important}
+#vc-bottom-dock #v7-tools:not(.v7-show),
+#vc-bottom-dock #v8-launcher:not(.v8-show){display:none!important}
+#vc-bottom-dock-toggle{
+  position:fixed; left:18px; bottom:var(--vc-bottom-dock-offset,88px); z-index:10026;
+  display:none; width:54px!important; height:54px!important; margin:0!important; padding:0!important;
+  border-radius:50%!important; background:var(--primary,#4f46e5)!important; color:#fff!important;
+  border:1px solid rgba(255,255,255,.22)!important; box-shadow:0 10px 28px rgba(0,0,0,.28)!important;
+  font-size:24px!important;
+}
+#vc-bottom-dock-toggle.vc-toggle-visible{display:block!important}
+@media(max-width:700px){
+  #vc-bottom-dock{width:calc(100vw - 16px);bottom:var(--vc-bottom-dock-offset,74px);padding:9px 48px 9px 8px;border-radius:16px;max-height:46vh;overflow:auto;justify-content:flex-start}
+  #vc-bottom-dock .vc-dock-content{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-left:4px}
+  #vc-bottom-dock #v7-tools,#vc-bottom-dock #v8-launcher{flex-wrap:nowrap!important;overflow:visible!important;right:auto!important;left:auto!important}
+  #vc-bottom-dock-toggle{left:10px;bottom:var(--vc-bottom-dock-offset,74px);width:50px!important;height:50px!important}
+}
+</style>
+<div id="vc-bottom-dock" aria-label="סרגל כלים תחתון נוסף">
+  <button class="vc-dock-close" type="button" onclick="VCBottomDock.collapse()" title="סגור את הסרגל והשאר סמל לפתיחה">×</button>
+  <div class="vc-dock-content" id="vc-bottom-dock-content"></div>
+</div>
+<button id="vc-bottom-dock-toggle" type="button" onclick="VCBottomDock.expand()" title="פתח את סרגל הכלים">☰</button>
+<script id="v9-bottom-dock-js">
+(function(){
+  const KEY='virtualClassroomBottomDockCollapsed';
+  const dock=document.getElementById('vc-bottom-dock');
+  const content=document.getElementById('vc-bottom-dock-content');
+  const toggle=document.getElementById('vc-bottom-dock-toggle');
+  const room=document.getElementById('room-section');
+  const tools=['v7-tools','v8-launcher'];
+  let collapsed=localStorage.getItem(KEY)==='1';
+
+  function moveTools(){
+    tools.forEach(id=>{const el=document.getElementById(id); if(el && el.parentElement!==content) content.appendChild(el);});
+  }
+  function roomVisible(){return room && !room.classList.contains('hidden');}
+  function originalBottomOffset(){
+    const candidates=['floating-features-bar','floating-features-toggle'];
+    let offset=18;
+    candidates.forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      const cs=getComputedStyle(el); const r=el.getBoundingClientRect();
+      if(cs.display!=='none' && r.width>0 && r.height>0){offset=Math.max(offset,Math.round(window.innerHeight-r.top+10));}
+    });
+    document.documentElement.style.setProperty('--vc-bottom-dock-offset',offset+'px');
+  }
+  function render(){
+    originalBottomOffset();
+    const show=roomVisible();
+    dock.classList.toggle('vc-dock-visible',show && !collapsed);
+    dock.classList.toggle('vc-dock-collapsed',collapsed || !show);
+    toggle.classList.toggle('vc-toggle-visible',show && collapsed);
+  }
+  window.VCBottomDock={
+    collapse(){collapsed=true;localStorage.setItem(KEY,'1');render();},
+    expand(){collapsed=false;localStorage.removeItem(KEY);render();},
+    toggle(){collapsed=!collapsed;collapsed?localStorage.setItem(KEY,'1'):localStorage.removeItem(KEY);render();}
+  };
+  moveTools();
+  if(room)new MutationObserver(()=>setTimeout(render,0)).observe(room,{attributes:true,attributeFilter:['class']});
+  window.addEventListener('resize',render);
+  window.addEventListener('load',()=>setTimeout(render,150));
+  setInterval(originalBottomOffset,500);
+  render();
+})();
+</script>
+
 </body>
 </html>
