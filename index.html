@@ -2770,5 +2770,181 @@ ${p.payload.text}`)}});
 })();
 </script>
 
+
+<!-- V10 Multi-Language Translation Layer: isolated add-on, does not modify existing features -->
+<style id="v10-language-css">
+  #vc-language-tools{display:flex;align-items:center;gap:7px;flex:0 0 auto;direction:rtl}
+  #vc-language-tools .v10-lang-icon{font-size:20px;line-height:1}
+  #v10-language-select{min-width:150px;width:auto!important;margin:0!important;padding:9px 12px!important;border-radius:14px!important;border:1px solid var(--border)!important;background:var(--tool)!important;color:var(--text)!important;font:inherit;cursor:pointer}
+  #v10-language-status{font-size:11px;color:var(--muted);white-space:nowrap}
+  #v10-google-holder{position:absolute!important;left:-99999px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important}
+  .goog-te-banner-frame.skiptranslate{display:none!important}
+  body{top:0!important}
+  .goog-logo-link,.goog-te-gadget>span{display:none!important}
+  @media(max-width:700px){
+    #v10-language-status{display:none}
+    #v10-language-select{min-width:130px;max-width:48vw;padding:8px!important}
+  }
+</style>
+
+<div id="v10-google-holder" aria-hidden="true"><div id="google_translate_element"></div></div>
+
+<script id="v10-multilanguage-js">
+(function(){
+  'use strict';
+  const STORAGE_KEY='virtualClassroomLanguage';
+  const languages=[
+    ['he','עברית'],['en','English'],['ar','العربية'],['fr','Français'],['es','Español'],['de','Deutsch'],['it','Italiano'],['pt','Português'],['ru','Русский'],['uk','Українська'],['tr','Türkçe'],['fa','فارسی'],['ur','اردو'],['hi','हिन्दी'],['bn','বাংলা'],['pa','ਪੰਜਾਬੀ'],['gu','ગુજરાતી'],['mr','मराठी'],['ta','தமிழ்'],['te','తెలుగు'],['kn','ಕನ್ನಡ'],['ml','മലയാളം'],['si','සිංහල'],['th','ไทย'],['vi','Tiếng Việt'],['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['fil','Filipino'],['zh-CN','中文（简体）'],['zh-TW','中文（繁體）'],['ja','日本語'],['ko','한국어'],
+    ['af','Afrikaans'],['sq','Shqip'],['am','አማርኛ'],['hy','Հայերեն'],['az','Azərbaycan'],['eu','Euskara'],['be','Беларуская'],['bs','Bosanski'],['bg','Български'],['ca','Català'],['ceb','Cebuano'],['ny','Chichewa'],['co','Corsu'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['eo','Esperanto'],['et','Eesti'],['fi','Suomi'],['fy','Frysk'],['gl','Galego'],['ka','ქართული'],['el','Ελληνικά'],['ht','Kreyòl Ayisyen'],['ha','Hausa'],['haw','ʻŌlelo Hawaiʻi'],['hmn','Hmong'],['hu','Magyar'],['is','Íslenska'],['ig','Igbo'],['ga','Gaeilge'],['jv','Basa Jawa'],['kk','Қазақша'],['km','ខ្មែរ'],['rw','Kinyarwanda'],['ku','Kurdî'],['ky','Кыргызча'],['lo','ລາວ'],['la','Latina'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['mg','Malagasy'],['mt','Malti'],['mi','Māori'],['mn','Монгол'],['my','မြန်မာ'],['ne','नेपाली'],['no','Norsk'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['pl','Polski'],['ro','Română'],['sm','Samoan'],['gd','Gàidhlig'],['sr','Српски'],['st','Sesotho'],['sn','Shona'],['sd','سنڌي'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['su','Basa Sunda'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['tt','Татарча'],['tk','Türkmençe'],['uz','Oʻzbekcha'],['cy','Cymraeg'],['xh','isiXhosa'],['yi','ייִדיש'],['yo','Yorùbá'],['zu','isiZulu']
+  ];
+  const langMap=Object.fromEntries(languages);
+  let select,status,requested=localStorage.getItem(STORAGE_KEY)||'he';
+
+  function addToDock(){
+    const content=document.getElementById('vc-bottom-dock-content');
+    if(!content || document.getElementById('vc-language-tools')) return;
+    const box=document.createElement('div');
+    box.id='vc-language-tools';
+    box.innerHTML='<span class="v10-lang-icon" title="תרגום שפה">🌐</span><select id="v10-language-select" aria-label="בחר שפת אתר"></select><span id="v10-language-status">תרגום: מוכן</span>';
+    content.insertBefore(box,content.firstChild);
+    select=document.getElementById('v10-language-select');
+    status=document.getElementById('v10-language-status');
+    languages.forEach(([code,name])=>{
+      const o=document.createElement('option');o.value=code;o.textContent=name;select.appendChild(o);
+    });
+    select.value=requested;
+    select.addEventListener('change',()=>setLanguage(select.value,true));
+  }
+
+  function setStatus(msg){ if(status) status.textContent=msg; }
+  function setLanguage(code,manual){
+    requested=code; localStorage.setItem(STORAGE_KEY,code);
+    if(code==='he'){
+      document.cookie='googtrans=;path=/;max-age=0';
+      document.cookie='googtrans=;path=/;domain='+location.hostname+';max-age=0';
+      setStatus('עברית מקורית');
+      if(manual) location.reload();
+      return;
+    }
+    const combo=document.querySelector('.goog-te-combo');
+    if(combo){
+      combo.value=code;
+      combo.dispatchEvent(new Event('change',{bubbles:true}));
+      setStatus('מתרגם ל-'+(langMap[code]||code));
+    } else {
+      setStatus('טוען מנוע תרגום...');
+    }
+  }
+
+  window.googleTranslateElementInit=function(){
+    try{
+      new google.translate.TranslateElement({
+        pageLanguage:'he',
+        includedLanguages:languages.map(x=>x[0]).join(','),
+        autoDisplay:false,
+        layout:google.translate.TranslateElement.InlineLayout.SIMPLE
+      },'google_translate_element');
+      let tries=0;
+      const timer=setInterval(()=>{
+        const combo=document.querySelector('.goog-te-combo');
+        if(combo || ++tries>40){clearInterval(timer);if(requested!=='he') setLanguage(requested,false);else setStatus('עברית מקורית');}
+      },150);
+    }catch(e){setStatus('מנוע התרגום אינו זמין');}
+  };
+
+  function boot(){
+    addToDock();
+    const script=document.createElement('script');
+    script.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.async=true;
+    script.onerror=()=>setStatus('לא ניתן לטעון תרגום כרגע');
+    document.head.appendChild(script);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+
+
+
+<!-- V11 Live Language & Accessibility Suite: isolated enhancement -->
+<style id="v11-live-language-style">
+#v11-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:7px 10px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid var(--border)}
+#v11-tools button{width:auto!important;margin:0!important;padding:8px 10px!important;border-radius:11px!important;font-size:13px}
+#v11-live-status{font-size:12px;color:var(--muted);min-width:110px}
+.v11-translated{margin-top:7px;padding:7px 9px;border-radius:10px;background:rgba(46,125,50,.08);font-size:.92em;border-inline-start:3px solid var(--success)}
+.v11-chat-translate{float:left;width:auto!important;padding:4px 7px!important;font-size:11px!important;margin-top:5px!important;opacity:.85}
+.v11-voice-panel{position:fixed;inset:auto 18px 90px 18px;z-index:10060;display:none;max-width:700px;margin:auto;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:0 18px 45px rgba(0,0,0,.22)}
+.v11-voice-panel.open{display:block}.v11-voice-panel textarea{width:100%;min-height:90px}.v11-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.v11-row>*{flex:1}.v11-row button{width:auto!important}
+@media(max-width:700px){#v11-tools{width:100%;justify-content:center}.v11-voice-panel{left:8px;right:8px;bottom:72px}}
+</style>
+
+<div class="v11-voice-panel" id="v11-voice-panel" aria-live="polite">
+  <div class="v11-row"><b>🎤 כלי שפה ודיבור V11</b><button onclick="V11.closeVoice()">✕</button></div>
+  <div class="v11-row" style="margin-top:8px"><select id="v11-speech-lang" aria-label="שפת דיבור"></select><button onclick="V11.startListening()">🎤 התחל להאזין</button><button onclick="V11.stopListening()">⏹ עצור</button></div>
+  <textarea id="v11-transcript" placeholder="הטקסט שזוהה בדיבור יופיע כאן..."></textarea>
+  <div class="v11-row"><button onclick="V11.speakText()">🔊 הקרא טקסט</button><button onclick="V11.sendTranscriptToChat()">💬 שלח לצ'אט</button></div>
+</div>
+
+<script id="v11-live-language-js">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const state={recognition:null,listening:false,autoTranslate:localStorage.getItem('v11AutoTranslate')==='1'};
+const speechLanguages=[
+ ['he-IL','עברית'],['en-US','English (US)'],['en-GB','English (UK)'],['ar-SA','العربية'],['fr-FR','Français'],['es-ES','Español'],['de-DE','Deutsch'],['it-IT','Italiano'],['pt-BR','Português'],['ru-RU','Русский'],['tr-TR','Türkçe'],['hi-IN','हिन्दी'],['ja-JP','日本語'],['ko-KR','한국어'],['zh-CN','中文']
+];
+function targetLang(){return $('v10-language-select')?.value||localStorage.getItem('virtualClassroomLanguage')||'he'}
+function speechLangFromTarget(code){let found=speechLanguages.find(x=>x[0].toLowerCase().startsWith(code.toLowerCase()));return found?found[0]:'he-IL'}
+function setStatus(t){const e=$('v11-live-status');if(e)e.textContent=t}
+function addTools(){
+ const dock=$('vc-bottom-dock-content');if(!dock||$('v11-tools'))return;
+ const box=document.createElement('div');box.id='v11-tools';
+ box.innerHTML='<button type="button" id="v11-voice-btn">🎤 דיבור</button><button type="button" id="v11-read-btn">🔊 הקראה</button><button type="button" id="v11-auto-btn">🌍 תרגום צ׳אט: '+(state.autoTranslate?'פעיל':'כבוי')+'</button><span id="v11-live-status">V11 מוכן</span>';
+ dock.appendChild(box);
+ $('v11-voice-btn').onclick=()=>window.V11.openVoice();
+ $('v11-read-btn').onclick=()=>window.V11.speakText();
+ $('v11-auto-btn').onclick=()=>window.V11.toggleAutoTranslate();
+}
+function initLanguages(){const sel=$('v11-speech-lang');if(!sel||sel.options.length)return;speechLanguages.forEach(([c,n])=>{const o=document.createElement('option');o.value=c;o.textContent=n;sel.appendChild(o)});sel.value=speechLangFromTarget(targetLang())}
+function translateText(text,target){
+ const source='auto';const t=(target||targetLang()).replace('zh-CN','zh-CN').replace('zh-TW','zh-TW');
+ // Uses Google Translate's public client endpoint when reachable; graceful fallback if blocked/offline.
+ const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+encodeURIComponent(source)+'&tl='+encodeURIComponent(t)+'&dt=t&q='+encodeURIComponent(text);
+ return fetch(url).then(r=>{if(!r.ok)throw new Error('translate unavailable');return r.json()}).then(data=>data?.[0]?.map(x=>x[0]).join('')||'');
+}
+function addTranslateButton(el){
+ if(!el||el.dataset.v11Bound)return;el.dataset.v11Bound='1';
+ const b=document.createElement('button');b.className='v11-chat-translate';b.type='button';b.textContent='🌐 תרגם';
+ b.onclick=async()=>{
+   const raw=el.dataset.v11Raw || el.textContent.replace(/^✦[^\n]*\n?/,'').replace(/🌐 תרגם\s*$/,'').trim();
+   el.dataset.v11Raw=raw;if(!raw)return;
+   b.disabled=true;b.textContent='מתרגם...';
+   try{const out=await translateText(raw,targetLang());showTranslation(el,out)}catch(e){showTranslation(el,'לא ניתן לתרגם כרגע. בדוק חיבור לאינטרנט.')}finally{b.disabled=false;b.textContent='🌐 תרגם'}
+ };
+ el.appendChild(b);
+ if(state.autoTranslate) setTimeout(()=>b.click(),150);
+}
+function showTranslation(el,text){let x=el.querySelector('.v11-translated');if(!x){x=document.createElement('div');x.className='v11-translated';el.appendChild(x)}x.textContent='🌐 '+text}
+function observeChat(){const chat=$('chat-messages');if(!chat)return;const apply=()=>chat.querySelectorAll(':scope > div').forEach(addTranslateButton);apply();new MutationObserver(apply).observe(chat,{childList:true,subtree:false})}
+window.V11={
+ openVoice(){initLanguages();$('v11-voice-panel')?.classList.add('open');setStatus('בחר שפה והתחל לדבר')},
+ closeVoice(){this.stopListening();$('v11-voice-panel')?.classList.remove('open')},
+ startListening(){
+   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('זיהוי דיבור אינו נתמך בדפדפן זה. מומלץ Chrome או Edge.');return}
+   if(state.listening)return;const r=new SR();state.recognition=r;r.lang=$('v11-speech-lang')?.value||speechLangFromTarget(targetLang());r.continuous=true;r.interimResults=true;
+   r.onstart=()=>{state.listening=true;setStatus('🎙️ מאזין...')};
+   r.onresult=e=>{let final='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript+' '}$('v11-transcript').value=( $('v11-transcript').value+' '+final+interim).replace(/\s+/g,' ').trim()};
+   r.onerror=e=>{setStatus('שגיאת דיבור: '+e.error)};r.onend=()=>{state.listening=false;setStatus('ההאזנה נעצרה')};r.start();
+ },
+ stopListening(){try{state.recognition?.stop()}catch(e){}state.listening=false},
+ speakText(){const text=$('v11-transcript')?.value.trim() || window.getSelection()?.toString().trim();if(!text){setStatus('בחר טקסט בעמוד או הזן טקסט בכלי הדיבור');return}if(!('speechSynthesis'in window)){alert('הקראת טקסט אינה נתמכת בדפדפן זה');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=$('v11-speech-lang')?.value||speechLangFromTarget(targetLang());speechSynthesis.speak(u);setStatus('🔊 מקריא...')},
+ sendTranscriptToChat(){const t=$('v11-transcript')?.value.trim(),inp=$('chat-input');if(!t||!inp)return;inp.value=t;if(typeof window.sendChatMessage==='function')window.sendChatMessage();else inp.focus();},
+ toggleAutoTranslate(){state.autoTranslate=!state.autoTranslate;localStorage.setItem('v11AutoTranslate',state.autoTranslate?'1':'0');const b=$('v11-auto-btn');if(b)b.textContent='🌍 תרגום צ׳אט: '+(state.autoTranslate?'פעיל':'כבוי');setStatus(state.autoTranslate?'תרגום אוטומטי הופעל':'תרגום אוטומטי כובה')}
+};
+function boot(){addTools();initLanguages();observeChat();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
 </body>
 </html>
