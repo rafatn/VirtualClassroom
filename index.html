@@ -222,6 +222,57 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
 /* Prevent legacy floating controls from occupying the same exact layer */
 #v7-tools{z-index:10002!important}
 </style>
+
+<!-- V9.2 robust dock stacking fix: dynamically keeps V8/V9 dock above the classroom floating bar -->
+<style id="v9-2-no-overlap-fix">
+:root{--vc-floating-clearance:64px}
+#v8-launcher{
+  left:18px!important;
+  right:auto!important;
+  bottom:calc(var(--vc-floating-clearance) + 18px)!important;
+  z-index:10020!important;
+  max-width:min(620px,calc(100vw - 36px))!important;
+  max-height:calc(100vh - var(--vc-floating-clearance) - 36px)!important;
+  overflow:auto!important;
+}
+#floating-features-bar{z-index:9999!important}
+#floating-features-toggle{z-index:10000!important}
+@media(max-width:700px){
+  #v8-launcher{
+    left:8px!important;right:8px!important;
+    bottom:calc(var(--vc-floating-clearance) + 10px)!important;
+    max-width:calc(100vw - 16px)!important;
+    max-height:45vh!important;
+  }
+}
+</style>
+<script id="v9-2-dock-stacking-script">
+(()=>{
+  const updateDockClearance=()=>{
+    const bar=document.getElementById('floating-features-bar');
+    const toggle=document.getElementById('floating-features-toggle');
+    let clearance=64;
+    if(bar && !bar.classList.contains('hidden') && !bar.classList.contains('collapsed')){
+      const r=bar.getBoundingClientRect();
+      if(r.width>0 && r.height>0) clearance=Math.ceil(r.height + 26);
+    } else if(toggle && getComputedStyle(toggle).display!=='none'){
+      clearance=Math.max(clearance, Math.ceil(toggle.getBoundingClientRect().height + 22));
+    }
+    document.documentElement.style.setProperty('--vc-floating-clearance', clearance+'px');
+  };
+  const start=()=>{
+    updateDockClearance();
+    const bar=document.getElementById('floating-features-bar');
+    if(bar) new MutationObserver(updateDockClearance).observe(bar,{attributes:true,attributeFilter:['class','style']});
+    if(bar && 'ResizeObserver' in window) new ResizeObserver(updateDockClearance).observe(bar);
+    window.addEventListener('resize',updateDockClearance,{passive:true});
+    window.addEventListener('orientationchange',()=>setTimeout(updateDockClearance,150),{passive:true});
+    // Existing controls may change the bar asynchronously. Recheck briefly after clicks.
+    document.addEventListener('click',()=>setTimeout(updateDockClearance,80),true);
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
 </head>
 <body><div id="ceramic-brand"><span class="ceramic-badge">🏺 Ceramic Classroom · Studio</span></div><div id="v5-live-pill">● LIVE</div><script>document.addEventListener('DOMContentLoaded',()=>{const r=document.getElementById('room-section'),p=document.getElementById('v5-live-pill');if(!r||!p)return;const f=()=>p.style.display=r.classList.contains('hidden')?'none':'block';new MutationObserver(f).observe(r,{attributes:true,attributeFilter:['class']});f()});</script>
     <div class="container" id="main-app-container">
