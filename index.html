@@ -3162,5 +3162,50 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  window.addEventListener('beforeunload',()=>{try{window.V12Auth?.client?.removeChannel(channel)}catch(e){}});
 })();
 </script>
+
+<!-- V15 INNOVATION LAB: isolated module -->
+<style id="v15-innovation-style">
+#v15-fab{position:fixed;left:20px;bottom:145px;z-index:99990;border:0;border-radius:50%;width:58px;height:58px;font-size:24px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);background:#6d28d9;color:#fff}
+#v15-panel{position:fixed;left:18px;bottom:150px;width:min(430px,calc(100vw - 36px));max-height:min(78vh,760px);overflow:auto;z-index:99991;background:#fff;color:#1f2937;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:16px;display:none;direction:rtl;font-family:inherit}
+#v15-panel.open{display:block}.v15-head{display:flex;justify-content:space-between;align-items:center;gap:8px;position:sticky;top:-16px;background:#fff;padding:10px 0;z-index:2}.v15-close{border:0;background:#eee;border-radius:10px;padding:6px 10px;cursor:pointer}.v15-tabs{display:flex;gap:6px;overflow:auto;padding-bottom:8px}.v15-tabs button{white-space:nowrap;border:0;border-radius:10px;padding:8px 10px;background:#f1f5f9;cursor:pointer}.v15-tabs button.active{background:#6d28d9;color:white}.v15-view{display:none}.v15-view.active{display:block}.v15-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:12px;margin:10px 0}.v15-card h4{margin:0 0 8px}.v15-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.v15-row button,.v15-card button{border:0;border-radius:9px;padding:8px 11px;cursor:pointer;background:#6d28d9;color:#fff}.v15-row input,.v15-row textarea,.v15-card input,.v15-card textarea{border:1px solid #d1d5db;border-radius:9px;padding:8px;flex:1;min-width:100px;font-family:inherit}.v15-meter{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}.v15-meter>span{display:block;height:100%;background:linear-gradient(90deg,#7c3aed,#22c55e);border-radius:inherit}.v15-item{padding:9px;border-bottom:1px solid #e5e7eb}.v15-small{font-size:12px;color:#64748b}.v15-emoji button{font-size:22px;background:#fff;color:#333;border:1px solid #ddd}.v15-mission{padding:12px;border-radius:14px;background:linear-gradient(135deg,#fff7ed,#fef3c7)}
+</style>
+<button id="v15-fab" title="V15 Innovation Lab">🚀</button>
+<div id="v15-panel" aria-label="V15 Innovation Lab">
+ <div class="v15-head"><div><b>🚀 V15 Innovation Lab</b><div class="v15-small">מודול עצמאי • לא משנה את הלוגיקה הקיימת</div></div><button class="v15-close" id="v15-close">✕</button></div>
+ <div class="v15-tabs" id="v15-tabs">
+  <button data-v15="pulse" class="active">🌡️ Pulse</button><button data-v15="ghost">👻 שאלות</button><button data-v15="capsule">📦 קפסולה</button><button data-v15="dna">🧠 DNA</button><button data-v15="compass">🧭 מצפן</button><button data-v15="rpg">🎮 RPG</button>
+ </div>
+ <section class="v15-view active" data-view="pulse"><div class="v15-card"><h4>🌡️ מצב הכיתה LIVE</h4><div class="v15-emoji v15-row" id="v15-pulse-buttons"><button data-p="understood">😊</button><button data-p="hard">🤔</button><button data-p="lost">😵</button><button data-p="fast">🚀</button><button data-p="slow">🐢</button></div><p id="v15-pulse-summary">עדיין אין תגובות.</p><div class="v15-meter"><span id="v15-energy" style="width:50%"></span></div><div class="v15-small">אנרגיית כיתה: <b id="v15-energy-text">50%</b></div></div></section>
+ <section class="v15-view" data-view="ghost"><div class="v15-card"><h4>👻 Ghost Question</h4><textarea id="v15-question" rows="3" placeholder="שאל שאלה אנונימית..."></textarea><div class="v15-row"><button id="v15-send-question">שלח אנונימי</button></div></div><div id="v15-question-list"></div></section>
+ <section class="v15-view" data-view="capsule"><div class="v15-card"><h4>📦 Time Capsule</h4><input id="v15-capsule-note" placeholder="מה חשוב לזכור מהרגע הזה?"><div class="v15-row"><button id="v15-save-capsule">⭐ שמור רגע</button></div></div><div id="v15-capsule-list"></div></section>
+ <section class="v15-view" data-view="dna"><div class="v15-card"><h4>🧠 Learning DNA אישי</h4><div>ריכוז <b id="v15-dna-focus">72%</b><div class="v15-meter"><span id="v15-dna-focus-bar" style="width:72%"></span></div></div><div>השתתפות <b id="v15-dna-part">58%</b><div class="v15-meter"><span id="v15-dna-part-bar" style="width:58%"></span></div></div><div>תרגול <b id="v15-dna-practice">65%</b><div class="v15-meter"><span id="v15-dna-practice-bar" style="width:65%"></span></div></div><p id="v15-dna-tip"></p><button id="v15-dna-refresh">עדכן פרופיל</button></div></section>
+ <section class="v15-view" data-view="compass"><div class="v15-card"><h4>🧭 Smart Learning Compass</h4><p>איך אתה מרגיש עכשיו?</p><div class="v15-row"><button data-c="review">😕 צריך חזרה</button><button data-c="practice">📚 תרגול</button><button data-c="challenge">🚀 אתגר</button></div><div id="v15-compass-result" class="v15-card">בחר מצב כדי לקבל פעולה מומלצת.</div></div></section>
+ <section class="v15-view" data-view="rpg"><div class="v15-card"><h4>🎮 Classroom RPG</h4><div>⚡ Level <b id="v15-level">1</b> &nbsp; ⭐ XP <b id="v15-xp">0</b> &nbsp; 🔥 Streak <b id="v15-streak">0</b></div><div class="v15-meter"><span id="v15-xp-bar" style="width:0%"></span></div><div class="v15-row"><button id="v15-add-xp">+10 XP</button><button id="v15-reset-rpg">איפוס</button></div></div><div class="v15-mission"><b>🎯 משימה קבוצתית</b><p id="v15-mission-text">כל הכיתה אוספת 100 XP בשיתוף פעולה.</p><div class="v15-meter"><span id="v15-mission-bar" style="width:0%"></span></div><div class="v15-small">התקדמות: <span id="v15-mission-value">0</span>/100</div></div></section>
+</div>
+<script id="v15-innovation-script">
+(function(){'use strict';
+ const $=id=>document.getElementById(id), storeKey='vc_v15_innovation_v1';
+ let data={pulse:{understood:0,hard:0,lost:0,fast:0,slow:0},questions:[],capsules:[],dna:{focus:72,part:58,practice:65},rpg:{xp:0,streak:0,mission:0}};
+ try{data=Object.assign(data,JSON.parse(localStorage.getItem(storeKey)||'{}'))}catch(e){}
+ const save=()=>localStorage.setItem(storeKey,JSON.stringify(data));
+ const fab=$('v15-fab'),panel=$('v15-panel');fab.onclick=()=>panel.classList.toggle('open');$('v15-close').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('#v15-tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#v15-tabs button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.v15-view').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelector('[data-view="'+b.dataset.v15+'"]').classList.add('active')});
+ function pulse(){let p=data.pulse,total=Object.values(p).reduce((a,b)=>a+b,0),positive=p.understood+p.fast,energy=total?Math.round(35+65*positive/total):50;$('v15-energy').style.width=energy+'%';$('v15-energy-text').textContent=energy+'%';$('v15-pulse-summary').textContent=total?`😊 ${p.understood} | 🤔 ${p.hard} | 😵 ${p.lost} | 🚀 ${p.fast} | 🐢 ${p.slow}`:'עדיין אין תגובות.'}
+ $('v15-pulse-buttons').onclick=e=>{let k=e.target.dataset.p;if(!k)return;data.pulse[k]++;save();pulse()};
+ function questions(){let q=$('v15-question-list');q.innerHTML=data.questions.length?data.questions.slice().reverse().map((x,i)=>`<div class="v15-card v15-item">👻 ${escapeHtml(x.text)}<div class="v15-small">${new Date(x.time).toLocaleString()} • 👍 ${x.votes||0}</div><button data-vote="${data.questions.length-1-i}">גם אני לא הבנתי</button></div>`).join(''):'<div class="v15-small">אין שאלות עדיין.</div>'}
+ $('v15-send-question').onclick=()=>{let t=$('v15-question').value.trim();if(!t)return;data.questions.push({text:t,time:Date.now(),votes:0});$('v15-question').value='';save();questions()};$('v15-question-list').onclick=e=>{let i=e.target.dataset.vote;if(i===undefined)return;data.questions[i].votes++;save();questions()};
+ function capsules(){let q=$('v15-capsule-list');q.innerHTML=data.capsules.length?data.capsules.slice().reverse().map(x=>`<div class="v15-card v15-item">⭐ ${escapeHtml(x.note)}<div class="v15-small">${new Date(x.time).toLocaleTimeString()}</div></div>`).join(''):'<div class="v15-small">עוד לא נשמרו רגעים.</div>'}
+ $('v15-save-capsule').onclick=()=>{let n=$('v15-capsule-note').value.trim();if(!n)return;data.capsules.push({note:n,time:Date.now()});$('v15-capsule-note').value='';save();capsules()};
+ function dna(){let d=data.dna;[['focus','v15-dna-focus'],['part','v15-dna-part'],['practice','v15-dna-practice']].forEach(([k,id])=>{$(id).textContent=d[k]+'%';$(id+'-bar').style.width=d[k]+'%'});let min=Object.entries(d).sort((a,b)=>a[1]-b[1])[0][0];$('v15-dna-tip').textContent=({focus:'💡 מומלץ: הפסקה קצרה + חזרה מרוכזת.',part:'💡 מומלץ: שאל שאלה או השתתף בפעילות הבאה.',practice:'💡 מומלץ: נסה תרגיל קצר כדי לחזק את החומר.'})[min]}
+ $('v15-dna-refresh').onclick=()=>{Object.keys(data.dna).forEach(k=>data.dna[k]=Math.max(35,Math.min(98,data.dna[k]+Math.floor(Math.random()*17)-6)));save();dna()};
+ document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{$('v15-compass-result').innerHTML={review:'📖 המלצה: חזור על הסיכום האחרון ובחר שאלה אחת שלא הייתה ברורה.',practice:'✍️ המלצה: פתר תרגיל קצר עכשיו כדי לקבע את החומר.',challenge:'🚀 המלצה: נסה שאלה ברמה גבוהה יותר או הסבר את הנושא לאחר.'}[b.dataset.c]});
+ function rpg(){let r=data.rpg,level=Math.floor(r.xp/100)+1,percent=r.xp%100;$('v15-level').textContent=level;$('v15-xp').textContent=r.xp;$('v15-streak').textContent=r.streak;$('v15-xp-bar').style.width=percent+'%';$('v15-mission-value').textContent=Math.min(r.mission,100);$('v15-mission-bar').style.width=Math.min(r.mission,100)+'%'}
+ $('v15-add-xp').onclick=()=>{data.rpg.xp+=10;data.rpg.streak=Math.max(1,data.rpg.streak);data.rpg.mission=Math.min(100,data.rpg.mission+10);save();rpg()};$('v15-reset-rpg').onclick=()=>{data.rpg={xp:0,streak:0,mission:0};save();rpg()};
+ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+ pulse();questions();capsules();dna();rpg();
+ window.V15Innovation={data,refresh(){pulse();questions();capsules();dna();rpg()}};
+})();
+</script>
+
 </body>
 </html>
