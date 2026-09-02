@@ -1611,7 +1611,9 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
                 room_id: id, user_id: userId, cam_active: true, mic_active: true, hand_raised: false, status: role === 'teacher' ? 'approved' : 'pending', weather_info: myWeatherInfo 
             }], { onConflict: 'room_id, user_id' });
             
-            fetchParticipants(id);
+            // טעינה ראשונית: אם המורה כבר אישר לפני שה-Realtime התחבר,
+            // התלמיד צריך להיכנס מיד ולא להישאר במסך ההמתנה.
+            await fetchParticipants(id);
 
             activeChannel = supabase.channel(`room_${id}`)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'room_participants', filter: `room_id=eq.${id}` }, async p => {
@@ -1763,9 +1765,49 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
                     if (status === 'SUBSCRIBED') {
                         participantMeta.set(userId, myParticipantMeta());
                         await activeChannel.send({ type:'broadcast', event:'participant_info', payload: myParticipantMeta() });
-                        if (role === 'teacher' || sessionParticipants.some(x => x.user_id === userId && x.status === 'approved')) await startWebRTC();
+
+                        // בדיקה מחדש אחרי החיבור ל-Realtime כדי לא לפספס אישור
+                        // שהגיע בדיוק בזמן הכניסה.
+                        await fetchParticipants(id);
+                        const me = sessionParticipants.find(x => x.user_id === userId);
+
+                        if (role === 'teacher' || me?.status === 'approved') {
+                            if (role === 'student') closeStudentWaitingRoom();
+                            await startWebRTC();
+                        } else if (role === 'student' && me?.status === 'pending') {
+                            showStudentWaitingRoom('pending');
+                        }
                     }
                 });
+
+            // גיבוי: polling קצר לסטטוס אישור. זה פותר מקרים שבהם
+            // Supabase Realtime לא שולח UPDATE בגלל הגדרות publication/RLS.
+            if (role === 'student') {
+                if (window.__vcxApprovalPoll) clearInterval(window.__vcxApprovalPoll);
+                window.__vcxApprovalPoll = setInterval(async () => {
+                    if (!roomId || roomId !== id) return;
+                    const { data: meRow, error } = await supabase
+                        .from('room_participants')
+                        .select('status')
+                        .eq('room_id', id)
+                        .eq('user_id', userId)
+                        .maybeSingle();
+
+                    if (error || !meRow) return;
+
+                    if (meRow.status === 'approved') {
+                        clearInterval(window.__vcxApprovalPoll);
+                        window.__vcxApprovalPoll = null;
+                        await fetchParticipants(id);
+                        closeStudentWaitingRoom();
+                        if (!rtcReady) await startWebRTC();
+                    } else if (meRow.status === 'rejected') {
+                        clearInterval(window.__vcxApprovalPoll);
+                        window.__vcxApprovalPoll = null;
+                        showStudentWaitingRoom('rejected');
+                    }
+                }, 2000);
+            }
             vcxInitRoom(id);
         };
 
@@ -2401,6 +2443,7 @@ body{background:radial-gradient(circle at 10% 0%,rgba(183,154,98,.12),transparen
             }
             activeChannel = null;
             roomId = null;
+            if (window.__vcxApprovalPoll) { clearInterval(window.__vcxApprovalPoll); window.__vcxApprovalPoll = null; }
             sessionParticipants = [];
             participantMeta.clear();
 
