@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl" data-theme="light">
 <head>
-    <meta charset="UTF-8"> 
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>כיתה וירטואלית חכמה - פרימיום אולטימטיבי</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -3056,5 +3056,111 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- V13 SAFE ENHANCEMENTS: isolated module, no changes to existing logic -->
+<style id="v13-safe-enhancements">
+#v13-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+#v13-tools button{width:auto!important;margin:0!important;padding:8px 11px!important;border-radius:12px!important}
+.v13-modal{position:fixed;inset:0;z-index:120000;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:16px}
+.v13-modal.open{display:flex}.v13-card{width:min(760px,96vw);max-height:88vh;overflow:auto;background:var(--card,#fff);color:var(--text,#111);border-radius:20px;padding:18px;border:1px solid var(--border,#ddd);box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.v13-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.v13-row>*{flex:1}.v13-row button{width:auto}.v13-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:12px}.v13-box{padding:14px;border:1px solid var(--border,#ddd);border-radius:14px;background:var(--tool,#f8fafc)}
+.v13-timer{font-size:34px;font-weight:800;text-align:center;margin:8px 0}.v13-list{margin-top:8px}.v13-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--border,#ddd)}
+#v13-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:130000;display:none;padding:12px 18px;border-radius:12px;background:#1f2937;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+@media(max-width:700px){#v13-tools{width:100%;justify-content:center}.v13-card{padding:14px}}
+</style>
+<div id="v13-toast" role="status" aria-live="polite"></div>
+<div class="v13-modal" id="v13-modal"><div class="v13-card">
+ <div class="v13-row"><h3 style="margin:0">✨ V13 – כלי לימוד אישיים</h3><button onclick="V13.close()">✕</button></div>
+ <div class="v13-grid">
+  <section class="v13-box"><b>🎯 מצב ריכוז</b><div class="v13-timer" id="v13-timer">25:00</div><div class="v13-row"><button onclick="V13.startTimer()">▶ התחל</button><button onclick="V13.pauseTimer()">⏸ עצור</button><button onclick="V13.setTimer(25)">25 דק'</button><button onclick="V13.setTimer(5)">5 דק'</button></div></section>
+  <section class="v13-box"><b>📝 משימה אישית</b><div class="v13-row" style="margin-top:8px"><input id="v13-task-input" placeholder="מה צריך לעשות?"><button onclick="V13.addTask()">הוסף</button></div><div id="v13-tasks" class="v13-list"></div></section>
+  <section class="v13-box"><b>📌 סימניות מהירות</b><div class="v13-row" style="margin-top:8px"><input id="v13-bookmark-input" placeholder="שם / קישור / הערה"><button onclick="V13.addBookmark()">שמור</button></div><div id="v13-bookmarks" class="v13-list"></div></section>
+  <section class="v13-box"><b>💾 שמירה בטוחה</b><p style="font-size:13px;margin:8px 0">כל נתוני V13 נשמרים בנפרד ואינם משנים את הנתונים הקיימים או את Supabase.</p><div class="v13-row"><button onclick="V13.exportData()">ייצוא V13</button><button onclick="V13.reset()">איפוס V13</button></div></section>
+ </div>
+</div></div>
+<script id="v13-safe-enhancements-js">
+(function(){'use strict';
+ const K='virtualClassroomV13Safe'; const $=id=>document.getElementById(id); let state={tasks:[],bookmarks:[],seconds:1500}; let interval=null;
+ try{state={...state,...JSON.parse(localStorage.getItem(K)||'{}')}}catch(e){}
+ const save=()=>localStorage.setItem(K,JSON.stringify(state));
+ const esc=s=>String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+ function toast(t){const e=$('v13-toast');if(!e)return;e.textContent=t;e.style.display='block';clearTimeout(window.__v13Toast);window.__v13Toast=setTimeout(()=>e.style.display='none',2800)}
+ function render(){const m=Math.floor(state.seconds/60),s=state.seconds%60;if($('v13-timer'))$('v13-timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if($('v13-tasks'))$('v13-tasks').innerHTML=state.tasks.length?state.tasks.map((t,i)=>`<div class="v13-item"><label><input type="checkbox" ${t.done?'checked':''} onchange="V13.toggleTask(${i})"> ${esc(t.text)}</label><button onclick="V13.deleteTask(${i})">✕</button></div>`).join(''):'<small>אין משימות עדיין.</small>';if($('v13-bookmarks'))$('v13-bookmarks').innerHTML=state.bookmarks.length?state.bookmarks.map((b,i)=>`<div class="v13-item"><span>${esc(b)}</span><button onclick="V13.deleteBookmark(${i})">✕</button></div>`).join(''):'<small>אין סימניות עדיין.</small>'}
+ function addTools(){const dock=$('vc-bottom-dock-content');if(!dock||$('v13-tools'))return false;const box=document.createElement('div');box.id='v13-tools';box.innerHTML='<button type="button" id="v13-open-btn">✨ כלי V13</button>';dock.appendChild(box);$('v13-open-btn').onclick=()=>window.V13.open();return true}
+ window.V13={open(){ $('v13-modal').classList.add('open');render()},close(){ $('v13-modal').classList.remove('open')},setTimer(m){this.pauseTimer();state.seconds=m*60;save();render()},startTimer(){if(interval)return;interval=setInterval(()=>{if(state.seconds<=0){this.pauseTimer();toast('🎉 זמן הריכוז הסתיים!');return}state.seconds--;save();render()},1000);toast('מצב ריכוז הופעל')},pauseTimer(){if(interval){clearInterval(interval);interval=null;toast('הטיימר נעצר')}},addTask(){const e=$('v13-task-input'),t=e.value.trim();if(!t)return;state.tasks.push({text:t,done:false});e.value='';save();render()},toggleTask(i){state.tasks[i].done=!state.tasks[i].done;save();render()},deleteTask(i){state.tasks.splice(i,1);save();render()},addBookmark(){const e=$('v13-bookmark-input'),t=e.value.trim();if(!t)return;state.bookmarks.push(t);e.value='';save();render()},deleteBookmark(i){state.bookmarks.splice(i,1);save();render()},exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='virtual-classroom-v13-data.json';a.click();URL.revokeObjectURL(a.href)},reset(){if(confirm('לאפס רק את נתוני V13?')){state={tasks:[],bookmarks:[],seconds:1500};save();render();toast('נתוני V13 אופסו')}}};
+ document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='f'){e.preventDefault();window.V13.open()}});
+ const boot=()=>{if(!addTools())setTimeout(boot,500);};boot();render();
+})();
+</script>
+<!-- END V13 SAFE ENHANCEMENTS -->
+
+
+<!-- V14 REALTIME CLASSROOM SUITE: isolated enhancement module -->
+<style id="v14-realtime-suite">
+#v14-fab{position:fixed;top:16px;left:16px;z-index:119500;width:auto!important;margin:0!important;padding:10px 14px!important;border-radius:999px!important;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.v14-modal{position:fixed;inset:0;z-index:140000;background:rgba(15,23,42,.58);display:none;align-items:center;justify-content:center;padding:16px}.v14-modal.open{display:flex}
+.v14-card{width:min(820px,96vw);max-height:88vh;overflow:auto;background:var(--card,#fff);color:var(--text,#111);border:1px solid var(--border,#ddd);border-radius:22px;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.v14-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.v14-row>*{flex:1}.v14-row button{width:auto}.v14-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}.v14-box{padding:14px;border:1px solid var(--border,#ddd);border-radius:16px;background:var(--tool,#f8fafc)}
+.v14-stat{font-size:28px;font-weight:800}.v14-list{margin-top:8px;max-height:190px;overflow:auto}.v14-item{padding:9px;border-bottom:1px solid var(--border,#ddd)}
+#v14-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:145000;display:none;max-width:min(600px,92vw);padding:12px 16px;border-radius:14px;background:#111827;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.v14-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-left:6px}.v14-muted{color:var(--muted,#64748b);font-size:13px}
+@media(max-width:700px){#v14-fab{top:10px;left:10px;font-size:13px}.v14-card{padding:14px}}
+</style>
+<button id="v14-fab" type="button">🚀 V14 כיתה חיה</button>
+<div id="v14-toast" role="status" aria-live="polite"></div>
+<div class="v14-modal" id="v14-modal"><div class="v14-card">
+ <div class="v14-row"><h3 style="margin:0;flex:1">🚀 V14 – Real-Time Classroom Suite</h3><button onclick="V14.close()">✕</button></div>
+ <div class="v14-grid">
+  <section class="v14-box"><b>🟢 משתמשים אונליין</b><div class="v14-stat" id="v14-online-count">0</div><div class="v14-muted" id="v14-connection-status">ממתין לחיבור...</div><div id="v14-online-list" class="v14-list"></div></section>
+  <section class="v14-box"><b>✋ הרמת יד מהירה</b><p class="v14-muted">שלח למורה בקשה לעזרה בזמן אמת.</p><div class="v14-row"><button onclick="V14.raiseHand()">🙋 הרם יד</button><button onclick="V14.lowerHand()">⬇ הורד יד</button></div><div id="v14-hands" class="v14-list"></div></section>
+  <section class="v14-box" id="v14-announcement-box"><b>📢 הודעת כיתה</b><textarea id="v14-announcement-input" rows="3" placeholder="כתוב הודעה לכל המשתתפים..."></textarea><div class="v14-row" style="margin-top:8px"><button onclick="V14.sendAnnouncement()">שלח הודעה</button></div></section>
+  <section class="v14-box"><b>🔔 התראות כיתה</b><div id="v14-announcements" class="v14-list"><div class="v14-muted">אין הודעות עדיין.</div></div></section>
+  <section class="v14-box"><b>📊 ההתקדמות שלי</b><div class="v14-stat" id="v14-score">0%</div><input id="v14-score-input" type="range" min="0" max="100" value="0" oninput="V14.setProgress(this.value)"><div class="v14-muted">נשמר מקומית בצורה מבודדת ואינו משנה את נתוני V12/V13.</div></section>
+  <section class="v14-box"><b>🧪 בדיקת חיבור</b><div id="v14-latency" class="v14-stat">—</div><button onclick="V14.ping()">בדוק עכשיו</button><div class="v14-muted">בדיקה מול Supabase Realtime כאשר זמין.</div></section>
+ </div>
+</div></div>
+<script id="v14-realtime-script">
+(function(){
+ const $=id=>document.getElementById(id), KEY='virtualClassroomV14Safe';
+ let state={progress:0,announcements:[]};try{state={...state,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){}
+ let channel=null,joined=false,raised=false;
+ const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+ const toast=t=>{const e=$('v14-toast');if(!e)return;e.textContent=t;e.style.display='block';clearTimeout(window.__v14Toast);window.__v14Toast=setTimeout(()=>e.style.display='none',4000)};
+ function getUser(){try{return window.V12Auth?.getProfile?.()||null}catch(e){return null}}
+ function getName(){return getUser()?.full_name||window.userName||'משתמש'}
+ function getRole(){return getUser()?.role||window.role||'student'}
+ function channelName(){return 'v14-classroom-'+(window.roomId||'lobby')}
+ function render(){
+   $('v14-score').textContent=(state.progress||0)+'%';$('v14-score-input').value=state.progress||0;
+   $('v14-announcements').innerHTML=state.announcements.length?state.announcements.slice(-20).reverse().map(x=>`<div class="v14-item"><b>📢 ${escapeHtml(x.name||'מערכת')}</b><br>${escapeHtml(x.text)}<div class="v14-muted">${escapeHtml(x.time||'')}</div></div>`).join(''):'<div class="v14-muted">אין הודעות עדיין.</div>';
+   $('v14-announcement-box').style.display=getRole()==='student'?'none':'';
+ }
+ function escapeHtml(x){return String(x||'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
+ function renderPresence(){if(!channel)return;const ps=channel.presenceState?channel.presenceState():{};const users=[];Object.values(ps).forEach(arr=>arr.forEach(x=>users.push(x)));$('v14-online-count').textContent=users.length;$('v14-online-list').innerHTML=users.length?users.map(x=>`<div class="v14-item"><span class="v14-dot"></span>${escapeHtml(x.name||'משתמש')}${x.role?' — '+escapeHtml(x.role):''}</div>`).join(''):'<div class="v14-muted">עדיין אין משתמשים מזוהים בערוץ.</div>'}
+ function renderHands(items){$('v14-hands').innerHTML=items.length?items.map(x=>`<div class="v14-item">🙋 ${escapeHtml(x.name||'משתמש')} ${x.active?'מבקש עזרה':''}</div>`).join(''):'<div class="v14-muted">אין ידיים מורמות כרגע.</div>'}
+ async function connect(){
+   if(joined&&channel)return;
+   const sb=window.V12Auth?.client;if(!sb){$('v14-connection-status').textContent='Supabase עדיין לא מוכן';return}
+   channel=sb.channel(channelName(),{config:{presence:{key:(window.userId||getName())}}});
+   channel.on('presence',{event:'sync'},renderPresence)
+    .on('broadcast',{event:'announcement'},p=>{const a=p.payload||{};state.announcements.push(a);state.announcements=state.announcements.slice(-50);save();render();toast('📢 '+(a.text||'הודעה חדשה'))})
+    .on('broadcast',{event:'hand'},p=>{const h=p.payload||{};window.__v14Hands=window.__v14Hands||new Map();if(h.active)window.__v14Hands.set(h.id,h);else window.__v14Hands.delete(h.id);renderHands([...window.__v14Hands.values()]);if(h.active&&getRole()==='teacher')toast('🙋 '+(h.name||'תלמיד')+' הרים יד')})
+    .on('broadcast',{event:'ping'},p=>{channel.send({type:'broadcast',event:'pong',payload:{id:p.payload?.id}})})
+    .on('broadcast',{event:'pong'},p=>{if(window.__v14PingId===p.payload?.id){$('v14-latency').textContent=(Date.now()-window.__v14PingAt)+' ms'}})
+    .subscribe(async status=>{if(status==='SUBSCRIBED'){joined=true;$('v14-connection-status').textContent='מחובר בזמן אמת';await channel.track({name:getName(),role:getRole(),online_at:new Date().toISOString()});renderPresence()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')$('v14-connection-status').textContent='חיבור Realtime נכשל — שאר האתר ממשיך כרגיל'});
+ }
+ window.V14={
+   open(){ $('v14-modal').classList.add('open');render();connect() },close(){ $('v14-modal').classList.remove('open') },
+   setProgress(v){state.progress=Math.max(0,Math.min(100,Number(v)||0));save();render()},
+   async raiseHand(){raised=true;const p={id:window.userId||getName(),name:getName(),active:true,time:new Date().toLocaleTimeString()};if(channel)await channel.send({type:'broadcast',event:'hand',payload:p});toast('היד הורמה')},
+   async lowerHand(){raised=false;const p={id:window.userId||getName(),name:getName(),active:false};if(channel)await channel.send({type:'broadcast',event:'hand',payload:p});toast('היד הורדה')},
+   async sendAnnouncement(){const text=$('v14-announcement-input').value.trim();if(!text)return toast('כתוב הודעה קודם');const a={name:getName(),text,time:new Date().toLocaleTimeString()};state.announcements.push(a);save();render();$('v14-announcement-input').value='';if(channel)await channel.send({type:'broadcast',event:'announcement',payload:a});toast('ההודעה נשלחה')},
+   async ping(){if(!channel)return toast('Realtime לא מחובר');const id=Math.random().toString(36).slice(2);window.__v14PingId=id;window.__v14PingAt=Date.now();$('v14-latency').textContent='...';await channel.send({type:'broadcast',event:'ping',payload:{id}});setTimeout(()=>{if(window.__v14PingId===id&&$('v14-latency').textContent==='...')$('v14-latency').textContent='אין תגובה'},2500)}
+ };
+ $('v14-fab').addEventListener('click',()=>V14.open());
+ render();
+ window.addEventListener('beforeunload',()=>{try{window.V12Auth?.client?.removeChannel(channel)}catch(e){}});
+})();
+</script>
 </body>
 </html>
